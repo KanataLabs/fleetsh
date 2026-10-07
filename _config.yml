@@ -1,0 +1,15 @@
+title: fleetsh
+description: Lightweight, agentless VPS fleet management.
+url: https://kanatalabs.github.io
+baseurl: /fleetsh
+markdown: kramdown
+kramdown:
+  input: GFM
+exclude:
+  - plans
+  - README.md
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

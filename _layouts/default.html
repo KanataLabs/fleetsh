@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{ page.lang | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ page.title | escape }} · fleetsh</title>
+  <meta name="description" content="{{ page.description | default: site.description | escape }}">
+  <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header>
+    <a class="brand" href="{{ '/' | relative_url }}">fleetsh<span> / docs</span></a>
+    <a href="https://github.com/KanataLabs/fleetsh">GitHub ↗</a>
+  </header>
+  <div class="shell">
+    <nav aria-label="Documentation">
+      <p>GET STARTED</p>
+      <a href="{{ '/' | relative_url }}">Overview</a>
+      <a href="{{ '/getting-started/' | relative_url }}">Getting started</a>
+      <a href="{{ '/configuration/' | relative_url }}">Configuration</a>
+      <p>PROJECT</p>
+      <a href="{{ '/product/' | relative_url }}">产品设计 · 中文</a>
+      <a href="{{ '/architecture/' | relative_url }}">Architecture</a>
+      <a href="{{ '/security/' | relative_url }}">Security</a>
+      <a href="{{ '/roadmap/' | relative_url }}">Roadmap</a>
+    </nav>
+    <main id="content">{{ content }}</main>
+  </div>
+  <footer>fleetsh · KanataLabs · GPL-3.0-only · Foundation stage</footer>
+</body>
+</html>
