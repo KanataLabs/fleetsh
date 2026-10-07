@@ -1,0 +1,9 @@
+/dist/
+/fleetsh
+/fleetsh.exe
+/coverage.out
+/docs/_site/
+/docs/.jekyll-cache/
+.env
+*.key
+*.pem

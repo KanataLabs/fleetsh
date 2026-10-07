@@ -1,0 +1,42 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', '.github/workflows/docs.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: documentation
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: published
+      - name: Sync documentation source to gh-pages
+        working-directory: published
+        run: |
+          git rm -r --ignore-unmatch .
+          cp -R ../source/docs/. .
+          git add --all
+          if git diff --cached --quiet; then
+            echo "Documentation already synchronized"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "docs: publish from ${GITHUB_SHA}"
+            git push origin HEAD:gh-pages
+          fi
+      # GITHUB_TOKEN branch pushes do not trigger Pages builds automatically.
+      - name: Request GitHub Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST repos/${{ github.repository }}/pages/builds

@@ -1,0 +1,22 @@
+name: Bug report
+description: Report an observed problem
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: fleetsh version and OS
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use examples without passwords, private keys or real inventory.
+    validations:
+      required: true

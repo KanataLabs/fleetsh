@@ -1,0 +1,55 @@
+# fleetsh example configuration; the schema is a draft until v0.1.
+# Keep passwords, proxy passwords, tokens and private keys out of this file.
+# Host and credential management commands are planned, not implemented yet.
+
+[defaults]
+connect_timeout = "10s"
+command_timeout = "30m"
+parallel = 10
+
+# Uncomment and adapt examples when SSH support becomes available.
+# [hosts.hk1]
+# host = "hk1.example.com"
+# port = 22
+# user = "ubuntu"
+# connection = "ssh"
+# auth = "key"
+# key = "~/.ssh/id_ed25519"
+# groups = ["asia", "web"]
+# tags = ["production"]
+# description = "Hong Kong web server"
+
+# [hosts.sg1]
+# host = "sg1.example.com"
+# user = "ubuntu"
+# auth = "password"
+# credential = "sg1-login"
+# groups = ["asia"]
+
+# [hosts.jump-hk]
+# host = "jump.example.com"
+# user = "ubuntu"
+# auth = "agent"
+
+# [hosts.private1]
+# host = "10.0.0.10"
+# user = "ubuntu"
+# auth = "agent"
+# proxy_jump = "jump-hk"
+
+# [hosts.console1]
+# host = "console.example.com"
+# connection = "console-only"
+# description = "Inventory only; never selected for remote execution"
+
+# SOCKS5 URL userinfo is forbidden; proxy secrets use credential references.
+# [hosts.proxy1]
+# host = "proxy-target.example.com"
+# user = "ubuntu"
+# auth = "agent"
+# proxy = "socks5://127.0.0.1:1080"
+# proxy_credential = "local-proxy"
+
+# Custom commands are planned for v0.2.
+# [commands.disk]
+# command = "df -h"
