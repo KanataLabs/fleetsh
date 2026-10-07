@@ -209,12 +209,27 @@ func run(ctx context.Context, m *transport.Manager, id, command string, options 
 	var stdout, stderr cappedBuffer
 	session.Stdout = &stdout
 	session.Stderr = &stderr
+	var input io.Reader
+	var inputPipe io.WriteCloser
 	if options.Sudo {
-		command, session.Stdin = WrapSudo(command, m.Sudo[id])
+		command, input = WrapSudo(command, m.Sudo[id])
+		if input != nil {
+			inputPipe, err = session.StdinPipe()
+			if err != nil {
+				r.Error = err.Error()
+				r.ErrorKind = "connection"
+				return
+			}
+		}
 	}
 	err = session.Start(command)
 	if err == nil {
 		r.Started = true
+		if inputPipe != nil {
+			// The remote exit status is authoritative even if it exits before reading stdin.
+			_, _ = io.Copy(inputPipe, input)
+			_ = inputPipe.Close()
+		}
 		err = session.Wait()
 	}
 	if raw != nil {
