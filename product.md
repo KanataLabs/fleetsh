@@ -4,7 +4,7 @@ permalink: /product/
 lang: zh-CN
 ---
 
-> 这是原始产品方案，已统一项目及命令名为 fleetsh。功能均为规划；当前实现范围见路线图。
+> 这是原始产品方案，已统一项目及命令名为 fleetsh。已实现与规划中的功能范围见路线图。
 > 版本范围以 [Roadmap](../roadmap/) 为准，本文保留原始讨论中的优先级差异。
 
 # Lightweight fleetsh Fleet Manager

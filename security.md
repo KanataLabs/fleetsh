@@ -5,51 +5,60 @@ permalink: /security/
 
 # Security design
 
-These are requirements for future remote management features, not claims that
-those features already exist.
+fleetsh is a development build. The following implemented controls and remaining
+release checks guide contributors.
 
 ## Secrets
 
-Passwords, key passphrases, proxy passwords, sudo passwords and tokens must never
-be written to TOML, process arguments, shell history or diagnostic logs.
-Read secrets with terminal echo disabled; require confirmation when storing them.
-Store only credential references in inventory.
+Inventory stores credential references, never secret values. Strict decoding rejects
+plaintext password fields and unsupported fields without echoing source lines in errors.
+Passwords/passphrases use hidden terminal input; echoed/piped secret input is rejected.
+Credential replacement requires an explicit `--replace`.
 
-Use Windows Credential Manager, macOS Keychain or Linux Secret Service.
-If a store is unavailable, fail clearly rather than falling back to plaintext.
-An encrypted local fallback is deferred until its format, KDF, recovery and tests
-receive a separate design review.
+Windows Credential Manager, macOS Keychain and Linux Secret Service hold values.
+Store errors fail without plaintext fallback. macOS uses `security -i` and stdin,
+so secrets never enter process arguments. Secret size is limited to 2560 bytes.
+Agent sockets and private keys stay local.
+
+sudo secrets are transmitted through SSH channel stdin. Commands are never constructed
+with `echo password` or credential values. Known secrets are redacted from buffered
+execution output and diagnostics; arbitrary application secrets cannot be recognized.
+Interactive shell output is passed through unchanged to preserve terminal behavior.
+There is no persisted execution log/history.
 
 ## Host identity
 
-Host key verification is on by default. A first connection displays the fingerprint
-and requires explicit trust. Changed keys are rejected, including on jump hosts.
-Unattended connections to unknown hosts fail. Trust changes require explicit user
-action and preserve an auditable fingerprint record.
+Strict known_hosts validation applies to targets and every jump host.
+First connections show fingerprints and require an interactive `y`; automation fails
+on unknown keys. Changed keys are rejected without a new-trust prompt.
+Trust writes are locked and revalidated after confirmation.
 
-## Remote operations
+`hostkey reset` requires confirmation or `--yes`. Shared/wildcard/marked records
+require manual editing so resetting one host cannot silently remove broader trust.
 
-Use bounded concurrency and separate connection/command deadlines. Send sudo
-passwords through the SSH channel, never by interpolating an echo command.
-Quote generated action arguments; arbitrary user shell commands are intentionally
-executed by the remote shell.
+## Actions and resources
 
-Updates and reboots support a reviewed plan/dry run and a confirmation showing all
-targets; `--yes` is the explicit automation override.
-A reboot is successful only after reconnecting and verifying changed boot identity
-and a health probe, not merely after an SSH disconnect.
+Execution uses bounded concurrency, connection/command deadlines, cancellation,
+keepalive and output caps. User-supplied shell commands execute intentionally on the
+remote shell. Generated action commands use fixed templates and safe shell quoting.
 
-## Output and filesystem
+Update dry run probes OS only. Any preflight failure prevents all updates.
+Actual update/reboot requires confirmation showing selected aliases, or explicit
+`--yes` automation approval. Reboot concurrency defaults to 2 and success requires
+a new boot identity plus a successful uptime probe.
 
-Redact known secret values and sensitive URL userinfo in diagnostic output.
-Arbitrary remote stdout/stderr may contain application secrets and cannot be
-guaranteed secret-free; document this when execution output is implemented.
+## Files and platform checks
 
-Create local configuration with restrictive permissions. Do not overwrite files
-on initialization. Windows ACL validation needs dedicated testing before a local
-secret database is introduced.
+Inventory updates use advisory locks, private temporary files and atomic replacement.
+Initialization never overwrites an existing file. Inventory and known_hosts symlinks
+are refused. New Unix directories/files use 0700/0600; Windows uses directory ACLs.
+Credential values are not exported in inventory backups and are not recoverable
+from reference names alone.
+
+Tests use localhost fixtures and temporary OS-store entries. No real VPS is needed.
+The roadmap distinguishes completed test coverage from the remaining release work.
 
 ## Reporting
 
 Use [private vulnerability reporting](https://github.com/KanataLabs/fleetsh/security/advisories/new).
-See the repository's [security policy](https://github.com/KanataLabs/fleetsh/blob/main/SECURITY.md).
+See [SECURITY.md](https://github.com/KanataLabs/fleetsh/blob/main/SECURITY.md).
