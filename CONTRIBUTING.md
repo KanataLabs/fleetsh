@@ -1,7 +1,7 @@
 # Contributing to fleetsh
 
-Start with the [roadmap](docs/roadmap.md), [architecture](docs/architecture.md) and
-[security requirements](docs/security.md). Discuss large changes in a GitHub issue
+Start with the [roadmap](docs/en/roadmap.md), [architecture](docs/en/architecture.md) and
+[security requirements](docs/en/security.md). Discuss large changes in a GitHub issue
 before implementation. Small fixes can go directly to a pull request.
 
 Use Go 1.27 or newer. Keep changes focused and run:
@@ -26,3 +26,9 @@ example domains and private/documentation IP addresses in examples.
 
 Contributions are licensed under GPL-3.0-only. Preserve the license and copyright
 notices. There is no CLA requirement.
+
+Documentation has separate English (docs/en/) and Chinese (docs/zh/) trees.
+Update both language versions when changing supported behavior. Keep each page's
+locale, lang, page_key and permalink aligned with its counterpart. Relative
+documentation links should stay in the current language. Shared navigation labels
+live in docs/_data/locales.yml; legacy root pages only redirect.

@@ -6,7 +6,7 @@
 A lightweight, agentless VPS fleet manager for individual developers and small teams.
 One Go binary for Windows, macOS and Linux, without a central server or remote agent.
 
-[Documentation](https://kanatalabs.com/fleetsh/) · [Install / PATH](https://kanatalabs.com/fleetsh/installation/) · [中文](README.zh-CN.md) · [Roadmap](docs/roadmap.md)
+[Documentation](https://kanatalabs.com/fleetsh/en/) · [Install / PATH](https://kanatalabs.com/fleetsh/en/installation/) · [中文](README.zh-CN.md) · [Roadmap](docs/en/roadmap.md)
 
 > **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
 > update and reboot are implemented. There is no stable release yet.
@@ -23,7 +23,7 @@ go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 
 Windows: `go build -trimpath -o dist/fleetsh.exe ./cmd/fleetsh`.
 Or use `go install github.com/KanataLabs/fleetsh/cmd/fleetsh@latest`.
-See [installation and global PATH registration](docs/installation.md) for
+See [installation and global PATH registration](docs/en/installation.md) for
 Windows user/system PATH and macOS/Linux user/system installation.
 
 ## Use
@@ -55,8 +55,8 @@ Authenticated SOCKS5 stores `username:password` by reference; URL secrets are re
 SSH keys, agent sockets/pipes and ProxyJump work in process without OpenSSH.
 Unavailable credential stores fail without a plaintext fallback.
 
-See [configuration](docs/configuration.md), [usage](docs/getting-started.md) and
-[security](docs/security.md). No playbooks, desired-state DSL, remote daemon or Web UI.
+See [configuration](docs/en/configuration.md), [usage](docs/en/getting-started.md) and
+[security](docs/en/security.md). No playbooks, desired-state DSL, remote daemon or Web UI.
 
 ## Development
 

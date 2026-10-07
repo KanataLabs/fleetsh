@@ -1,0 +1,40 @@
+en:
+  lang: en
+  description: Lightweight, agentless VPS fleet management.
+  skip: Skip to content
+  docs: docs
+  navigation: Documentation
+  start: GET STARTED
+  project: PROJECT
+  overview: Overview
+  installation: Installation / PATH
+  getting-started: Getting started
+  configuration: Configuration
+  product: Product brief
+  architecture: Architecture
+  security: Security design
+  roadmap: Roadmap
+  development: Development build
+  other_locale: zh
+  other_lang: zh-CN
+  switch: 中文
+zh:
+  lang: zh-CN
+  description: 轻量、无需远程代理的 VPS 管理工具。
+  skip: 跳转到正文
+  docs: 文档
+  navigation: 文档导航
+  start: 开始使用
+  project: 项目
+  overview: 概览
+  installation: 安装与 PATH
+  getting-started: 快速开始
+  configuration: 配置
+  product: 产品设计
+  architecture: 架构
+  security: 安全设计
+  roadmap: 路线图
+  development: 开发版
+  other_locale: en
+  other_lang: en
+  switch: English

@@ -3,7 +3,7 @@
 面向个人开发者和小团队的轻量 VPS 管理工具。Go 单个二进制文件，在 Windows、
 macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 
-[文档站](https://kanatalabs.com/fleetsh/) · [安装及全局 PATH 注册](docs/installation.md) · [English](README.md)
+[文档站](https://kanatalabs.com/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md)
 
 **当前为开发版。** 已实现主机管理、SSH、系统凭据、跳板/SOCKS5、并发命令、更新和
 重启验证；尚未发布稳定版。
@@ -19,7 +19,7 @@ go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 需要 Go 1.27 或更新版本。Windows 构建输出使用 `dist/fleetsh.exe`。
 也可 `go install github.com/KanataLabs/fleetsh/cmd/fleetsh@latest`。
 
-[安装文档](docs/installation.md) 提供可直接复制的方案：
+[安装文档](docs/zh/installation.md) 提供可直接复制的方案：
 
 - Windows：用户 PATH 注册，无需管理员；另附系统级 PATH 注册。
 - macOS：`~/.local/bin` + Zsh 配置；系统级使用 `/usr/local/bin`。
@@ -44,7 +44,7 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 内置更新/重启动作面向 Linux VPS。
 
 密码、密钥口令和代理密码通过隐藏输入或系统凭据库读取，TOML 只保存引用。
-配置及命令细节见 [快速开始](docs/getting-started.md) 和 [配置](docs/configuration.md)。
+配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
 所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看选项。
 
 文档源文件位于 main 的 `docs/`，自动发布到 `gh-pages`。
