@@ -17,7 +17,7 @@ fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --credential sg1-login --groups asia
 fleetsh credential add sg1-login
 fleetsh ls
-fleetsh ls @asia --json
+fleetsh ls '@asia' --json
 fleetsh show hk1
 fleetsh edit hk1 --port 2222
 ```
@@ -55,9 +55,13 @@ and forward terminal size changes. OpenSSH argument passthrough/forwarding is de
 
 ## Execute
 
+Quote group selectors in PowerShell: "fleetsh ls '@asia'". The quotes prevent
+PowerShell from interpreting the @ prefix as variable splatting. Quoted selectors
+also work in Bash and Zsh.
+
 ```sh
 fleetsh exec hk1 "uptime"
-fleetsh exec @asia "df -h" --parallel 10
+fleetsh exec '@asia' "df -h" --parallel 10
 fleetsh exec hk1,sg1 "uptime" --serial --json
 fleetsh exec all "docker ps" --tag web --timeout 60s
 fleetsh exec hk1 "apt-get update" --sudo
@@ -80,11 +84,11 @@ nonzero remote exit status returns 1; transport failure returns 3.
 ## Update and reboot Linux VPSs
 
 ```sh
-fleetsh update @asia --dry-run --sudo
-fleetsh update @asia --sudo
+fleetsh update '@asia' --dry-run --sudo
+fleetsh update '@asia' --sudo
 fleetsh update hk1 --dist --sudo --yes
-fleetsh reboot @asia --dry-run --sudo
-fleetsh reboot @asia --parallel 2 --sudo --wait-timeout 5m
+fleetsh reboot '@asia' --dry-run --sudo
+fleetsh reboot '@asia' --parallel 2 --sudo --wait-timeout 5m
 ```
 
 Update dry runs connect to identify the OS but never dispatch package updates.
