@@ -1,33 +1,41 @@
+{% assign locale = page.locale | default: 'en' %}{% assign labels = site.data.locales[locale] %}{% assign prefix = '/' | append: locale | append: '/' %}{% assign alternate = '/' | append: labels.other_locale | append: '/' | append: page.page_key %}
 <!doctype html>
-<html lang="{{ page.lang | default: 'en' }}">
+<html lang="{{ labels.lang }}">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{ page.title | escape }} · fleetsh</title>
-  <meta name="description" content="{{ page.description | default: site.description | escape }}">
-  <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page.title | escape }} · fleetsh</title>
+<meta name="description" content="{{ page.description | default: labels.description | escape }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<link rel="alternate" hreflang="{{ labels.lang }}" href="{{ page.url | absolute_url }}">
+<link rel="alternate" hreflang="{{ labels.other_lang }}" href="{{ alternate | absolute_url }}">
+<link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
 </head>
 <body>
-  <a class="skip" href="#content">Skip to content</a>
-  <header>
-    <a class="brand" href="{{ '/' | relative_url }}">fleetsh<span> / docs</span></a>
-    <a href="https://github.com/KanataLabs/fleetsh">GitHub ↗</a>
-  </header>
-  <div class="shell">
-    <nav aria-label="Documentation">
-      <p>GET STARTED</p>
-      <a href="{{ '/' | relative_url }}">Overview</a>
-      <a href="{{ '/installation/' | relative_url }}">Installation / PATH</a>
-      <a href="{{ '/getting-started/' | relative_url }}">Getting started</a>
-      <a href="{{ '/configuration/' | relative_url }}">Configuration</a>
-      <p>PROJECT</p>
-      <a href="{{ '/product/' | relative_url }}">产品设计 · 中文</a>
-      <a href="{{ '/architecture/' | relative_url }}">Architecture</a>
-      <a href="{{ '/security/' | relative_url }}">Security</a>
-      <a href="{{ '/roadmap/' | relative_url }}">Roadmap</a>
-    </nav>
-    <main id="content">{{ content }}</main>
-  </div>
-  <footer>fleetsh · KanataLabs · GPL-3.0-only · Development build</footer>
+<a class="skip" href="#content">{{ labels.skip }}</a>
+<header>
+<a class="brand" href="{{ prefix | relative_url }}">fleetsh<span> / {{ labels.docs }}</span></a>
+<div class="header-links">
+<a class="language-switch" href="{{ alternate | relative_url }}" lang="{{ labels.other_lang }}" hreflang="{{ labels.other_lang }}">{{ labels.switch }}</a>
+<a href="https://github.com/KanataLabs/fleetsh">GitHub ↗</a>
+</div>
+</header>
+<div class="shell">
+<nav aria-label="{{ labels.navigation }}">
+<p>{{ labels.start }}</p>
+<a href="{{ prefix | relative_url }}"{% if page.page_key == '' %} aria-current="page"{% endif %}>{{ labels.overview }}</a>
+{% assign start_pages = 'installation,getting-started,configuration' | split: ',' %}
+{% for slug in start_pages %}{% assign key = slug | append: '/' %}{% assign path = prefix | append: key %}
+<a href="{{ path | relative_url }}"{% if page.page_key == key %} aria-current="page"{% endif %}>{{ labels[slug] }}</a>
+{% endfor %}
+<p>{{ labels.project }}</p>
+{% assign project_pages = 'product,architecture,security,roadmap' | split: ',' %}
+{% for slug in project_pages %}{% assign key = slug | append: '/' %}{% assign path = prefix | append: key %}
+<a href="{{ path | relative_url }}"{% if page.page_key == key %} aria-current="page"{% endif %}>{{ labels[slug] }}</a>
+{% endfor %}
+</nav>
+<main id="content">{{ content }}</main>
+</div>
+<footer>fleetsh · KanataLabs · GPL-3.0-only · {{ labels.development }}</footer>
 </body>
 </html>
