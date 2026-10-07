@@ -53,7 +53,7 @@ were implemented alongside the core executor.
 - [x] Worker limits, output truncation and mixed-failure exit codes tested.
 - [x] Update confirmation/preflight and reboot identity verification tested.
 - [x] CGO-free single binaries across OS/architectures.
-- [ ] Native credential integration CI passed on all supported platforms.
+- [x] Native credential integration CI passed on all supported platforms.
 - [ ] Manual terminal/PTY acceptance and real-VPS action verification.
 - [ ] Reviewed, tagged release.
 
