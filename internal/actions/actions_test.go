@@ -53,11 +53,15 @@ func TestRebootNeedsNewIdentity(t *testing.T) {
 			if err := m.Prepare(context.Background(), []string{"a"}, false); err != nil {
 				t.Fatal(err)
 			}
+			m.Secrets = append(m.Secrets, "boot-1", "boot-2")
 			wait := 5 * time.Second
 			if !changes {
 				wait = 150 * time.Millisecond
 			}
 			result := Reboot(context.Background(), m, "a", executor.Options{}, wait)
+			if strings.Contains(result.Stdout, "boot-2") {
+				t.Fatal("boot identity leaked a matching secret")
+			}
 			if result.Success != changes {
 				t.Fatalf("incorrect reboot result: %+v", result)
 			}

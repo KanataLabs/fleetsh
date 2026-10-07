@@ -170,7 +170,17 @@ func Classify(err error) string {
 		return "connection"
 	}
 }
-func Run(ctx context.Context, m *transport.Manager, id, command string, options Options) (r Result) {
+func Run(ctx context.Context, m *transport.Manager, id, command string, options Options) Result {
+	return run(ctx, m, id, command, options, nil)
+}
+
+// Probe returns unredacted machine output for action decisions. Do not print the raw value.
+func Probe(ctx context.Context, m *transport.Manager, id, command string, options Options) (string, Result) {
+	var raw string
+	r := run(ctx, m, id, command, options, &raw)
+	return raw, r
+}
+func run(ctx context.Context, m *transport.Manager, id, command string, options Options, raw *string) (r Result) {
 	started := time.Now()
 	r = Result{Host: id, ExitCode: -1}
 	defer func() { r.Duration = time.Since(started).Seconds(); r.Error = credentials.Redact(r.Error, m.Secrets) }()
@@ -206,6 +216,9 @@ func Run(ctx context.Context, m *transport.Manager, id, command string, options 
 	if err == nil {
 		r.Started = true
 		err = session.Wait()
+	}
+	if raw != nil {
+		*raw = stdout.String()
 	}
 	r.Stdout = credentials.Redact(stdout.String(), m.Secrets)
 	r.Stderr = credentials.Redact(stderr.String(), m.Secrets)

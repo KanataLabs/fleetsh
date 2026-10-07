@@ -210,10 +210,26 @@ func (a *application) updateCommand(root *cobra.Command) {
 		if err = m.Prepare(a.ctx, ids, o.sudo && !dry); err != nil {
 			return err
 		}
-		commands := make(map[string]string)
+		commands := make([]string, len(ids))
+		indices := make(map[string]int)
+		for i, id := range ids {
+			indices[id] = i
+		}
 		plans := []plan{}
 		rows := executor.Batch(a.ctx, inv, ids, n, func(ctx context.Context, id string) executor.Result {
-			return executor.Run(ctx, m, id, actions.DetectOS, executor.Options{Timeout: 10 * time.Second})
+			raw, r := executor.Probe(ctx, m, id, actions.DetectOS, executor.Options{Timeout: 10 * time.Second})
+			if r.Success {
+				command, e := actions.UpdateCommand(raw, dist)
+				if e != nil {
+					r.Success = false
+					r.Error = e.Error()
+					r.ErrorKind = "command"
+					r.ExitCode = -1
+				} else {
+					commands[indices[id]] = command
+				}
+			}
+			return r
 		})
 		failed := false
 		for i, r := range rows {
@@ -225,16 +241,8 @@ func (a *application) updateCommand(root *cobra.Command) {
 				failed = true
 				continue
 			}
-			command, err := actions.UpdateCommand(r.Stdout, dist)
-			if err != nil {
-				rows[i].Success = false
-				rows[i].ErrorKind = "command"
-				rows[i].Error = err.Error()
-				rows[i].ExitCode = -1
-				failed = true
-				continue
-			}
-			commands[r.Host] = command
+			command := commands[i]
+
 			plans = append(plans, plan{Host: r.Host, Command: command, Sudo: o.sudo})
 		}
 		if failed {
@@ -254,7 +262,7 @@ func (a *application) updateCommand(root *cobra.Command) {
 			return errors.New("update canceled")
 		}
 		rows = executor.Batch(a.ctx, inv, ids, n, func(ctx context.Context, id string) executor.Result {
-			return executor.Run(ctx, m, id, commands[id], executor.Options{Timeout: o.timeout, Sudo: o.sudo})
+			return executor.Run(ctx, m, id, commands[indices[id]], executor.Options{Timeout: o.timeout, Sudo: o.sudo})
 		})
 		return a.results(rows)
 	}}

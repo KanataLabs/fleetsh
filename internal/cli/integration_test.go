@@ -73,7 +73,9 @@ func TestRemoteCLIJSONAndUpdatePreflight(t *testing.T) {
 	})
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.toml")
-	inv := inventory.Inventory{Hosts: map[string]inventory.Host{"a": server.Host(), "console": {Host: "console.example", Connection: "console-only"}}}
+	host := server.Host()
+	host.SudoCredential = "sudo"
+	inv := inventory.Inventory{Hosts: map[string]inventory.Host{"a": host, "console": {Host: "console.example", Connection: "console-only"}}}
 	if err := inv.Validate(); err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +93,7 @@ func TestRemoteCLIJSONAndUpdatePreflight(t *testing.T) {
 	invoke := func(args ...string) error {
 		out.Reset()
 		errOut.Reset()
-		app := &application{ctx: context.Background(), in: strings.NewReader(""), out: &out, errOut: &errOut, store: testutil.Store{"login": testutil.Password}, path: path}
+		app := &application{ctx: context.Background(), in: strings.NewReader(""), out: &out, errOut: &errOut, store: testutil.Store{"login": testutil.Password, "sudo": "ubuntu"}, path: path}
 		root := app.root("test")
 		root.SetArgs(append([]string{"--config", path}, args...))
 		return root.Execute()
@@ -112,7 +114,7 @@ func TestRemoteCLIJSONAndUpdatePreflight(t *testing.T) {
 	if err := invoke("update", "a"); err == nil || dispatched.Load() != 0 {
 		t.Fatal("non-terminal update did not require confirmation")
 	}
-	if err := invoke("update", "a", "--yes"); err != nil || dispatched.Load() != 1 {
+	if err := invoke("update", "a", "--yes", "--sudo"); err != nil || dispatched.Load() != 1 {
 		t.Fatalf("confirmed update failed: %v %s", err, out.String())
 	}
 }

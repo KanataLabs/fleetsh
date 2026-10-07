@@ -29,26 +29,30 @@ jobs:
         if: runner.os == 'Windows'
         env:
           FLEETSH_TEST_KEYRING: '1'
-        run: go test ./internal/credentials -run TestNativeRoundTrip -count=1
+        run: go test ./internal/credentials -run TestNativeRoundTrip -count=1 -timeout 60s
       - name: macOS isolated keychain
         if: runner.os == 'macOS'
         shell: bash
         run: |
           keychain="$RUNNER_TEMP/fleetsh-fixture.keychain-db"
-          previous="$(security default-keychain -d user | tr -d '"')"
+          previous="$(security default-keychain -d user | sed -e 's/^[[:space:]]*"//' -e 's/"[[:space:]]*$//')"
           trap 'security default-keychain -d user -s "$previous"; security delete-keychain "$keychain"' EXIT
           printf 'create-keychain -p fixture-password %s\n' "$keychain" | security -i
           security default-keychain -d user -s "$keychain"
           security list-keychains -d user -s "$keychain" "$previous"
           printf 'unlock-keychain -p fixture-password %s\n' "$keychain" | security -i
-          FLEETSH_TEST_KEYRING=1 go test ./internal/credentials -run TestNativeRoundTrip -count=1
+          FLEETSH_TEST_KEYRING=1 go test ./internal/credentials -run TestNativeRoundTrip -count=1 -timeout 60s
       - name: Linux isolated Secret Service
         if: runner.os == 'Linux'
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y gnome-keyring dbus-x11
-          dbus-run-session -- bash -c 'eval "$(printf "%s" fleetsh-fixture | gnome-keyring-daemon --unlock --components=secrets)"; export FLEETSH_TEST_KEYRING=1; go test ./internal/credentials -run TestNativeRoundTrip -count=1'
+          timeout 180s dbus-run-session -- bash -e -c '
+            printf "%s\n" fleetsh-fixture | gnome-keyring-daemon --unlock --daemonize --components=secrets
+            export FLEETSH_TEST_KEYRING=1
+            go test ./internal/credentials -run TestNativeRoundTrip -count=1 -timeout 60s
+          '
   cross-build:
     runs-on: ubuntu-latest
     steps:

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/KanataLabs/fleetsh/internal/credentials"
 	"github.com/KanataLabs/fleetsh/internal/executor"
 	"github.com/KanataLabs/fleetsh/internal/transport"
 )
@@ -38,11 +39,11 @@ const healthProbe = "cat /proc/sys/kernel/random/boot_id && uptime"
 // Reboot only succeeds when a new boot identity and a health probe are observed.
 func Reboot(ctx context.Context, m *transport.Manager, id string, options executor.Options, wait time.Duration) executor.Result {
 	start := time.Now()
-	probe := executor.Run(ctx, m, id, bootProbe, executor.Options{Timeout: 10 * time.Second})
+	rawBoot, probe := executor.Probe(ctx, m, id, bootProbe, executor.Options{Timeout: 10 * time.Second})
 	if !probe.Success {
 		return probe
 	}
-	original := strings.TrimSpace(probe.Stdout)
+	original := strings.TrimSpace(rawBoot)
 	if original == "" {
 		probe.Success = false
 		probe.ErrorKind = "command"
@@ -65,13 +66,13 @@ func Reboot(ctx context.Context, m *transport.Manager, id string, options execut
 		case <-waitCtx.Done():
 			return executor.Result{Host: id, ExitCode: -1, ErrorKind: "timeout", Error: "reboot did not produce a new boot identity and health probe before deadline", Duration: time.Since(start).Seconds()}
 		case <-timer.C:
-			health := executor.Run(waitCtx, m, id, healthProbe, executor.Options{Timeout: 10 * time.Second})
+			rawHealth, health := executor.Probe(waitCtx, m, id, healthProbe, executor.Options{Timeout: 10 * time.Second})
 			if health.ErrorKind == "hostkey" {
 				return health
 			}
-			newBoot, _, _ := strings.Cut(strings.TrimSpace(health.Stdout), "\n")
+			newBoot, _, _ := strings.Cut(strings.TrimSpace(rawHealth), "\n")
 			if health.Success && newBoot != "" && newBoot != original {
-				health.Stdout = "Reboot verified; new boot identity: " + newBoot + "\n"
+				health.Stdout = credentials.Redact("Reboot verified; new boot identity: "+newBoot+"\n", m.Secrets)
 				health.Duration = time.Since(start).Seconds()
 				return health
 			}
