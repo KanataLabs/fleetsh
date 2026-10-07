@@ -23,7 +23,7 @@ Commands available now:
   init      Create an example configuration without overwriting existing files
 
 SSH, inventory management, credentials and remote execution are planned.
-See https://kanatalabs.github.io/fleetsh/roadmap/
+See https://kanatalabs.com/fleetsh/roadmap/
 
 Copyright (C) 2026 KanataLabs contributors.
 Licensed under GPL-3.0-only. No warranty; see LICENSE in the source repository.

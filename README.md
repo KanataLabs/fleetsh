@@ -6,7 +6,7 @@
 A lightweight, agentless VPS fleet manager for individual developers and small teams.
 One Go binary for Windows, macOS and Linux, with no central server or remote agent.
 
-[Documentation](https://kanatalabs.github.io/fleetsh/) · [中文介绍](README.zh-CN.md) · [Roadmap](docs/roadmap.md) · [Product design](docs/product.md)
+[Documentation](https://kanatalabs.com/fleetsh/) · [中文介绍](README.zh-CN.md) · [Roadmap](docs/roadmap.md) · [Product design](docs/product.md)
 
 > **Project status: foundation stage.** Available commands are `help`, `version` and
 > `init`. SSH, credential storage and remote execution are under design and are

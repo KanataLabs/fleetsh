@@ -1,6 +1,6 @@
 title: fleetsh
 description: Lightweight, agentless VPS fleet management.
-url: https://kanatalabs.github.io
+url: https://kanatalabs.com
 baseurl: /fleetsh
 markdown: kramdown
 kramdown:

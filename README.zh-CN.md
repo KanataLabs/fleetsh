@@ -3,7 +3,7 @@
 面向个人开发者和小团队的轻量 VPS 管理工具。使用 Go 编写，目标是单个二进制文件，
 在 Windows、macOS、Linux 上运行；不安装远程 Agent，也不要求中心服务器。
 
-[文档站](https://kanatalabs.github.io/fleetsh/) · [English](README.md) · [产品设计](docs/product.md) · [路线图](docs/roadmap.md)
+[文档站](https://kanatalabs.com/fleetsh/) · [English](README.md) · [产品设计](docs/product.md) · [路线图](docs/roadmap.md)
 
 **当前状态：项目基础阶段。** 已实现 `help`、`version`、`init`，可创建不会覆盖已有文件的
 配置示例。SSH、凭据管理、远程执行等功能尚未实现，也尚未发布 v0.1。
