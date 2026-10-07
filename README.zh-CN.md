@@ -33,10 +33,10 @@ go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh ssh hk1 --connect-timeout 60s
-fleetsh exec @web "uptime" --parallel 10
+fleetsh exec '@web' "uptime" --parallel 10
 fleetsh exec hk1,sg1 "df -h" --json
-fleetsh update @all --dry-run --sudo
-fleetsh reboot @all --parallel 2 --sudo --wait-timeout 5m
+fleetsh update '@all' --dry-run --sudo
+fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 ```
 
 首次连接需要核实并确认指纹，指纹变化始终拒绝；自动化不静默信任未知主机。

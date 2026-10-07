@@ -19,9 +19,9 @@ Windows, macOS and Linux.
 ```sh
 fleetsh ls
 fleetsh ssh hk1
-fleetsh exec @web "uptime" --parallel 10
-fleetsh update @all --dry-run --sudo
-fleetsh reboot @all --parallel 2 --sudo
+fleetsh exec '@web' "uptime" --parallel 10
+fleetsh update '@all' --dry-run --sudo
+fleetsh reboot '@all' --parallel 2 --sudo
 ```
 
 ## Principles

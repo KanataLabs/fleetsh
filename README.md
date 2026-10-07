@@ -32,10 +32,10 @@ Windows user/system PATH and macOS/Linux user/system installation.
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh ssh hk1 --connect-timeout 60s
-fleetsh exec @web "uptime" --parallel 10
+fleetsh exec '@web' "uptime" --parallel 10
 fleetsh exec hk1 "df -h" --json
-fleetsh update @all --dry-run --sudo
-fleetsh reboot @all --parallel 2 --sudo
+fleetsh update '@all' --dry-run --sudo
+fleetsh reboot '@all' --parallel 2 --sudo
 ```
 
 Verify the first-connection fingerprint independently before trusting it.
