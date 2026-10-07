@@ -4,73 +4,75 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 A lightweight, agentless VPS fleet manager for individual developers and small teams.
-One Go binary for Windows, macOS and Linux, with no central server or remote agent.
+One Go binary for Windows, macOS and Linux, without a central server or remote agent.
 
-[Documentation](https://kanatalabs.com/fleetsh/) · [中文介绍](README.zh-CN.md) · [Roadmap](docs/roadmap.md) · [Product design](docs/product.md)
+[Documentation](https://kanatalabs.com/fleetsh/) · [Install / PATH](https://kanatalabs.com/fleetsh/installation/) · [中文](README.zh-CN.md) · [Roadmap](docs/roadmap.md)
 
-> **Project status: foundation stage.** Available commands are `help`, `version` and
-> `init`. SSH, credential storage and remote execution are under design and are
-> not implemented yet. There is no v0.1 release.
+> **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
+> update and reboot are implemented. There is no stable release yet.
 
-## Build and try
+## Install
 
-Install Go 1.27 or newer, then:
+Build with Go 1.27 or newer:
 
 ```sh
 git clone https://github.com/KanataLabs/fleetsh.git
 cd fleetsh
-go build -o dist/fleetsh ./cmd/fleetsh
-go run ./cmd/fleetsh help
-go run ./cmd/fleetsh version
-go run ./cmd/fleetsh init
+go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 ```
 
-On Windows, build with `go build -o dist/fleetsh.exe ./cmd/fleetsh`.
-`init` creates a commented example configuration in the OS user config directory
-and refuses to overwrite existing files. Override it with
-`fleetsh init --config ./config.toml`.
+Windows: `go build -trimpath -o dist/fleetsh.exe ./cmd/fleetsh`.
+Or use `go install github.com/KanataLabs/fleetsh/cmd/fleetsh@latest`.
+See [installation and global PATH registration](docs/installation.md) for
+Windows user/system PATH and macOS/Linux user/system installation.
 
-## Planned workflow
-
-These examples describe the target UX; they do not work in the foundation build:
+## Use
 
 ```sh
-fleetsh ls
-fleetsh ssh hk1
+fleetsh init
+fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
+fleetsh ssh hk1 --connect-timeout 60s
 fleetsh exec @web "uptime" --parallel 10
-fleetsh exec hk1,sg1 "df -h" --json
-fleetsh update @all --dry-run
-fleetsh reboot @all --parallel 2
+fleetsh exec hk1 "df -h" --json
+fleetsh update @all --dry-run --sudo
+fleetsh reboot @all --parallel 2 --sudo
 ```
 
-Planned v0.1 features include TOML inventory, groups and tags, SSH password/key/agent
-authentication, OS credential stores, ProxyJump and SOCKS5, strict host key
-verification, bounded parallel execution, JSON output, update and reboot.
-[See the versioned scope](docs/roadmap.md).
+Verify the first-connection fingerprint independently before trusting it.
+Batch automation rejects unknown/changed keys. Updates/reboots require confirmation;
+`--yes` is the explicit automation override. A reboot is verified by a new boot ID
+and health probe. Built-in update/reboot actions target Linux VPSs.
 
-## Boundaries
+Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
+`exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`.
+All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for flags.
 
-fleetsh executes commands over SSH. It does not introduce playbooks, desired state,
-a remote agent, a central daemon, a Web UI or an infrastructure automation DSL.
+## Credentials and proxies
 
-Passwords, private keys, sudo secrets and proxy secrets must never be stored in
-inventory files or command-line arguments. See the [security design](docs/security.md).
+Passwords/passphrases use hidden input or Windows Credential Manager, macOS Keychain
+and Linux Secret Service. Inventory holds only credential references.
+Authenticated SOCKS5 stores `username:password` by reference; URL secrets are rejected.
+SSH keys, agent sockets/pipes and ProxyJump work in process without OpenSSH.
+Unavailable credential stores fail without a plaintext fallback.
+
+See [configuration](docs/configuration.md), [usage](docs/getting-started.md) and
+[security](docs/security.md). No playbooks, desired-state DSL, remote daemon or Web UI.
 
 ## Development
 
 ```sh
-go test ./...
+go test -race ./...
 go vet ./...
 go build ./cmd/fleetsh
 ```
 
-CI tests Linux, macOS and Windows and cross-compiles all three platforms for amd64
-and arm64. Documentation source lives in `docs/` on `main`; an Actions workflow
-syncs it to `gh-pages`, which GitHub Pages builds with Jekyll.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Tests use localhost SSH/proxy fixtures, never real VPS credentials.
+CI tests three OSs and six CGO-free build targets. Native keyring tests use
+`FLEETSH_TEST_KEYRING=1` and temporary fixture entries in unlocked stores.
+Documentation source is `docs/` on main; Actions publishes it to gh-pages.
+Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
 Copyright (C) 2026 KanataLabs contributors.
-Licensed under **GNU GPL version 3 only** (`GPL-3.0-only`); see [LICENSE](LICENSE).
+**GPL-3.0-only**; see [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).

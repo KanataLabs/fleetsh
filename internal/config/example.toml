@@ -1,13 +1,13 @@
-# fleetsh example configuration; the schema is a draft until v0.1.
+# fleetsh example configuration; development schema.
 # Keep passwords, proxy passwords, tokens and private keys out of this file.
-# Host and credential management commands are planned, not implemented yet.
+# Create hosts with fleetsh add; secret values belong in the OS credential store.
 
 [defaults]
 connect_timeout = "10s"
 command_timeout = "30m"
 parallel = 10
 
-# Uncomment and adapt examples when SSH support becomes available.
+# Uncomment and adapt the host examples, or use fleetsh add.
 # [hosts.hk1]
 # host = "hk1.example.com"
 # port = 22

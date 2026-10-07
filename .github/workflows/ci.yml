@@ -18,13 +18,37 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
       - name: Check formatting
         shell: bash
         run: test -z "$(gofmt -l cmd internal)"
       - run: go vet ./...
-      - run: go test -race ./...
+      - run: go test -race ./... -timeout 120s
       - run: go build ./cmd/fleetsh
+      - name: Windows native credential store
+        if: runner.os == 'Windows'
+        env:
+          FLEETSH_TEST_KEYRING: '1'
+        run: go test ./internal/credentials -run TestNativeRoundTrip -count=1
+      - name: macOS isolated keychain
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          keychain="$RUNNER_TEMP/fleetsh-fixture.keychain-db"
+          previous="$(security default-keychain -d user | tr -d '"')"
+          trap 'security default-keychain -d user -s "$previous"; security delete-keychain "$keychain"' EXIT
+          printf 'create-keychain -p fixture-password %s\n' "$keychain" | security -i
+          security default-keychain -d user -s "$keychain"
+          security list-keychains -d user -s "$keychain" "$previous"
+          printf 'unlock-keychain -p fixture-password %s\n' "$keychain" | security -i
+          FLEETSH_TEST_KEYRING=1 go test ./internal/credentials -run TestNativeRoundTrip -count=1
+      - name: Linux isolated Secret Service
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnome-keyring dbus-x11
+          dbus-run-session -- bash -c 'eval "$(printf "%s" fleetsh-fixture | gnome-keyring-daemon --unlock --components=secrets)"; export FLEETSH_TEST_KEYRING=1; go test ./internal/credentials -run TestNativeRoundTrip -count=1'
   cross-build:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +56,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
       - name: Build supported targets without CGO
         shell: bash
         run: |

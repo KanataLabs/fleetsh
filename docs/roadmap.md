@@ -5,42 +5,37 @@ permalink: /roadmap/
 
 # Roadmap
 
-## Current: foundation
+## Current: v0.1 development implementation
 
 - [x] Public Go repository in KanataLabs, GPL-3.0-only.
-- [x] `help`, `version`, `init` with exclusive configuration creation.
-- [x] English and Chinese introduction, product brief, architecture and security design.
-- [x] CI for Windows/macOS/Linux, amd64/arm64 cross-compilation.
-- [x] Documentation source on main and publication through gh-pages.
+- [x] Inventory add/edit/rm/ls/show, groups/tags, console-only assets.
+- [x] Keys (including encrypted keys), passwords and SSH agent.
+- [x] Native OS credential adapters and private terminal input.
+- [x] Direct SSH, ProxyJump and authenticated SOCKS5.
+- [x] Interactive PTY/shell, host key trust/show/reset, keepalive and deadlines.
+- [x] Single/batch exec, worker bounds, per-host results, JSON and output limits.
+- [x] Linux update with OS detection, dry run and confirmation.
+- [x] Reboot with reconnect, new boot ID and health probe.
+- [x] Channel-based sudo credential input and serial execution.
+- [x] Cross-platform CI, release packaging workflow, main-to-gh-pages publishing.
+- [x] Windows/macOS/Linux user/system PATH installation instructions.
+- [ ] First tagged release binaries and checksums.
+- [ ] Manual real-VPS acceptance before declaring a stable release.
 
-There is no production-ready VPS management release yet.
-
-## v0.1: usable fleet management
-
-- [ ] TOML inventory: add/edit/rm/ls/show, groups/tags, console-only assets.
-- [ ] SSH keys (including encrypted keys), passwords and SSH agent.
-- [ ] Native OS credential stores and private prompted input.
-- [ ] Direct SSH, ProxyJump and SOCKS5, including authenticated proxies.
-- [ ] Interactive shell/PTY, host key trust/reset, keepalive and deadlines.
-- [ ] Single/batch exec, bounded concurrency, per-host results and JSON output.
-- [ ] Update with OS detection, dry run and confirmation.
-- [ ] Reboot with reconnect, boot identity verification and health probe.
-- [ ] Tagged release binaries and checksums for supported OS/architectures.
-
-Remote execution must not be released before the security gates below pass.
+Implemented features are tested with local fixtures. This is a development build;
+no stable version has been published.
 
 ## v0.2: convenience and interoperability
 
 - [ ] HTTP CONNECT proxy.
 - [ ] status and reboot-required.
 - [ ] Custom command aliases and `run`.
-- [ ] sudo credential references.
 - [ ] OpenSSH config import and TOML/JSON/OpenSSH export.
-- [ ] Connection retry, serial/rolling execution.
+- [ ] Connection retry and rolling execution.
 
-The original brief calls HTTP CONNECT P0 but also schedules it for v0.2.
-This roadmap adopts v0.2 to keep the first transport release focused.
-It also places aliases/`run` in v0.2 to deliver them together.
+The initial brief placed HTTP CONNECT in both P0 and v0.2; the roadmap uses v0.2.
+Aliases/`run` also remain v0.2. sudo credential references and serial execution
+were implemented alongside the core executor.
 
 ## v0.3: transfers and interactive tooling
 
@@ -52,16 +47,18 @@ It also places aliases/`run` in v0.2 to deliver them together.
 
 ## Release gates
 
-- [ ] Strict target and jump-host key verification; changed keys rejected.
-- [ ] No plaintext secrets in inventory, argv, history or diagnostics.
-- [ ] Native credential integration verified on all supported platforms.
-- [ ] Authenticated proxies and cancellation tested with local fixtures.
-- [ ] Mixed failures produce documented exit codes and structured output.
-- [ ] Destructive actions require consent and verify the resulting host state.
-- [ ] Single binary works without Python, Node.js, Java or a remote agent.
+- [x] Target/jump key verification, unknown-key refusal and changed-key rejection.
+- [x] Plaintext-secret field rejection and channel-based sudo.
+- [x] Authenticated proxies and cancellation tested with local fixtures.
+- [x] Worker limits, output truncation and mixed-failure exit codes tested.
+- [x] Update confirmation/preflight and reboot identity verification tested.
+- [x] CGO-free single binaries across OS/architectures.
+- [ ] Native credential integration CI passed on all supported platforms.
+- [ ] Manual terminal/PTY acceptance and real-VPS action verification.
+- [ ] Reviewed, tagged release.
 
-## Explicit non-goals
+## Non-goals
 
 Complex YAML playbooks, desired-state configuration, template languages, roles,
-collections, a package ecosystem, remote agents, a central daemon, Web UI,
-scheduling, Terraform replacement, Kubernetes management, service discovery and CMDB.
+collections, remote agents, a central daemon, Web UI, scheduling, Terraform
+replacement, Kubernetes management, service discovery and CMDB.

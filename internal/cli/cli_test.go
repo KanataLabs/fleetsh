@@ -11,7 +11,7 @@ import (
 
 func TestInvalidCommandsReturnUsageError(t *testing.T) {
 	for _, args := range [][]string{
-		{"exec", "@all", "uptime"},
+		{"exec", "@all"},
 		{"init", "--unknown"},
 		{"init", "extra"},
 		{"version", "extra"},

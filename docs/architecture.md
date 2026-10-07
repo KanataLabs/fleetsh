@@ -5,63 +5,66 @@ permalink: /architecture/
 
 # Architecture
 
-## Boundaries
-
-The CLI owns argument parsing and presentation. Inventory, secrets, connection
-construction, execution and built-in actions are separate packages.
-No package may silently disable host key verification or persist plaintext secrets.
-
-```text
-CLI
- ├─ Inventory: TOML, host validation, groups/tags, selectors
- ├─ Credentials: OS store, prompted input, credential references
- ├─ Transport: direct SSH, ProxyJump, SOCKS5, later HTTP CONNECT
- ├─ Executor: deadlines, bounded concurrency, ordered per-host results
- ├─ Actions: exec, update, reboot, later status
- └─ Output: terminal and structured JSON
-```
-
-## Current repository
+The CLI owns arguments and presentation. Packages separate inventory, credentials,
+transport, execution and built-in actions.
 
 | Path | Responsibility |
 | --- | --- |
-| `cmd/fleetsh/` | Process entry point and build version |
-| `internal/cli/` | Foundation commands and exit codes |
-| `internal/config/` | Embedded TOML example and exclusive file creation |
-| `docs/` | Documentation source |
-| `.github/workflows/` | CI and documentation publishing |
+| `cmd/fleetsh/` | Entrypoint, version, interrupt cancellation |
+| `internal/cli/` | Cobra commands, prompting, JSON/terminal output |
+| `internal/config/` | Exclusive initial configuration creation |
+| `internal/inventory/` | Strict TOML, validation, selectors, locked atomic saves |
+| `internal/credentials/` | OS keyring, hidden terminal input, known-secret redaction |
+| `internal/transport/` | SSH auth, Agent, jump/SOCKS5, known_hosts, keepalive |
+| `internal/executor/` | Worker pool, deadlines, capped output, PTY, sudo |
+| `internal/actions/` | OS-aware update and verified Linux reboot |
+| `internal/testutil/` | Local-only SSH/Agent/proxy fixtures |
+| `docs/` | Jekyll source; published through gh-pages |
 
-Additional packages should be added when their functionality is implemented,
-rather than as empty scaffolding.
+## Connection lifecycle
 
-## Planned implementation choices
+Credentials and agent keys are resolved before parallel work to prevent prompt
+interleaving. Each target owns its SSH client and jump chain.
+All network work receives cancellation and a connection deadline.
+Unknown host keys require confirmation; changed keys are rejected.
+Keepalive probes run every 15 seconds and close unresponsive connections.
 
-Use Cobra for the full command hierarchy, a maintained TOML parser,
-`golang.org/x/crypto/ssh` for in-process SSH and
-`golang.org/x/net/proxy` for SOCKS5. Evaluate native OS credential adapters for
-Windows Credential Manager, macOS Keychain and Linux Secret Service.
-Do not require the OpenSSH executable for the core SSH implementation.
+Execution starts a separate command deadline after connecting, closes the SSH
+client on cancellation and preserves stdout/stderr/remote exit status.
+Output is capped at 4 MiB per stream and reports truncation.
+The worker pool limits simultaneous target operations; sorted inventory selectors
+produce stable output order.
 
-All remote work receives a context with cancellation and separate connection and
-command deadlines. Parallelism defaults to 10; reboot defaults to 2.
-Resources, agent sockets and jump-host chains must close on every failure path.
+## State changes
 
-## Results and exit codes (proposed)
+A process-level advisory file lock protects cooperating inventory writers.
+Validated TOML is written to a private temporary file, synchronized and renamed.
+CLI edits rewrite comments. Known-host trust uses a separate lock and rechecks
+identity after confirmation to handle concurrent writers.
 
-Each result contains host ID, stdout, stderr, remote exit status, duration and an
-error category. Console-only hosts are explicitly skipped.
+Updates probe every selected executable host before dispatching any update.
+Reboots capture the original boot ID, dispatch the command and reconnect until
+both a changed boot ID and health probe are verified.
 
-- 0: every executable target succeeded.
-- 1: at least one remote command failed (takes precedence in mixed failures).
-- 2: invalid local arguments, inventory or configuration.
-- 3: connection/authentication/proxy/host-key failure without a command failure.
+## Exit status
 
-Only 0 and 2 are used by the current foundation CLI.
-Never retry a command automatically; future retries apply only before command
-dispatch to avoid duplicating side effects.
+- 0: all executable targets succeeded; console-only targets may be skipped.
+- 1: remote command failure, command timeout or cancellation.
+- 2: local usage/configuration or credential preparation error.
+- 3: connection/authentication/proxy/host-key failure, including connection timeout.
 
-## Validation
+In a mixed remote result, code 1 takes precedence over 3.
+Interactive nonzero shell exit returns 1. There are no automatic command retries.
 
-Use local SSH fixtures to verify auth, host keys, jump hosts, proxy negotiation,
-PTY behavior, timeouts and cancellation. Test credential adapters per OS.
-Cross-compile with CGO disabled and verify that releases run without language runtimes.
+## Dependencies and validation
+
+Cobra, go-toml/v2, x/crypto/ssh, x/net/proxy, x/term, go-keyring,
+go-winio and flock are pinned in go.mod/go.sum.
+Core SSH does not invoke an OpenSSH executable. macOS Keychain uses its standard
+`security` utility with secret input through stdin; Linux uses Secret Service/D-Bus.
+
+Tests exercise local SSH servers, encrypted keys, Unix sockets/Windows Agent pipes,
+strict trust, target/jump identity, authenticated proxies, deadlines, sudo input,
+worker bounds, output caps, update confirmation and reboot identity.
+CI runs race tests and six CGO-free cross-builds; native store tests use temporary
+fixture entries in isolated OS credential stores.
