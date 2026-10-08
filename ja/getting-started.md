@@ -13,7 +13,7 @@ fleetsh は v0.1 の基本的な操作を実装しています。現在は開発
 
 ## ヘルプとオフラインガイド
 
-実行ファイルには、例付きの英語コマンドヘルプと 9 つのオフラインガイドが含まれます。
+実行ファイルには、例付きの英語コマンドヘルプと 11 のオフラインガイドが含まれます。
 `init` の実行前でも、設定ファイル、ネットワーク接続、資格情報ストアなしで参照できます。
 オンライン文書は言語ごとに分かれており、既定は英語です。
 
@@ -35,8 +35,10 @@ fleetsh docs patching
 | `groups` | 複数グループ、所属の追加と削除、タグ |
 | `selectors` | ホストとグループの和集合、`@all`、タグ絞り込み |
 | `exec` | 並列数、引用符、タイムアウト、sudo、JSON |
-| `proxies` | ProxyJump と認証付き SOCKS5 |
+| `proxies` | 全体とホストごとの SOCKS5、HTTP/HTTPS CONNECT、ProxyJump |
 | `patching` | 更新の事前確認、apt などの更新、再起動 |
+| `monitoring` | SSH 接続確認、CPU・メモリー・swap・ユーザー・ディスク |
+| `forwarding` | ローカル・リモート・動的 TCP 転送 |
 | `troubleshooting` | 終了コード、信頼、認証、資格情報ストア |
 
 `fleetsh docs TOPIC` でガイドを表示します。オフラインの本文は英語のプレーンテキストです。
@@ -95,7 +97,33 @@ fleetsh ssh hk1 --connect-timeout 60s
 
 専用の `known_hosts` は、選択したホスト一覧のファイルと同じディレクトリにあります。
 SSH の標準入力が端末の場合は PTY と raw モードを使い、端末サイズの変更も転送します。
-OpenSSH 引数の引き渡しとポート転送は今後の実装予定です。
+ポート転送は名前付き設定と `fleetsh forward` を使います。OpenSSH 引数の引き渡しは今後の予定です。
+
+## コマンドひとつでリモート監視
+
+```sh
+fleetsh alive
+fleetsh stats
+fleetsh alive '@web' --timeout 10s
+fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh monitor hk1
+fleetsh stats --json
+```
+
+`alive` は SSH 認証とコマンド実行の可否を確認します。ICMP の確認ではありません。
+`stats`（別名 `monitor`）は Linux のスナップショットを 1 回表示します。
+内容は `whoami`、1 秒間の CPU 使用率、メモリーと swap の使用量（MiB と割合）、
+空き容量を含む `df -h -P` です。両コマンドの既定対象は `@all` で、
+セレクター、タグ、並列数、タイムアウトを指定できます。コンソール専用ホストはスキップします。
+JSON は通常の一括実行レポートで、スナップショットは各ホストの `stdout` に入ります。
+
+Agent のインストールや sudo は不要です。Linux の `/proc`、`awk`、`sleep`、
+`whoami`、`df` が必要です。メモリー使用量は総量から利用可能量を引き、swap 無効時は 0 と表示します。
+CPU はホストの値で、コンテナーの割り当て上限ではありません。`--sudo` は表示されるユーザーを変更します。
+オフラインの説明は `fleetsh docs monitoring` にあります。
+
+ポート転送は `fleetsh forward HOST [NAME]` で起動します。
+[ローカル・リモート・動的転送の設定](../configuration/#forwarding)を参照してください。
 
 ## コマンドを実行する
 

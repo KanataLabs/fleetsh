@@ -250,21 +250,104 @@ Linux には、動作中のユーザー D-Bus セッションと、GNOME Keyring
 このホスト一覧から追加した参照名を記録します。
 ストアから削除してもホスト側の参照は残るため、必要に応じてホスト設定も変更してください。
 
-## プロキシと SSH Agent
+<a id="proxies"></a>
 
-踏み台には `proxy_jump`、SOCKS5 には `proxy` を使います。両方の同時指定はできません。
-循環する踏み台や、存在しない踏み台は拒否します。接続先と踏み台の鍵を検証します。
-SOCKS5 ではプロキシ側が接続先のホスト名を解決します。
+## 全体とホストごとの SSH プロキシ
 
-認証付き SOCKS5 は、`credential add` で `username:password` を保存し、
-`proxy_credential` を設定します。URL にユーザー名やパスワードを含めることは禁止します。
+既存の `[defaults]` にプロキシを設定すると、SSH 接続の共通経路になります。
 
-Unix の Agent は `SSH_AUTH_SOCK` を使用します。
-Windows は既定で `\\.\pipe\openssh-ssh-agent` を使い、
-`SSH_AUTH_SOCK` で別のソケットやパイプを指定できます。Agent には鍵を 1 本以上読み込んでください。
+```toml
+[defaults]
+proxy = "socks5://127.0.0.1:1080"
+# proxy_credential = "local-proxy"
+```
 
-HTTP CONNECT、独自のコマンド別名、OpenSSH のインポートとエクスポート、
-ポート転送は[ロードマップ](../roadmap/)を参照してください。
+`socks5://`、`http://`、`https://` に対応します。HTTP/HTTPS は CONNECT を使い、
+HTTPS ではプロキシの証明書を検証します。既定ポートは順に 1080、80、443 です。
+URL に認証情報、パス、クエリ、フラグメントを含めないでください。
+認証が必要な場合は `fleetsh credential add local-proxy` の非表示入力で
+`username:password` を保存し、`proxy_credential` で参照します。TOML に秘密値は保存しません。
+
+ホスト側で URL を指定しない場合、全体設定を継承します。ホストの URL は全体設定を上書きし、
+そのホストの `proxy_credential` だけを使います。別の接続先へ全体の認証情報を流用しません。
+全体 URL の継承時は、ホストの認証情報参照だけを変更できます。
+`proxy = "direct"` を指定すると全体プロキシを使わず直接接続します。
+
+```sh
+fleetsh edit hk1 --proxy http://127.0.0.1:7890
+fleetsh edit hk1 --proxy socks5://127.0.0.1:1080 --proxy-credential local-proxy
+fleetsh edit hk1 --proxy direct --proxy-credential ""
+fleetsh edit hk1 --proxy "" --proxy-credential ""
+```
+
+最後の例は継承に戻します。プロキシは `ssh`、`exec`、`alive`、`stats`、`update`、
+`reboot`、`forward` に適用されます。設定は接続時に解決され、編集しても継承と明示設定を区別します。
+
+`proxy_jump` は接続先への経路を踏み台に切り替えます。踏み台自体は、上書きしない限り全体の
+プロキシを継承します。同じホストで `proxy` と `proxy_jump` を併用できません。
+循環や存在しない踏み台を拒否し、接続先と踏み台の鍵をそれぞれ検証します。
+
+Unix の Agent は `SSH_AUTH_SOCK` を使います。Windows の既定は
+`\\.\pipe\openssh-ssh-agent` で、`SSH_AUTH_SOCK` に別の接続先も設定できます。
+利用できる鍵を 1 本以上読み込んでください。オフラインの説明は `fleetsh docs proxies` にあります。
+
+<a id="forwarding"></a>
+
+## 3 種類の SSH ポート転送
+
+既存の SSH ホストに、名前付きの設定を追加します。
+
+```toml
+[[hosts.hk1.forwards]]
+name = "web"
+type = "local"
+listen = "127.0.0.1:8080"
+destination = "127.0.0.1:80"
+
+[[hosts.hk1.forwards]]
+name = "reverse"
+type = "remote"
+listen = "127.0.0.1:9000"
+destination = "127.0.0.1:3000"
+
+[[hosts.hk1.forwards]]
+name = "socks"
+type = "dynamic"
+listen = "127.0.0.1:1080"
+```
+
+| 種類 | 待ち受ける場所 | 接続先へ通信する場所 |
+| --- | --- | --- |
+| `local` | このコンピューター | VPS |
+| `remote` | VPS | このコンピューター |
+| `dynamic` | このコンピューターの SOCKS5 | VPS。接続先は SOCKS クライアントが指定 |
+
+```sh
+fleetsh forward hk1 --dry-run
+fleetsh forward hk1 web
+fleetsh forward hk1 socks
+fleetsh forward hk1
+fleetsh forward hk1 --dry-run --json
+```
+
+名前を指定すると 1 件、省略すると全設定を起動します。ドライランは設定を読むだけで、
+SSH 接続、パスワード参照、ポートの待ち受けを行いません。実際の転送は前面で動作し、
+Ctrl+C または切断時に待ち受けと通信を閉じます。起動失敗時は全設定を解除します。
+他のコマンドでは自動起動しません。通常の `edit` は転送設定を保持します。
+
+名前はホスト内で一意にします。待ち受け先には IP または `localhost` と
+0–65535 のポートを指定します。0 は空きポートを選び、実際のアドレスを表示します。
+接続先のポートは 1–65535 です。IPv6 は `[::1]:1080` のように角括弧を使います。
+`--connect-timeout` は接続、起動、接続先へのダイヤルに適用されます。開始済みの通信に
+固定の有効期限はありません。セッションごとの同時接続上限は 128 です。
+
+非公開アクセスにはループバックで待ち受けます。`0.0.0.0`/`::` は他の端末へ公開します。
+動的転送は認証なしの SOCKS5 TCP CONNECT で、BIND と UDP には対応しません。
+ホスト名は VPS 側で解決します。リモート待ち受けは sshd の
+`AllowTcpForwarding`/`GatewayPorts` に従い、サーバー設定は変更しません。
+オフラインの例は `fleetsh docs forwarding` にあります。
+
+独自コマンド別名と OpenSSH の入出力は[ロードマップ](../roadmap/)にあります。
 
 ## ファイルと権限
 

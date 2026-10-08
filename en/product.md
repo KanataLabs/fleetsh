@@ -172,8 +172,9 @@ The current implementation stores authenticated proxy values through
 
 ### HTTP CONNECT
 
-Proposed URLs such as `http://127.0.0.1:8080` establish a CONNECT tunnel.
-HTTP CONNECT is scheduled for v0.2.
+URLs such as `http://127.0.0.1:8080` establish a CONNECT tunnel. HTTP and HTTPS
+CONNECT are implemented, including credential references and global/per-host
+routing. See [proxy configuration](../configuration/#proxies).
 
 ## 8. SSH
 
@@ -182,8 +183,9 @@ Support PTY, interactive shell, password/public-key/agent authentication,
 custom ports, host-key verification, keepalive and timeout.
 
 The original brief proposed forwarding extra OpenSSH arguments, such as
-`fleetsh ssh hk1 -- -L 8080:localhost:80`. Argument passthrough and forwarding
-are deferred; core SSH runs in process.
+`fleetsh ssh hk1 -- -L 8080:localhost:80`. OpenSSH argument passthrough remains
+deferred; local, remote and dynamic forwarding instead use named profiles and
+`fleetsh forward hk1 [NAME]`. Core SSH runs in process.
 
 ## 9. Remote execution
 
@@ -234,7 +236,13 @@ logs or process arguments through constructions such as `echo password | sudo -S
 
 Start with a few frequent actions, without an Ansible-style YAML system.
 
-### status (planned)
+### Basic monitoring and richer status
+
+`fleetsh alive` verifies SSH liveness. `fleetsh stats` (alias `monitor`) prints
+Linux CPU, memory, swap, current user and free disk space. Both default to all
+hosts and support the existing batch JSON format.
+
+A richer status dashboard remains planned.
 
 `fleetsh status '@all'` would report SSH reachability, uptime, load, disk,
 memory, OS and kernel information.
@@ -393,14 +401,14 @@ The original MVP list included `run`; the roadmap places it in v0.2.
 
 ## 27. v0.2
 
-HTTP CONNECT, reboot-required, status, custom aliases, OpenSSH import,
+reboot-required, a richer status dashboard, custom aliases, OpenSSH import,
 configuration export, connection retries and rolling execution.
 sudo credential references and serial execution were proposed here but are
 already implemented with the core executor.
 
 ## 28. v0.3
 
-File upload/download through SFTP, port forwarding, OS-aware command profiles,
+File upload/download through SFTP, OS-aware command profiles,
 optional history and logs, PowerShell/Bash/Zsh completion and an optional TUI.
 
 ## 29. Recommended technology
@@ -417,7 +425,7 @@ CLI
 │   ├── Direct
 │   ├── ProxyJump
 │   ├── SOCKS5
-│   └── HTTP CONNECT (planned)
+│   └── HTTP/HTTPS CONNECT
 ├── Executor: single / parallel
 ├── Actions: exec / update / reboot / status (planned)
 └── Output: terminal / JSON

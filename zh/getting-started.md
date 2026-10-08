@@ -13,7 +13,7 @@ fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 
 ## 帮助与离线指南
 
-程序内置带示例的英文命令帮助和九个离线指南。执行 `init` 前即可查看，
+程序内置带示例的英文命令帮助和十一个离线指南。执行 `init` 前即可查看，
 无需配置文件、网络连接或系统凭据库。在线文档继续按语言分开，默认英语。
 
 ```sh
@@ -34,8 +34,10 @@ fleetsh docs patching
 | `groups` | 多分组、增删成员关系和标签 |
 | `selectors` | 主机与分组的并集、`@all` 和标签筛选 |
 | `exec` | 并发、引号、超时、sudo 和 JSON |
-| `proxies` | ProxyJump 与需要认证的 SOCKS5 |
+| `proxies` | 全局/单机 SOCKS5、HTTP/HTTPS CONNECT 和跳板 |
 | `patching` | 更新预演、apt 等包管理器升级和重启 |
+| `monitoring` | SSH 存活、CPU、内存、swap、用户和磁盘 |
+| `forwarding` | 本地、远程和动态 TCP 转发 |
 | `troubleshooting` | 退出码、信任、认证和系统凭据库 |
 
 使用 `fleetsh docs TOPIC` 查看具体指南；离线正文采用英文纯文本。
@@ -92,7 +94,31 @@ fleetsh ssh hk1 --connect-timeout 60s
 
 专用 `known_hosts` 文件位于所选清单旁边。
 标准输入为终端时，交互 SSH 会使用 PTY 和终端原始模式，并传递窗口大小变化。
-OpenSSH 参数透传和端口转发尚未实现。
+端口转发使用命名配置和 `fleetsh forward`；OpenSSH 参数透传仍在规划中。
+
+## 一键远程监控
+
+```sh
+fleetsh alive
+fleetsh stats
+fleetsh alive '@web' --timeout 10s
+fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh monitor hk1
+fleetsh stats --json
+```
+
+`alive` 检查 SSH 认证及远程命令执行是否可用；`stats`（别名 `monitor`）
+一次打印 Linux 的当前用户、CPU 一秒采样占用、内存及 swap 的 MiB/百分比占用、
+以及 `df -h -P` 的磁盘空余。两个命令默认选择 `@all`，也支持选择器、标签、
+并发和超时参数。仅控制台资产会跳过，JSON 使用标准批量报告，快照放在各主机的 `stdout` 字段。
+
+无需安装远程组件或使用 sudo，只需 Linux `/proc` 和 `awk`、`sleep`、`whoami`、`df`。
+内存占用按总量减可用量计算，未启用 swap 时显示零。CPU 是主机级计数，
+不反映容器配额。每次调用采集一份快照；使用 `--sudo` 会改变显示的用户。
+离线说明见 `fleetsh docs monitoring`。
+
+端口转发用 `fleetsh forward HOST [NAME]` 启动，
+详见 [本地、远程及动态转发配置](../configuration/#forwarding)。
 
 ## 执行命令
 

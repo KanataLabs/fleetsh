@@ -17,9 +17,10 @@ page_key: 'architecture/'
 | `internal/config/` | 独占创建初始配置 |
 | `internal/inventory/` | 严格解析 TOML、校验、选择器、带锁原子保存 |
 | `internal/credentials/` | 系统凭据库、隐藏输入、已知凭据脱敏 |
-| `internal/transport/` | SSH 认证、Agent、跳板与 SOCKS5、主机密钥、保活 |
+| `internal/transport/` | SSH 认证、Agent、跳板、SOCKS5/HTTP/HTTPS 代理、主机密钥、保活 |
 | `internal/executor/` | 工作池、超时、输出限制、PTY、sudo |
-| `internal/actions/` | 按操作系统更新、验证 Linux 重启 |
+| `internal/actions/` | Linux 资源快照、系统更新、重启验证 |
+| `internal/forwarding/` | 本地/远程/动态隧道、连接数限制与取消清理 |
 | `internal/testutil/` | 本地 SSH、Agent 和代理测试环境 |
 | `docs/` | Jekyll 文档源码，通过 gh-pages 发布 |
 

@@ -14,7 +14,9 @@ page_key: 'roadmap/'
 - [x] Inventory add/edit/rm/ls/show, groups/tags, console-only assets.
 - [x] Keys (including encrypted keys), passwords and SSH agent.
 - [x] Native OS credential adapters and private terminal input.
-- [x] Direct SSH, ProxyJump and authenticated SOCKS5.
+- [x] Direct SSH, ProxyJump, global/per-host SOCKS5 and HTTP/HTTPS CONNECT.
+- [x] One-command SSH liveness and Linux CPU/memory/swap/user/disk snapshots.
+- [x] Named local, remote and dynamic TCP port forwards.
 - [x] Interactive PTY/shell, host key trust/show/reset, keepalive and deadlines.
 - [x] Single/batch exec, worker bounds, per-host results, JSON and output limits.
 - [x] Linux update with OS detection, dry run and confirmation.
@@ -22,7 +24,7 @@ page_key: 'roadmap/'
 - [x] Channel-based sudo credential input and serial execution.
 - [x] Cross-platform CI, release packaging workflow, main-to-gh-pages publishing.
 - [x] Windows/macOS/Linux user/system PATH installation instructions.
-- [ ] First tagged release binaries and checksums.
+- [ ] First stable release binaries and checksums (alpha tags are development builds).
 - [ ] Manual real-VPS acceptance before declaring a stable release.
 
 Implemented features are tested with local fixtures. This is a development build;
@@ -30,19 +32,17 @@ no stable version has been published.
 
 ## v0.2: convenience and interoperability
 
-- [ ] HTTP CONNECT proxy.
 - [ ] status and reboot-required.
 - [ ] Custom command aliases and `run`.
 - [ ] OpenSSH config import and TOML/JSON/OpenSSH export.
 - [ ] Connection retry and rolling execution.
 
-The initial brief placed HTTP CONNECT in both P0 and v0.2; the roadmap uses v0.2.
-Aliases/`run` also remain v0.2. sudo credential references and serial execution
+HTTP CONNECT and basic snapshots are implemented. Custom aliases/`run` remain v0.2. sudo credential references and serial execution
 were implemented alongside the core executor.
 
 ## v0.3: transfers and interactive tooling
 
-- [ ] SFTP upload/download and port forwarding.
+- [ ] SFTP upload/download.
 - [ ] OS-aware command profiles.
 - [ ] Opt-in history/logs with redaction and retention policy.
 - [ ] Bash/Zsh/PowerShell completion.

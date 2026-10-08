@@ -14,7 +14,7 @@ the command available from any directory.
 
 ## Help and offline guides
 
-The binary includes English command help with examples and nine offline guides.
+The binary includes English command help with examples and eleven offline guides.
 Help and guides work before `init`, without an inventory, network connection or
 credential store. Online editions remain separate; English is the default.
 
@@ -36,8 +36,10 @@ fleetsh docs patching
 | `groups` | Multiple memberships, incremental edits and tags |
 | `selectors` | Host/group unions, `@all` and tag filters |
 | `exec` | Parallelism, quoting, timeouts, sudo and JSON |
-| `proxies` | ProxyJump and authenticated SOCKS5 |
+| `proxies` | Global/per-host SOCKS5 and HTTP/HTTPS CONNECT, ProxyJump |
 | `patching` | Preview updates, apply apt/package upgrades and reboot |
+| `monitoring` | SSH liveness and Linux CPU/memory/swap/user/disk |
+| `forwarding` | Local, remote and dynamic TCP tunnels |
 | `troubleshooting` | Exit codes, trust, authentication and credential stores |
 
 Use `fleetsh docs TOPIC` to open a guide. Guides print plain text; `--json` applies
@@ -95,7 +97,35 @@ fleetsh ssh hk1 --connect-timeout 60s
 
 The dedicated `known_hosts` file sits next to the selected inventory file.
 SSH interactive sessions use PTY/raw terminal mode when stdin is a terminal,
-and forward terminal size changes. OpenSSH argument passthrough/forwarding is deferred.
+and forward terminal size changes. Port forwards use `fleetsh forward` with named
+profiles; OpenSSH argument passthrough remains deferred.
+
+## One-command remote monitoring
+
+```sh
+fleetsh alive
+fleetsh stats
+fleetsh alive '@web' --timeout 10s
+fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh monitor hk1
+fleetsh stats --json
+```
+
+`alive` checks authenticated SSH execution, rather than ICMP. `stats` (alias
+`monitor`) prints one Linux snapshot: `whoami`, one-second CPU busy percentage,
+memory and swap usage in MiB/percent, and `df -h -P` with free disk space.
+Both default to `@all` and accept selectors, tags, parallelism and timeout flags.
+Console-only assets are skipped. JSON uses the standard batch report, with each
+snapshot in its host’s `stdout` field.
+
+No agent installation or sudo is required. Linux `/proc`, `awk`, `sleep`,
+`whoami` and `df` must be available. Memory is total minus available; swap
+disabled is shown as zero. CPU reflects host counters, not container quotas.
+Each invocation takes one snapshot. `--sudo` can change the reported user.
+Run `fleetsh docs monitoring` for the offline guide.
+
+Port-forward profiles are started with `fleetsh forward HOST [NAME]`;
+see [local, remote and dynamic configuration](../configuration/#forwarding).
 
 ## Execute
 

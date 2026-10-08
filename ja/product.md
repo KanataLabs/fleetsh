@@ -165,8 +165,9 @@ fleetsh credential rm hk1-root
 
 ### HTTP CONNECT
 
-`http://127.0.0.1:8080` などの URL で CONNECT トンネルを作る予定です。
-HTTP CONNECT は v0.2 の計画です。
+`http://127.0.0.1:8080` などの URL で CONNECT トンネルを作ります。
+HTTP/HTTPS CONNECT、認証情報参照、全体とホストごとの経路は実装済みです。
+[プロキシ設定](../configuration/#proxies)を参照してください。
 
 ## 8. SSH
 
@@ -176,7 +177,8 @@ PTY、対話シェル、パスワード・公開鍵・Agent 認証、独自ポ�
 
 当初は `fleetsh ssh hk1 -- -L 8080:localhost:80` のような
 OpenSSH 引数の引き渡しも提案していました。
-引数の引き渡しとポート転送は今後の予定です。現在の SSH はプロセス内で動作します。
+引数の引き渡しは今後の予定です。ローカル・リモート・動的転送は名前付き設定と
+`fleetsh forward hk1 [NAME]` で実装済みです。SSH はプロセス内で動作します。
 
 ## 9. リモート実行
 
@@ -225,7 +227,12 @@ fleetsh exec hk1 "apt-get update" --sudo
 
 頻度の高い少数の操作を提供し、Ansible のような YAML システムは導入しません。
 
-### status（計画中）
+### 基本的な監視と詳細な状態表示
+
+`fleetsh alive` は SSH 接続確認、`fleetsh stats`（別名 `monitor`）は Linux の
+CPU、メモリー、swap、ユーザー、空き容量を表示します。既定は全ホストで、JSON に対応します。
+
+詳細な状態一覧は今後の予定です。
 
 `fleetsh status '@all'` で SSH 接続可否、稼働時間、負荷、ディスク、
 メモリー、OS、カーネル情報を表示する予定です。
@@ -382,13 +389,13 @@ Web UI、スケジュール実行、Terraform の置換、Kubernetes 管理、�
 
 ## 27. v0.2
 
-HTTP CONNECT、reboot-required、status、独自の別名、OpenSSH インポート、
+reboot-required、詳細な状態表示、独自の別名、OpenSSH インポート、
 設定のエクスポート、接続の再試行、段階的な実行。
 sudo の認証情報参照と直列実行も当初はここに含まれていましたが、基本の実行処理で実装済みです。
 
 ## 28. v0.3
 
-SFTP のアップロードとダウンロード、ポート転送、OS ごとのコマンドプロファイル、
+SFTP のアップロードとダウンロード、OS ごとのコマンドプロファイル、
 任意の履歴とログ、PowerShell/Bash/Zsh 補完、任意の TUI。
 
 ## 29. 推奨する技術
@@ -405,7 +412,7 @@ CLI
 │   ├── 直接接続
 │   ├── ProxyJump
 │   ├── SOCKS5
-│   └── HTTP CONNECT（計画中）
+│   └── HTTP/HTTPS CONNECT
 ├── 実行: 単一 / 並列
 ├── 操作: exec / update / reboot / status（計画中）
 └── 出力: 端末 / JSON

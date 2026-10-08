@@ -255,20 +255,107 @@ it does not enumerate unrelated OS-store items. A top-level `credentials` array
 records names added through this inventory. Removing an entry from the store leaves
 host references intact; update those hosts as needed.
 
-## Proxies and SSH agent
+<a id="proxies"></a>
 
-Use `proxy_jump` for an inventory jump host, or `proxy` for SOCKS5, not both.
-Jump cycles and missing jump hosts are rejected. Both target and jump host keys
-are checked. The target hostname is resolved by SOCKS5.
-For authenticated SOCKS5, store `username:password` with `credential add` and set
-`proxy_credential`; URL userinfo is forbidden.
+## Global and per-host SSH proxies
 
-Unix agents use `SSH_AUTH_SOCK`. Windows uses
-`\\.\pipe\openssh-ssh-agent` by default, or the socket/pipe in `SSH_AUTH_SOCK`.
-Agent connections require at least one loaded key.
+Edit the existing `[defaults]` table to route SSH through a global proxy:
 
-HTTP CONNECT, custom aliases, OpenSSH import/export and forwarding remain on the
-[roadmap](../roadmap/).
+```toml
+[defaults]
+proxy = "socks5://127.0.0.1:1080"
+# proxy_credential = "local-proxy"
+```
+
+Supported schemes are `socks5://`, `http://` and `https://`. HTTP/HTTPS uses CONNECT;
+HTTPS checks the proxy certificate. Default ports are 1080, 80 and 443 respectively.
+URLs must not contain userinfo, paths, queries or fragments. Save authentication
+as `username:password` through `fleetsh credential add local-proxy`, then set
+`proxy_credential`. No secret values belong in TOML.
+
+A host with no explicit proxy inherits the global URL. A per-host URL overrides
+it and uses only that host’s `proxy_credential`, without inheriting credentials
+for a different endpoint. A host inheriting the global URL may override just the
+credential reference. `proxy = "direct"` bypasses the global route.
+
+```sh
+fleetsh edit hk1 --proxy http://127.0.0.1:7890
+fleetsh edit hk1 --proxy socks5://127.0.0.1:1080 --proxy-credential local-proxy
+fleetsh edit hk1 --proxy direct --proxy-credential ""
+fleetsh edit hk1 --proxy "" --proxy-credential ""
+```
+
+The last command restores inheritance. Proxies apply to `ssh`, `exec`, `alive`,
+`stats`, `update`, `reboot` and `forward`. Settings are resolved per connection;
+CLI edits preserve the distinction between inherited and explicit routes.
+
+`proxy_jump` selects an inventory SSH gateway instead of the global proxy for
+the destination. The gateway itself inherits the global proxy unless overridden.
+A host cannot combine `proxy` and `proxy_jump`; jump cycles and missing gateways
+are rejected. Target and gateway host keys are verified independently.
+
+Unix agents use `SSH_AUTH_SOCK`. Windows uses `\\.\pipe\openssh-ssh-agent`
+by default, or the socket/pipe in `SSH_AUTH_SOCK`. Load at least one usable key.
+Run `fleetsh docs proxies` for the offline guide.
+
+<a id="forwarding"></a>
+
+## Three kinds of SSH port forwarding
+
+Add profiles to an existing SSH host:
+
+```toml
+[[hosts.hk1.forwards]]
+name = "web"
+type = "local"
+listen = "127.0.0.1:8080"
+destination = "127.0.0.1:80"
+
+[[hosts.hk1.forwards]]
+name = "reverse"
+type = "remote"
+listen = "127.0.0.1:9000"
+destination = "127.0.0.1:3000"
+
+[[hosts.hk1.forwards]]
+name = "socks"
+type = "dynamic"
+listen = "127.0.0.1:1080"
+```
+
+| Type | Listener | Destination connects from |
+| --- | --- | --- |
+| `local` | This computer | The VPS |
+| `remote` | The VPS | This computer |
+| `dynamic` | This computer’s SOCKS5 endpoint | The VPS; requested by the SOCKS client |
+
+```sh
+fleetsh forward hk1 --dry-run
+fleetsh forward hk1 web
+fleetsh forward hk1 socks
+fleetsh forward hk1
+fleetsh forward hk1 --dry-run --json
+```
+
+An optional name selects one profile; otherwise all profiles start together.
+The dry run reads config without SSH, passwords or listeners. Actual forwarding
+runs in the foreground until Ctrl+C or disconnect, then releases listeners and
+active streams. Failed startup rolls back all profiles. Other commands do not
+start profiles automatically. Profiles survive ordinary `edit` operations.
+
+Names must be valid and unique per host. Listen hosts must be explicit IPs or
+`localhost`, with ports 0–65535 (0 allocates a free port and prints its address).
+Destination ports are 1–65535. Bracket IPv6 addresses, for example `[::1]:1080`.
+`--connect-timeout` bounds connection, setup and destination dialing; existing
+streams have no artificial lifetime limit. A session permits 128 active connections.
+
+Use loopback binds for private access. Explicit `0.0.0.0`/`::` exposes listeners
+to other machines. Dynamic forwarding is unauthenticated SOCKS5 TCP CONNECT;
+BIND and UDP are unsupported, and domain names resolve through the VPS.
+Remote listening depends on sshd `AllowTcpForwarding`/`GatewayPorts` policy;
+fleetsh does not modify server settings. Run `fleetsh docs forwarding` for examples.
+
+Custom command aliases and OpenSSH import/export remain on the [roadmap](../roadmap/).
 
 ## Files and permissions
 
