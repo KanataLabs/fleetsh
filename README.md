@@ -47,6 +47,12 @@ Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
 `exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`.
 All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for flags.
 
+VPS configuration is local to your OS user, in `%APPDATA%\fleetsh\config.toml`
+(Windows), `~/Library/Application Support/fleetsh/config.toml` (macOS), or
+`$XDG_CONFIG_HOME/fleetsh/config.toml` / `~/.config/fleetsh/config.toml` (Linux).
+See [storage locations and backup](docs/en/configuration.md#storage) for custom
+inventories, host trust files and migrating credentials.
+
 ## Use cases
 
 [Patch every VPS](docs/en/cases/patch-all-vps.md): preview and apply Debian/Ubuntu

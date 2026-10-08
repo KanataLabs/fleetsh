@@ -8,6 +8,96 @@ page_key: 'configuration/'
 
 # 配置
 
+<a id="storage"></a>
+
+## VPS 配置信息存放在哪里
+
+主机清单保存在运行 fleetsh 的电脑上，属于当前操作系统用户。
+一个 `config.toml` 保存 VPS 地址、SSH 用户名和端口、分组、标签、代理设置、
+默认参数及凭据引用名称；每台 VPS 对应一个 `[hosts.别名]` 条目。
+把程序加入 PATH 不会改变配置位置，在不同工作目录运行时仍使用同一份默认清单。
+
+| 操作系统 | 默认清单路径 |
+| --- | --- |
+| Windows | `%APPDATA%\fleetsh\config.toml` |
+| macOS | `~/Library/Application Support/fleetsh/config.toml` |
+| Linux | 设置了 `XDG_CONFIG_HOME` 时为 `$XDG_CONFIG_HOME/fleetsh/config.toml`，否则为 `~/.config/fleetsh/config.toml` |
+
+Windows 下通常展开为 `C:\Users\<用户名>\AppData\Roaming\fleetsh\config.toml`。
+`fleetsh init` 创建文件时会输出路径；已有文件会保留。
+初始化后，可以用下面的命令查找默认清单：
+
+Windows PowerShell：
+
+```powershell
+$configFile = Join-Path $env:APPDATA "fleetsh\config.toml"
+Write-Output $configFile
+Get-Item -LiteralPath $configFile
+notepad $configFile
+```
+
+macOS：
+
+```sh
+config_file="$HOME/Library/Application Support/fleetsh/config.toml"
+printf '%s\n' "$config_file"
+ls -l "$config_file"
+```
+
+Linux：
+
+```sh
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/fleetsh/config.toml"
+printf '%s\n' "$config_file"
+ls -l "$config_file"
+```
+
+这些命令显示默认位置。如果运行时指定了 `--config`，应查看该参数所选的文件。
+
+### 指定其他清单
+
+需要使用自定义清单时，每条相关命令都传入 `--config PATH`：
+
+```sh
+fleetsh --config "./inventories/production/config.toml" init
+fleetsh --config "./inventories/production/config.toml" add web1 --host web1.example.com --user ubuntu --auth agent
+fleetsh --config "./inventories/production/config.toml" ls
+fleetsh --config "./inventories/production/config.toml" ssh web1
+```
+
+相对路径以当前工作目录为基准；`~/` 展开为当前用户的主目录。
+包含空格的路径需要加引号。该选项只为本次执行选择一份文件，
+不会修改默认位置，也不会合并其他清单。经常切换工作目录时，建议传入绝对路径。
+分别放在 `inventories/production/` 和 `inventories/staging/` 等不同目录，
+还可以分别保存各环境信任的主机公钥。
+
+### 相关文件与凭据
+
+| 数据 | 存储位置 |
+| --- | --- |
+| VPS 清单和凭据名称 | 默认 `config.toml`，或 `--config` 指定的文件 |
+| 已信任的 SSH 主机公钥 | 所选清单目录中的 `known_hosts`，首次信任主机密钥时创建 |
+| SSH 私钥 | 主机 `key` 字段指定的路径，fleetsh 从该处读取 |
+| 已保存的密码、私钥口令和代理凭据 | Windows Credential Manager、macOS Keychain 或 Linux Secret Service |
+| 文件锁 | 清单旁的 `<清单路径>.lock` 和信任文件旁的 `known_hosts.lock` |
+
+fleetsh 使用清单旁的 `known_hosts`；同目录的清单共用该文件。
+它不使用 `~/.ssh/known_hosts`。秘密值保存在当前用户的系统凭据库中，
+服务名称为 `fleetsh`。即使清单位于不同目录，相同凭据引用仍指向同一个秘密值。
+需要隔离时可分别命名为 `production-web1-login` 和 `staging-web1-login`。
+
+### 备份与迁移到另一台电脑
+
+1. 等待 fleetsh 命令执行完毕，将所选清单及其相邻的 `known_hosts` 复制到目标配置目录。锁文件用于协调写入，无需备份。
+2. 单独迁移需要的 SSH 私钥，保留受限访问权限，并按需修改 `key` 路径。
+3. 在目标电脑上用 `fleetsh credential add REFERENCE` 重新保存凭据；自定义清单需同时传入 `--config PATH`。复制 TOML 不会复制系统凭据库中的秘密值。
+4. 连接前先用 `fleetsh ls` 检查所选清单。没有迁移 `known_hosts` 时，需要重新核实并信任主机指纹。
+
+清单包含主机地址、用户名等基础设施信息，备份应保持私密。
+文件权限说明见本文末尾。
+
+## 清单格式
+
 `fleetsh init` 会写入带注释的示例。通过命令行添加主机，或直接编辑 TOML。
 严格解析会拒绝未知字段和误写的明文密码。
 命令行修改使用文件锁和原子替换，并会重写注释。
@@ -111,13 +201,7 @@ HTTP CONNECT、自定义命令别名、OpenSSH 导入导出和端口转发见 [�
 
 ## 文件与权限
 
-| 操作系统 | 默认清单 |
-| --- | --- |
-| Windows | `%APPDATA%\fleetsh\config.toml` |
-| macOS | `~/Library/Application Support/fleetsh/config.toml` |
-| Linux | `$XDG_CONFIG_HOME/fleetsh/config.toml`，或 `~/.config/fleetsh/config.toml` |
-
-相邻的 `known_hosts` 保存已信任的公钥。
+清单和主机信任文件的位置见 [上文](#storage)。
 Unix 创建文件使用 0600 权限，新建目录使用 0700。
 Windows 使用用户目录的访问控制列表。
 清单和 `known_hosts` 必须是普通文件，符号链接会被拒绝。

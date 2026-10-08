@@ -8,6 +8,102 @@ page_key: 'configuration/'
 
 # Configuration
 
+<a id="storage"></a>
+
+## Where VPS configuration is stored
+
+fleetsh stores the inventory locally on the computer running the CLI, under the
+current OS user account. One `config.toml` holds host addresses, SSH users and
+ports, groups, tags, proxy settings, defaults and credential reference names.
+Each VPS is a `[hosts.ALIAS]` entry. Adding the binary to PATH does not change
+the configuration location; commands use the same default inventory from any
+working directory.
+
+| OS | Default inventory |
+| --- | --- |
+| Windows | `%APPDATA%\fleetsh\config.toml` |
+| macOS | `~/Library/Application Support/fleetsh/config.toml` |
+| Linux | `$XDG_CONFIG_HOME/fleetsh/config.toml` when `XDG_CONFIG_HOME` is set; otherwise `~/.config/fleetsh/config.toml` |
+
+On Windows this is normally `C:\Users\<user>\AppData\Roaming\fleetsh\config.toml`.
+`fleetsh init` creates the file and prints its path. It preserves existing files.
+To locate the default inventory after initialization:
+
+Windows PowerShell:
+
+```powershell
+$configFile = Join-Path $env:APPDATA "fleetsh\config.toml"
+Write-Output $configFile
+Get-Item -LiteralPath $configFile
+notepad $configFile
+```
+
+macOS:
+
+```sh
+config_file="$HOME/Library/Application Support/fleetsh/config.toml"
+printf '%s\n' "$config_file"
+ls -l "$config_file"
+```
+
+Linux:
+
+```sh
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/fleetsh/config.toml"
+printf '%s\n' "$config_file"
+ls -l "$config_file"
+```
+
+These commands show the default path. If you supply `--config`, use that selected
+path instead.
+
+### Use a different inventory
+
+Pass `--config PATH` on every command that should use a custom inventory:
+
+```sh
+fleetsh --config "./inventories/production/config.toml" init
+fleetsh --config "./inventories/production/config.toml" add web1 --host web1.example.com --user ubuntu --auth agent
+fleetsh --config "./inventories/production/config.toml" ls
+fleetsh --config "./inventories/production/config.toml" ssh web1
+```
+
+Relative paths resolve from the current working directory; `~/` expands to the
+current user's home directory. Quote paths containing spaces. The option selects
+one file for that invocation; it does not save a new default or merge inventories.
+Use an absolute path when invoking fleetsh from different directories. Separate
+directories, such as `inventories/production/` and `inventories/staging/`, also
+keep their host trust files separate.
+
+### Related files and credentials
+
+| Data | Location |
+| --- | --- |
+| VPS inventory and credential names | The selected `config.toml`, or the file passed through `--config` |
+| Trusted SSH host public keys | `known_hosts` in the selected inventory's directory; created when a host key is trusted |
+| SSH private keys | The path in each host's `key` field; fleetsh reads the file there |
+| Saved passwords, key passphrases and proxy credentials | Windows Credential Manager, macOS Keychain or Linux Secret Service |
+| File locks | `<inventory-path>.lock` and `known_hosts.lock` alongside their respective files |
+
+fleetsh uses its adjacent `known_hosts` rather than `~/.ssh/known_hosts`. Inventories
+in the same directory share that trust file. Secrets are stored under the
+`fleetsh` service in the current user's OS credential store. Inventories using the
+same credential reference share the same stored secret, even if their files are
+in different directories. Use distinct names such as `production-web1-login`
+and `staging-web1-login` when credentials should be independent.
+
+### Back up or move to another computer
+
+1. Finish running fleetsh commands, then copy the selected inventory and its adjacent `known_hosts` to the destination configuration directory. Lock files are coordination files and are not needed in the backup.
+2. Transfer any SSH private keys separately, preserve restricted permissions and update `key` paths if necessary.
+3. Re-create saved secrets on the destination with `fleetsh credential add REFERENCE`, supplying `--config PATH` if using a custom inventory. Copying TOML does not copy OS-store credentials.
+4. Run `fleetsh ls` with the chosen inventory to check it before connecting. If you did not transfer `known_hosts`, verify and trust host fingerprints again.
+
+The inventory contains infrastructure details such as host addresses and
+usernames; keep backups private. See [files and permissions](#files-and-permissions).
+
+## Inventory format
+
 `fleetsh init` writes a commented example. Add hosts through CLI or edit TOML.
 Strict decoding rejects unknown fields and accidental plaintext secrets.
 CLI mutations use a file lock and atomic replacement and rewrite comments.
@@ -112,13 +208,7 @@ HTTP CONNECT, custom aliases, OpenSSH import/export and forwarding remain on the
 
 ## Files and permissions
 
-| OS | Default inventory |
-| --- | --- |
-| Windows | `%APPDATA%\fleetsh\config.toml` |
-| macOS | `~/Library/Application Support/fleetsh/config.toml` |
-| Linux | `$XDG_CONFIG_HOME/fleetsh/config.toml`, or `~/.config/fleetsh/config.toml` |
-
-The adjacent `known_hosts` file holds trusted public keys.
+Inventory and host trust file locations are listed [above](#storage).
 Unix files are created with mode 0600 and new directories with 0700.
 Windows uses the user directory's ACL. Inventory and known_hosts must be regular
 files; symlinks are rejected. Secret values remain in the OS store.

@@ -47,6 +47,11 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
 所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看选项。
 
+VPS 配置保存在本机当前用户的配置目录：Windows 为 `%APPDATA%\fleetsh\config.toml`，
+macOS 为 `~/Library/Application Support/fleetsh/config.toml`，
+Linux 为 `$XDG_CONFIG_HOME/fleetsh/config.toml` 或 `~/.config/fleetsh/config.toml`。
+[存储位置与备份迁移](docs/zh/configuration.md#storage) 说明自定义清单、主机信任文件及凭据迁移。
+
 文档源文件位于 main 的 `docs/`，由持续集成构建，再通过组织 App 发布到 `gh-pages`。
 项目采用 **GPL-3.0-only**，许可证全文见 [LICENSE](LICENSE)。
 
