@@ -5,6 +5,7 @@ en:
   docs: docs
   navigation: Documentation
   start: GET STARTED
+  cases: Use cases
   project: PROJECT
   overview: Overview
   installation: Installation / PATH
@@ -25,6 +26,7 @@ zh:
   docs: 文档
   navigation: 文档导航
   start: 开始使用
+  cases: 使用案例
   project: 项目
   overview: 概览
   installation: 安装与 PATH

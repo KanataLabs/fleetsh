@@ -103,3 +103,5 @@ Actual updates and reboots show selected aliases and require confirmation; use
 `--yes` for explicit automation approval. Reboot concurrency defaults to 2.
 A reboot succeeds only after a changed Linux boot ID and successful uptime probe.
 No commands are automatically retried.
+
+For a complete maintenance workflow, see [Patch every VPS](../cases/patch-all-vps/).

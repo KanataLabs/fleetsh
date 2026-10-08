@@ -19,6 +19,8 @@ Windows, macOS and Linux.
 [Install and register PATH](installation/) · [Get started](getting-started/) ·
 [Read the product brief](product/) · [Roadmap](roadmap/)
 
+[Use cases: patch every VPS](cases/patch-all-vps/)
+
 ```sh
 fleetsh ls
 fleetsh ssh hk1

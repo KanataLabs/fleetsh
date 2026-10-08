@@ -18,6 +18,8 @@ fleetsh 是面向个人开发者和小团队的轻量 VPS 管理工具，使用 
 [安装与 PATH 注册](installation/) · [快速开始](getting-started/) ·
 [产品设计](product/) · [路线图](roadmap/)
 
+[使用案例：给所有 VPS 打补丁](cases/patch-all-vps/)
+
 ```sh
 fleetsh ls
 fleetsh ssh hk1

@@ -98,3 +98,5 @@ fleetsh reboot '@asia' --parallel 2 --sudo --wait-timeout 5m
 实际更新和重启会显示所选别名并要求确认；自动化显式使用 `--yes`。
 重启默认并发为 2。只有 Linux 启动标识变化且 uptime 健康探测成功，才算重启成功。
 命令不会自动重试。
+
+完整维护流程见 [给所有 VPS 打补丁](../cases/patch-all-vps/)。
