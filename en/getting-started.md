@@ -14,6 +14,11 @@ the command available from any directory.
 
 ## Initialize an inventory
 
+The inventory is stored locally for your OS user: `%APPDATA%\fleetsh\config.toml`
+on Windows, `~/Library/Application Support/fleetsh/config.toml` on macOS, and
+`$XDG_CONFIG_HOME/fleetsh/config.toml` or `~/.config/fleetsh/config.toml` on Linux.
+See [storage locations, custom inventories and backup](../configuration/#storage).
+
 ```sh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web

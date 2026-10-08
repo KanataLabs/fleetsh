@@ -13,6 +13,11 @@ fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 
 ## 初始化主机清单
 
+清单保存在本机当前用户的配置目录：Windows 为 `%APPDATA%\fleetsh\config.toml`，
+macOS 为 `~/Library/Application Support/fleetsh/config.toml`，
+Linux 为 `$XDG_CONFIG_HOME/fleetsh/config.toml` 或 `~/.config/fleetsh/config.toml`。
+详见 [存储位置、自定义清单与备份迁移](../configuration/#storage)。
+
 ```sh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
