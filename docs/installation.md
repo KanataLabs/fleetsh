@@ -1,8 +1,8 @@
 ---
-title: fleetsh 文档
+title: fleetsh documentation
 permalink: /installation/
 layout: redirect
-lang: zh-CN
-redirect_to: /zh/installation/
-link_label: 进入中文文档
+lang: en
+redirect_to: /en/installation/
+link_label: Open English documentation
 ---

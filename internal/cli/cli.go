@@ -57,7 +57,7 @@ func RunContext(ctx context.Context, args []string, version string, in io.Reader
 }
 func (a *application) root(version string) *cobra.Command {
 	root := &cobra.Command{Use: "fleetsh", Short: "Lightweight, agentless VPS fleet management",
-		Long: "fleetsh — one binary for inventory, SSH and parallel VPS management.\n\nGPL-3.0-only. No warranty. https://kanatalabs.com/fleetsh/",
+		Long: "fleetsh — one binary for inventory, SSH and parallel VPS management.\n\nGPL-3.0-only. No warranty. https://kanatalabs.github.io/fleetsh/",
 		Args: cobra.NoArgs, SilenceErrors: true, SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
 	}

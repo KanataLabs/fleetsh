@@ -3,7 +3,7 @@
 面向个人开发者和小团队的轻量 VPS 管理工具。Go 单个二进制文件，在 Windows、
 macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 
-[文档站](https://kanatalabs.com/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md)
+[文档站](https://kanatalabs.github.io/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md)
 
 **当前为开发版。** 已实现主机管理、SSH、系统凭据、跳板/SOCKS5、并发命令、更新和
 重启验证；尚未发布稳定版。
@@ -47,5 +47,7 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
 所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看选项。
 
-文档源文件位于 main 的 `docs/`，自动发布到 `gh-pages`。
+文档源文件位于 main 的 `docs/`，由持续集成构建，再通过组织 App 发布到 `gh-pages`。
 项目采用 **GPL-3.0-only**，许可证全文见 [LICENSE](LICENSE)。
+
+使用案例：[给所有 VPS 打补丁](docs/zh/cases/patch-all-vps.md)，涵盖预演、apt 批量更新、结果检查和按需重启。

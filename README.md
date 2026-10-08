@@ -6,7 +6,7 @@
 A lightweight, agentless VPS fleet manager for individual developers and small teams.
 One Go binary for Windows, macOS and Linux, without a central server or remote agent.
 
-[Documentation](https://kanatalabs.com/fleetsh/en/) · [Install / PATH](https://kanatalabs.com/fleetsh/en/installation/) · [中文](README.zh-CN.md) · [Roadmap](docs/en/roadmap.md)
+[Documentation](https://kanatalabs.github.io/fleetsh/en/) · [Install / PATH](https://kanatalabs.github.io/fleetsh/en/installation/) · [中文](README.zh-CN.md) · [Roadmap](docs/en/roadmap.md)
 
 > **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
 > update and reboot are implemented. There is no stable release yet.
@@ -47,6 +47,11 @@ Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
 `exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`.
 All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for flags.
 
+## Use cases
+
+[Patch every VPS](docs/en/cases/patch-all-vps.md): preview and apply Debian/Ubuntu
+package updates across the fleet, inspect results and reboot selected hosts.
+
 ## Credentials and proxies
 
 Passwords/passphrases use hidden input or Windows Credential Manager, macOS Keychain
@@ -69,7 +74,8 @@ go build ./cmd/fleetsh
 Tests use localhost SSH/proxy fixtures, never real VPS credentials.
 CI tests three OSs and six CGO-free build targets. Native keyring tests use
 `FLEETSH_TEST_KEYRING=1` and temporary fixture entries in unlocked stores.
-Documentation source is `docs/` on main; Actions publishes it to gh-pages.
+Documentation source is `docs/` on main. CI builds both languages; the organization App
+publishes to gh-pages through configured CI credentials or scripts/publish-docs.ps1.
 Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License

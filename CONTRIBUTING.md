@@ -32,3 +32,13 @@ Update both language versions when changing supported behavior. Keep each page's
 locale, lang, page_key and permalink aligned with its counterpart. Relative
 documentation links should stay in the current language. Shared navigation labels
 live in docs/_data/locales.yml; legacy root pages only redirect.
+
+English is the default documentation language; keep the Chinese tree separate.
+Documentation is built in CI. Automatic gh-pages publication uses the organization
+App only when KANATALABS_PUBLISHER_PRIVATE_KEY is configured as an Actions secret.
+Without that secret, use scripts/publish-docs.ps1 with the local Publisher utility.
+The script requires a clean main checkout and uses the App for every Git operation.
+Never paste a private key or installation token into this repository.
+The configured site URL is https://kanatalabs.github.io/fleetsh/. GitHub currently
+redirects this default URL through the organization site's custom domain.
+Do not add a corporate /fleetsh redirect back to this default URL: it would loop.
