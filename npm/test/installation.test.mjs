@@ -112,6 +112,20 @@ test('cache paths stay separate from inventory and respect explicit override', (
   assert.equal(cacheRoot({ FLEETSH_NPM_CACHE: './custom' }), path.resolve('./custom'));
 });
 
+test('download retries transient network failures once and never retries HTTP 404', async () => {
+  let attempts = 0;
+  assert.deepEqual(await download('https://example.test/archive', { expectedSize: 2, fetchImpl: async () => {
+    if (++attempts === 1) throw new TypeError('fetch failed');
+    return new Response('ok');
+  } }), Buffer.from('ok'));
+  assert.equal(attempts, 2);
+  attempts = 0;
+  await assert.rejects(download('https://example.test/archive', { fetchImpl: async () => {
+    attempts++; return new Response(null, { status: 404 });
+  } }), /HTTP 404/);
+  assert.equal(attempts, 1);
+});
+
 test('download follows HTTPS redirects, bounds body size and rejects truncation', async () => {
   const requests = [];
   const fetchImpl = async (url, opts) => {

@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
-export async function download(url, { expectedSize, fetchImpl = fetch, timeoutMs = 120000 } = {}) {
+export async function download(url, options = {}) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await downloadAttempt(url, options);
+    } catch (error) {
+      const transient = error.name === 'TimeoutError' || error.name === 'TypeError' || error.retryable;
+      if (attempt === 1 || !transient) throw error;
+    }
+  }
+}
+
+async function downloadAttempt(url, { expectedSize, fetchImpl = fetch, timeoutMs = 120000 } = {}) {
   const signal = AbortSignal.timeout(timeoutMs);
   for (let redirects = 0; redirects <= 5; redirects++) {
     if (new URL(url).protocol !== 'https:') throw new Error('Release downloads require HTTPS');
@@ -13,7 +24,9 @@ export async function download(url, { expectedSize, fetchImpl = fetch, timeoutMs
     }
     if (!response.ok || !response.body) {
       await response.body?.cancel();
-      throw new Error('Release download failed (HTTP ' + response.status + ')');
+      const error = new Error('Release download failed (HTTP ' + response.status + ')');
+      error.retryable = [408, 429].includes(response.status) || response.status >= 500;
+      throw error;
     }
     const limit = expectedSize ?? 16 * 1024 * 1024;
     const declared = response.headers.get('content-length');

@@ -14,7 +14,7 @@ selected with `FLEETSH_NPM_CACHE`. Inventory and credential paths remain unchang
 Archives and output sizes are bounded. Extraction never writes archive paths.
 Concurrent first runs may download twice, but atomically install a complete
 directory. Corrupted caches fail with the exact directory to remove. Unsupported
-platforms fail before downloading. Downloads use HTTPS and explicit timeouts.
+platforms fail before downloading. Downloads use HTTPS and explicit per-attempt timeouts, with one retry for transient network/server failures.
 
 The Go child inherits terminal handles, arguments and working directory. The
 launcher forwards termination signals and returns the child's exit status;
