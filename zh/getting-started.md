@@ -21,8 +21,7 @@ Linux 为 `$XDG_CONFIG_HOME/fleetsh/config.toml` 或 `~/.config/fleetsh/config.t
 ```sh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
-fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --credential sg1-login --groups asia
-fleetsh credential add sg1-login
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls
 fleetsh ls '@asia' --json
 fleetsh show hk1
@@ -31,6 +30,11 @@ fleetsh edit hk1 --port 2222
 
 密码输入不会显示。凭据值保存在操作系统凭据库中，清单仅保存引用名称。
 密钥口令也可使用 `--credential` 引用；没有引用时会通过隐藏输入询问。
+
+现在添加密码认证主机会直接询问两次密码并自动保存，无需手动建立 credential。
+自动引用以 `fleetsh-ssh-` 开头，清单只保存名称。
+可用 `fleetsh edit sg1 --save-password` 重新保存密码。
+详见 [密码保存](../configuration/#passwords) 和 [后续修改分组](../configuration/#groups)。
 
 所有命令支持 `--config PATH`，以 `~/` 开头的路径会展开。
 清单会严格校验，未知字段和明文 `password` 字段会被拒绝。
