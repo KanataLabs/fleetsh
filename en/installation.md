@@ -11,24 +11,26 @@ page_key: 'installation/'
 Place the binary in a permanent directory and add that **directory** to PATH
 to run `fleetsh` from any working directory. No Go, Python or Node.js runtime
 is required to run the binary. You can currently build the development version
-from source; no stable release is available yet.
+from source; no stable Go release is available yet.
 
 ## Run with npx or install with npm
 
-With Node.js 22 or newer, run the single [npm package](https://www.npmjs.com/package/fleetsh):
+With Node.js 22 or newer, run the single [npm package](https://www.npmjs.com/package/fleetsh).
+npm's `latest` tag provides launcher `0.1.0`; this does not change the Go release
+channel. The selected Go program may still be a preview.
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha init
-npx fleetsh@alpha alive
-npx fleetsh@alpha stats
-npx fleetsh@alpha ssh hk1
+npx fleetsh version
+npx fleetsh init
+npx fleetsh alive
+npx fleetsh stats
+npx fleetsh ssh hk1
 ```
 
 Or install once and use the command directly:
 
 ```sh
-npm install -g fleetsh@alpha
+npm install -g fleetsh
 fleetsh version
 fleetsh stats
 ```
@@ -48,13 +50,13 @@ New Go releases need no new npm publication. Only launcher changes require npm u
 Place launcher options **before** the Go command:
 
 ```sh
-npx fleetsh@alpha --release latest stats
-npx fleetsh@alpha --release preview stats
-npx fleetsh@alpha --release bundled version
-npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-npx fleetsh@alpha --refresh version
-npx fleetsh@alpha --offline stats
-npx fleetsh@alpha --launcher-help
+npx fleetsh --release latest stats
+npx fleetsh --release preview stats
+npx fleetsh --release bundled version
+npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --refresh version
+npx fleetsh --offline stats
+npx fleetsh --launcher-help
 ```
 
 | Selector or option | Behavior |
@@ -73,10 +75,10 @@ Environment alternatives are `FLEETSH_RELEASE`, `FLEETSH_REFRESH=1` and
 `FLEETSH_OFFLINE=1`; command-line options take precedence.
 
 `fleetsh version` prints the selected **Go** version. `npm ls -g fleetsh --depth=0`
-shows the installed **launcher** version. Pinning `npx fleetsh@0.1.0-alpha.2`
+shows the installed **launcher** version. Pinning `npx fleetsh@0.1.0`
 pins the launcher; add `--release vVERSION` to pin the Go program too.
 The original npm launcher `0.1.0-alpha.1` always selects Go `v0.1.0-alpha.1` and
-does not support these options. Update it once with `npm install -g fleetsh@alpha`.
+does not support these options. Update it once with `npm install -g fleetsh`.
 
 ### Downloads, cache and offline use
 

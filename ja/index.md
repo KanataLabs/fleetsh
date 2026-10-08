@@ -31,9 +31,9 @@ fleetsh reboot '@all' --parallel 2 --sudo
 Node.js 22+ があれば、[npm パッケージ](https://www.npmjs.com/package/fleetsh)を使用できます。
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha stats
-npm install -g fleetsh@alpha
+npx fleetsh version
+npx fleetsh stats
+npm install -g fleetsh
 ```
 
 ランチャーは GitHub Release を自動で追従します。`--release bundled` で元の版、

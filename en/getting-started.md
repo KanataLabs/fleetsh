@@ -17,22 +17,22 @@ the command available from any directory.
 Use Node.js 22 or newer:
 
 ```sh
-npx fleetsh@alpha init
-npx fleetsh@alpha add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
-npx fleetsh@alpha ssh hk1
-npx fleetsh@alpha alive
-npx fleetsh@alpha stats
+npx fleetsh init
+npx fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+npx fleetsh ssh hk1
+npx fleetsh alive
+npx fleetsh stats
 ```
 
-Or install globally with `npm install -g fleetsh@alpha` and replace the
-`npx fleetsh@alpha` prefix with `fleetsh` in every example. Both use the same
+Or install globally with `npm install -g fleetsh` and replace the
+`npx fleetsh` prefix with `fleetsh` in every example. Both use the same
 inventory and OS credential store as the direct binary.
 
 The launcher automatically follows GitHub Releases, preferring stable releases
 and using previews only while no stable release exists. Place launcher options
-before the command: `npx fleetsh@alpha --release bundled version` selects the
+before the command: `npx fleetsh --release bundled version` selects the
 original binary; `--release v0.1.0-alpha.1` selects an exact Go version.
-Run `npx fleetsh@alpha --launcher-help` or read
+Run `npx fleetsh --launcher-help` or read
 [version selection, caching and PATH](../installation/).
 
 ## Help and offline guides

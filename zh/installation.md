@@ -10,24 +10,25 @@ page_key: 'installation/'
 
 将二进制文件放进固定目录，再把**目录**加入 PATH，就可以在任意工作目录运行
 `fleetsh`。运行时不需要 Go、Python 或 Node.js；目前可从源码构建开发版，
-还没有发布稳定版。
+还没有发布 Go 稳定版。
 
 ## 使用 npx 或通过 npm 安装
 
-已有 Node.js 22 或更新版本时，可直接运行单个 [npm 包](https://www.npmjs.com/package/fleetsh)：
+已有 Node.js 22 或更新版本时，可直接运行单个 [npm 包](https://www.npmjs.com/package/fleetsh)。
+npm 的 `latest` 标签提供独立的启动器 `0.1.0`；下载的 Go 程序仍可能是预览版。
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha init
-npx fleetsh@alpha alive
-npx fleetsh@alpha stats
-npx fleetsh@alpha ssh hk1
+npx fleetsh version
+npx fleetsh init
+npx fleetsh alive
+npx fleetsh stats
+npx fleetsh ssh hk1
 ```
 
 也可以全局安装一次，随后直接运行：
 
 ```sh
-npm install -g fleetsh@alpha
+npm install -g fleetsh
 fleetsh version
 fleetsh stats
 ```
@@ -45,13 +46,13 @@ npm 会在全局可执行文件目录建立命令入口。Windows 使用 `npm co
 启动器选项放在 Go 子命令**前面**：
 
 ```sh
-npx fleetsh@alpha --release latest stats
-npx fleetsh@alpha --release preview stats
-npx fleetsh@alpha --release bundled version
-npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-npx fleetsh@alpha --refresh version
-npx fleetsh@alpha --offline stats
-npx fleetsh@alpha --launcher-help
+npx fleetsh --release latest stats
+npx fleetsh --release preview stats
+npx fleetsh --release bundled version
+npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --refresh version
+npx fleetsh --offline stats
+npx fleetsh --launcher-help
 ```
 
 | 选项 | 行为 |
@@ -71,9 +72,9 @@ npx fleetsh@alpha --launcher-help
 
 `fleetsh version` 显示实际运行的 **Go 程序**版本；
 `npm ls -g fleetsh --depth=0` 显示 **npm 启动器**版本。
-`npx fleetsh@0.1.0-alpha.2` 只固定启动器；同时加上 `--release vVERSION` 才固定 Go 程序。
+`npx fleetsh@0.1.0` 只固定启动器；同时加上 `--release vVERSION` 才固定 Go 程序。
 旧 npm 启动器 `0.1.0-alpha.1` 一直使用 Go `v0.1.0-alpha.1`，不支持这些选项。
-已全局安装旧版时，先运行一次 `npm install -g fleetsh@alpha` 更新。
+已全局安装旧版时，先运行一次 `npm install -g fleetsh` 更新。
 
 ### 下载、缓存和离线运行
 
