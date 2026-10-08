@@ -1,0 +1,42 @@
+Local configuration
+===================
+The default inventory is TOML, private to the current OS user:
+
+  Windows: %APPDATA%\fleetsh\config.toml
+  macOS:   ~/Library/Application Support/fleetsh/config.toml
+  Linux:   $XDG_CONFIG_HOME/fleetsh/config.toml
+           or ~/.config/fleetsh/config.toml when XDG_CONFIG_HOME is unset
+
+fleetsh init prints the created path and preserves existing files. It starts
+with example hosts commented out. --config PATH overrides the path for any command;
+relative paths are resolved from the current working directory. ~/ is expanded.
+
+  fleetsh init --config ./lab/config.toml
+  fleetsh ls --config ./lab/config.toml
+
+known_hosts lives beside the selected inventory. It contains explicitly trusted
+SSH public keys. A config.toml.lock file coordinates edits; it contains no secrets.
+fleetsh uses its own trust file, rather than the user's ~/.ssh/known_hosts.
+
+Defaults (flags override the applicable setting for that invocation):
+  [defaults]
+  connect_timeout = "10s"
+  command_timeout = "30m"
+  parallel = 10
+
+Reboot concurrency defaults to 2 independently of defaults.parallel.
+A host can have groups, tags, a description, a key path, proxy settings and
+credential references. Use add/edit rather than manually changing fields.
+show HOST prints its current local fields as JSON, without secret values.
+
+Back up config.toml, known_hosts and required private keys with appropriate access
+controls. Inventory metadata can reveal addresses and usernames. Credential
+references are not passwords: OS-store secrets must be restored separately on
+another machine. Exporting TOML does not migrate those secrets.
+
+Credential storage:
+  Windows Credential Manager; macOS Keychain; Linux Secret Service.
+  New entries have a fleetsh namespace and creator notes.
+  Unavailable stores fail without a plaintext fallback.
+
+  fleetsh docs passwords

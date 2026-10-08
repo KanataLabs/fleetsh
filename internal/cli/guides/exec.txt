@@ -1,0 +1,37 @@
+Batch execution
+===============
+exec immediately runs one quoted shell command on selected SSH hosts:
+
+  fleetsh exec '@web' "uptime" --parallel 5 --timeout 30s
+  fleetsh exec hk1 "df -h" --json
+
+Quote COMMAND as one argument; it is executed by the remote shell. On PowerShell,
+use single quotes when passing a remote $variable so the local shell leaves it
+literal. For example, the following assumes a POSIX shell on the remote host:
+
+  fleetsh exec hk1 'printf "%s\n" "$HOME"'
+
+Commands receive no interactive stdin. Use ssh HOST for interactive work.
+--parallel accepts 1-256 workers; the usual inventory default is 10. --serial
+runs one host at a time; do not combine it with --parallel. --timeout is the
+per-command deadline (default 30m), --connect-timeout the connection deadline
+(default 10s). Both accept positive durations such as 30s, 5m or 1h.
+
+Use --sudo to elevate the whole remote command:
+
+  fleetsh exec '@web' "systemctl status nginx --no-pager" --sudo
+
+sudo uses passwordless sudo or sudo_credential. If needed, create a sudo secret
+with credential add and associate it using edit HOST --sudo-credential REF.
+
+--json writes per-host results and a summary to stdout. Diagnostics use stderr.
+Each host reports success/failure/skipped state; the process exit code reflects
+aggregate failures. Captured output is limited to 4 MiB per stream per host.
+
+  fleetsh exec '@web' "uptime" --json --timeout 30s > results.json
+
+Failed commands are not automatically retried. Review each result before deciding
+whether to rerun it. Unknown host keys in noninteractive sessions are rejected;
+first connect with ssh and independently verify the fingerprint.
+
+  fleetsh docs troubleshooting

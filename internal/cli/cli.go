@@ -58,7 +58,6 @@ func RunContext(ctx context.Context, args []string, version string, in io.Reader
 }
 func (a *application) root(version string) *cobra.Command {
 	root := &cobra.Command{Use: "fleetsh", Short: "Lightweight, agentless VPS fleet management",
-		Long: "fleetsh — one binary for inventory, SSH and parallel VPS management.\n\nGPL-3.0-only. No warranty. https://kanatalabs.github.io/fleetsh/",
 		Args: cobra.NoArgs, SilenceErrors: true, SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
 	}
@@ -67,7 +66,7 @@ func (a *application) root(version string) *cobra.Command {
 	root.SetErr(a.errOut)
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().StringVar(&a.path, "config", "", "inventory file (default: OS user config directory)")
-	root.PersistentFlags().BoolVar(&a.json, "json", false, "emit structured JSON")
+	root.PersistentFlags().BoolVar(&a.json, "json", false, "JSON output for ls, show, credential ls and batch actions")
 	root.Version = version
 	root.SetVersionTemplate("fleetsh {{.Version}}\n")
 	root.AddCommand(&cobra.Command{Use: "version", Short: "Print the build version", Args: cobra.NoArgs, Run: func(*cobra.Command, []string) { fmt.Fprintf(a.out, "fleetsh %s\n", version) }})
@@ -86,6 +85,8 @@ func (a *application) root(version string) *cobra.Command {
 	a.credentialCommands(root)
 	a.remoteCommands(root)
 	a.hostkeyCommands(root)
+	a.documentationCommand(root)
+	documentCommands(root)
 	return root
 }
 func (a *application) configPath() (string, error) {

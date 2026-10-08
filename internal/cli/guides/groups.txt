@@ -1,0 +1,37 @@
+Groups and tags
+===============
+A host may belong to several groups. Group membership is stored on each host;
+there is no separate group registry to create beforehand.
+
+  fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups asia,web
+  fleetsh edit hk1 --add-groups production
+  fleetsh edit hk1 --remove-groups web
+
+Adding memberships preserves existing groups and removes duplicates. Removing
+an absent membership is harmless. You can add and remove different names together:
+
+  fleetsh edit hk1 --remove-groups staging --add-groups production
+
+Use --groups only when replacing the complete list; an empty string clears it:
+
+  fleetsh edit hk1 --groups asia,web
+  fleetsh edit hk1 --groups ""
+
+--groups cannot be combined with --add-groups or --remove-groups. Adding and
+removing the same name in one invocation is an error. Group-only edits preserve
+authentication and never ask for the stored SSH password.
+
+Group names contain 1-128 letters, digits, dots, underscores or hyphens and start
+with a letter/digit. Select a group with @NAME; quote it in PowerShell:
+
+  fleetsh ls '@web'
+  fleetsh exec '@web' "uptime"
+
+Tags provide an additional filter. --tags replaces the whole tag list on edit:
+
+  fleetsh edit hk1 --tags production,debian
+  fleetsh ls '@web' --tag production
+  fleetsh exec '@web' "df -h" --tag production --serial
+
+Groups select a union of hosts, while --tag narrows that selection.
+  fleetsh docs selectors

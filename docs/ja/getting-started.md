@@ -11,6 +11,38 @@ page_key: 'getting-started/'
 fleetsh は v0.1 の基本的な操作を実装しています。現在は開発版です。
 [インストールと PATH の設定](../installation/)を行うと、どのディレクトリからでも実行できます。
 
+## ヘルプとオフラインガイド
+
+実行ファイルには、例付きの英語コマンドヘルプと 9 つのオフラインガイドが含まれます。
+`init` の実行前でも、設定ファイル、ネットワーク接続、資格情報ストアなしで参照できます。
+オンライン文書は言語ごとに分かれており、既定は英語です。
+
+```sh
+fleetsh --help
+fleetsh help exec
+fleetsh add --help
+fleetsh docs
+fleetsh docs passwords
+fleetsh docs groups
+fleetsh docs patching
+```
+
+| トピック | 内容 |
+| --- | --- |
+| `quickstart` | 最初のホスト、SSH の信頼設定、基本操作 |
+| `config` | OS ごとの保存先、既定値、バックアップ |
+| `passwords` | 自動保存、更新、共有する参照、sudo |
+| `groups` | 複数グループ、所属の追加と削除、タグ |
+| `selectors` | ホストとグループの和集合、`@all`、タグ絞り込み |
+| `exec` | 並列数、引用符、タイムアウト、sudo、JSON |
+| `proxies` | ProxyJump と認証付き SOCKS5 |
+| `patching` | 更新の事前確認、apt などの更新、再起動 |
+| `troubleshooting` | 終了コード、信頼、認証、資格情報ストア |
+
+`fleetsh docs TOPIC` でガイドを表示します。オフラインの本文は英語のプレーンテキストです。
+`--json` は対応する一覧や一括操作の結果に適用され、文書表示には適用されません。
+ヘルプの表示は、例の実行や掲載リンクのブラウザー起動を行いません。
+
 ## ホスト一覧を初期化する
 
 ホスト一覧は現在の OS ユーザーのローカル設定ディレクトリに保存されます。

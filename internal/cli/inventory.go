@@ -66,11 +66,6 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		h := inventory.Host{}
 		options := hostOptions{}
 		cmd := &cobra.Command{Use: action + " HOST", Short: action + " a host", Args: cobra.ExactArgs(1)}
-		if action == "add" {
-			cmd.Long = "Add a host. Password authentication prompts twice and saves to the OS credential store\nwhen no --credential is supplied. Use --no-save-password for per-connection prompts."
-		} else {
-			cmd.Long = "Edit a host. Use --add-groups/--remove-groups to change selected memberships,\nor --groups to replace all groups. Use --save-password to prompt and save a new password."
-		}
 		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP")
 		cmd.Flags().IntVar(&h.Port, "port", 22, "SSH port")
 		cmd.Flags().StringVar(&h.User, "user", "", "SSH username")

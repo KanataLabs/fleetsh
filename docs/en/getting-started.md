@@ -12,6 +12,38 @@ fleetsh now implements the core v0.1 workflow. It is a development build, not a
 stable release. See [installation and PATH registration](../installation/) to make
 the command available from any directory.
 
+## Help and offline guides
+
+The binary includes English command help with examples and nine offline guides.
+Help and guides work before `init`, without an inventory, network connection or
+credential store. Online editions remain separate; English is the default.
+
+```sh
+fleetsh --help
+fleetsh help exec
+fleetsh add --help
+fleetsh docs
+fleetsh docs passwords
+fleetsh docs groups
+fleetsh docs patching
+```
+
+| Topic | Contents |
+| --- | --- |
+| `quickstart` | First host, SSH trust and common commands |
+| `config` | OS configuration paths, defaults and backup |
+| `passwords` | Automatic saving, rotation, shared references and sudo |
+| `groups` | Multiple memberships, incremental edits and tags |
+| `selectors` | Host/group unions, `@all` and tag filters |
+| `exec` | Parallelism, quoting, timeouts, sudo and JSON |
+| `proxies` | ProxyJump and authenticated SOCKS5 |
+| `patching` | Preview updates, apply apt/package upgrades and reboot |
+| `troubleshooting` | Exit codes, trust, authentication and credential stores |
+
+Use `fleetsh docs TOPIC` to open a guide. Guides print plain text; `--json` applies
+to supported inventory and batch-result commands, not documentation. Reading help
+never executes its examples or opens the printed documentation links.
+
 ## Initialize an inventory
 
 The inventory is stored locally for your OS user: `%APPDATA%\fleetsh\config.toml`

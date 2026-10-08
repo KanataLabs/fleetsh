@@ -44,8 +44,11 @@ Batch automation rejects unknown/changed keys. Updates/reboots require confirmat
 and health probe. Built-in update/reboot actions target Linux VPSs.
 
 Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
-`exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`.
-All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for flags.
+`exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`, `docs`.
+All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for behavior,
+flags and examples. `fleetsh docs` lists nine English offline guides, including
+`config`, `passwords`, `groups` and `patching`. Help and guides need no inventory
+or network; online documentation has separate English, Japanese and Chinese editions.
 
 VPS configuration is local to your OS user, in `%APPDATA%\fleetsh\config.toml`
 (Windows), `~/Library/Application Support/fleetsh/config.toml` (macOS), or
@@ -87,7 +90,7 @@ go build ./cmd/fleetsh
 Tests use localhost SSH/proxy fixtures, never real VPS credentials.
 CI tests three OSs and six CGO-free build targets. Native keyring tests use
 `FLEETSH_TEST_KEYRING=1` and temporary fixture entries in unlocked stores.
-Documentation source is `docs/` on main. CI builds both languages; the organization App
+Documentation source is `docs/` on main. CI builds all three languages; the organization App
 publishes to gh-pages through configured CI credentials or scripts/publish-docs.ps1.
 Read [CONTRIBUTING.md](CONTRIBUTING.md).
 

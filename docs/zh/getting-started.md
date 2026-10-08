@@ -11,6 +11,37 @@ page_key: 'getting-started/'
 fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 先参考 [安装与全局 PATH 注册](../installation/)，让命令在任意目录可用。
 
+## 帮助与离线指南
+
+程序内置带示例的英文命令帮助和九个离线指南。执行 `init` 前即可查看，
+无需配置文件、网络连接或系统凭据库。在线文档继续按语言分开，默认英语。
+
+```sh
+fleetsh --help
+fleetsh help exec
+fleetsh add --help
+fleetsh docs
+fleetsh docs passwords
+fleetsh docs groups
+fleetsh docs patching
+```
+
+| 主题 | 内容 |
+| --- | --- |
+| `quickstart` | 首台主机、SSH 指纹信任和常用操作 |
+| `config` | 各系统配置位置、默认值和备份 |
+| `passwords` | 密码自动保存、更新、共享引用及 sudo |
+| `groups` | 多分组、增删成员关系和标签 |
+| `selectors` | 主机与分组的并集、`@all` 和标签筛选 |
+| `exec` | 并发、引号、超时、sudo 和 JSON |
+| `proxies` | ProxyJump 与需要认证的 SOCKS5 |
+| `patching` | 更新预演、apt 等包管理器升级和重启 |
+| `troubleshooting` | 退出码、信任、认证和系统凭据库 |
+
+使用 `fleetsh docs TOPIC` 查看具体指南；离线正文采用英文纯文本。
+`--json` 用于支持它的列表和批量操作结果，不改变文档格式。
+查看帮助不会执行其中的示例，也不会自动打开文档链接。
+
 ## 初始化主机清单
 
 清单保存在本机当前用户的配置目录：Windows 为 `%APPDATA%\fleetsh\config.toml`，

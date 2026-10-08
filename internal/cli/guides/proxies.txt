@@ -1,0 +1,29 @@
+Proxies and jump hosts
+======================
+ProxyJump uses another inventory alias as the SSH gateway:
+
+  fleetsh add gateway --host jump.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+  fleetsh add private1 --host 10.0.0.10 --user ubuntu --auth key --key ~/.ssh/id_ed25519 --proxy-jump gateway
+  fleetsh ssh gateway
+  fleetsh ssh private1
+
+Verify gateway and destination fingerprints independently. Each host has its
+own authentication settings; a gateway is an ordinary SSH inventory host.
+
+SOCKS5 uses a URL without embedded credentials:
+
+  fleetsh edit hk1 --proxy socks5://127.0.0.1:1080
+
+For authenticated SOCKS5, enter username:password at the hidden secret prompt:
+
+  fleetsh credential add local-proxy
+  fleetsh edit hk1 --proxy socks5://127.0.0.1:1080 --proxy-credential local-proxy
+
+Never put username/password in the proxy URL; URLs with userinfo are rejected.
+Use one routing method per host. To switch, clear the previous setting:
+
+  fleetsh edit private1 --proxy-jump "" --proxy socks5://127.0.0.1:1080
+
+Clearing a proxy setting does not delete its reusable secret. Keep proxy endpoints
+and stored references out of public inventories when they reveal private details.
+All supported SSH/proxy transports run in process; OpenSSH is not required.

@@ -1,0 +1,49 @@
+Troubleshooting and automation
+==============================
+Process exit codes:
+  0  Success, including planned or skipped work.
+  1  Remote command failure, command timeout, reboot verification timeout,
+     or cancellation of an executing operation.
+  2  Argument, configuration, local preparation or credential-store failure.
+     Declining an update/reboot confirmation also returns 2.
+  3  SSH connection, authentication or host-key failure.
+Mixed batch command/connection failures return 1. Inspect the per-host results
+and JSON summary to identify every failure.
+
+Configuration issues:
+  Run init once, then add hosts. init never overwrites files.
+  Use the same --config PATH on every command for a custom inventory.
+  Use show HOST to inspect its alias, address, auth mode and references.
+  Empty target selections and unknown hosts/groups are errors.
+
+SSH host keys:
+  Unknown keys need a real terminal and independent fingerprint verification.
+  Changed keys are always rejected. hostkey show reads locally trusted keys;
+  it does not retrieve a live server key. Confirm replacements independently:
+
+  fleetsh hostkey show hk1
+  fleetsh hostkey reset hk1
+  fleetsh ssh hk1
+
+hostkey reset --yes only confirms removal, not acceptance of the new key.
+Trust is stored beside the selected inventory, so switching inventories changes
+which known_hosts file is used. Shared/wildcard trust may require manual review.
+
+Authentication and credentials:
+  Check the SSH username, auth mode and key path with show HOST.
+  Agent mode needs a reachable agent with an appropriate loaded key.
+  Encrypted keys can use a passphrase credential; password auth can use a stored
+  reference or hidden terminal input. Batch prompts are prepared before dispatch.
+  A missing/unavailable OS keyring fails without plaintext fallback.
+  credential ls shows local references, not proof that native secrets exist.
+  --sudo needs passwordless sudo or sudo_credential; the SSH secret is not
+  automatically reused as the sudo password.
+
+Connection and execution:
+  Increase --connect-timeout for slow networks, for example 60s.
+  Increase --timeout for long commands; use --wait-timeout for reboot recovery.
+  Inspect stderr as well as stdout. --json emits batch results to stdout.
+  Use ssh HOST for interactive commands; exec has no interactive stdin.
+  Verify failed maintenance before rerunning; remote commands have no rollback.
+
+  fleetsh exec hk1 "uptime" --connect-timeout 60s --timeout 30s --json

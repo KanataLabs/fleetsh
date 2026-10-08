@@ -1,0 +1,27 @@
+Selecting targets
+=================
+ls, exec, update and reboot accept SELECTOR:
+
+  hk1           one inventory alias
+  hk1,sg1       a union of aliases
+  '@web'        every host in group web
+  '@web,@asia'   the union of two groups
+  '@web,sg1'     a group plus another alias
+  '@all' or all  every host
+
+Comma-separated selectors are unions, not intersections. Hosts are deduplicated
+and sorted by alias. Avoid spaces around commas. Quote @ selectors in PowerShell.
+--tag NAME narrows the selected union to hosts carrying that exact tag.
+
+  fleetsh ls '@all'
+  fleetsh ls '@web,@asia' --tag production --json
+  fleetsh exec 'hk1,sg1' "uptime" --serial
+
+With no selector, ls lists all hosts, including an empty inventory.
+Remote actions require a selector. Unknown aliases/groups and selections with
+no matching hosts are errors. SSH and local host-edit/show commands take one
+exact alias, rather than a selector.
+
+Console-only hosts are inventory assets. They are listed normally and reported
+as skipped by batch remote actions; they are never contacted for SSH execution.
+Each host can belong to multiple groups; see docs groups to change memberships.

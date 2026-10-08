@@ -1,0 +1,46 @@
+Patch every VPS
+===============
+Inspect your selection and verify trust before running maintenance:
+
+  fleetsh ls '@all'
+  fleetsh exec '@all' "uptime" --parallel 5
+  fleetsh update '@all' --dry-run --sudo
+
+The update dry run connects and probes /etc/os-release on SSH targets. It prints
+the actual planned commands without changing packages. If any preflight fails,
+fleetsh dispatches no package updates. Console-only assets are skipped.
+
+Built-in plans:
+  Debian/Ubuntu: apt-get update && apt-get upgrade -y
+                 with DEBIAN_FRONTEND=noninteractive on each command
+  RHEL/Rocky/AlmaLinux/Fedora: dnf upgrade -y
+  CentOS: dnf upgrade -y when available, otherwise yum update -y
+  Arch/Manjaro: pacman -Syu --noconfirm
+
+Apply after reviewing the plan; the command asks for confirmation:
+
+  fleetsh update '@all' --sudo --parallel 5 --timeout 30m
+
+For already-approved automation, explicitly confirm and collect results:
+
+  fleetsh update '@all' --sudo --yes --parallel 5 --timeout 30m --json
+
+On Debian/Ubuntu only, --dist selects apt-get dist-upgrade instead of upgrade.
+Other distributions keep their normal plan. A failed upgrade is not rolled back.
+
+If every selected host uses apt and you specifically want apt update/upgrade:
+
+  fleetsh exec '@all' 'DEBIAN_FRONTEND=noninteractive apt update && DEBIAN_FRONTEND=noninteractive apt upgrade -y' --sudo --parallel 5 --timeout 30m
+
+exec runs immediately: it does not probe package managers or ask for confirmation.
+Use an appropriate group/tag when only part of your fleet uses apt.
+--sudo needs passwordless sudo or an explicit sudo_credential reference.
+
+Updates never reboot hosts automatically. After reviewing failures and deciding
+which hosts need a reboot, use a group or explicit aliases:
+
+  fleetsh reboot '@web' --dry-run --sudo
+  fleetsh reboot '@web' --sudo --serial --wait-timeout 10m
+
+The reboot dry run makes no connections. Actual reboots require confirmation;
+verification requires a new boot ID and a successful uptime probe.

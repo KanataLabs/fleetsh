@@ -1,0 +1,36 @@
+Quick start
+===========
+Initialize a local inventory, add a host, then verify its first SSH fingerprint.
+These are examples; replace example.com addresses and usernames with your own.
+
+  fleetsh init
+  fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups asia,web
+  fleetsh ssh hk1
+  fleetsh ls '@web'
+  fleetsh show hk1
+  fleetsh exec '@web' "uptime" --parallel 5
+
+Adding a password host prompts twice and saves automatically in the OS store.
+For key authentication, use:
+
+  fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups web
+
+Agent authentication is the default; it requires an available SSH agent with keys.
+Verify the first fingerprint through an independently trusted channel before
+accepting it. Trust is kept in known_hosts beside your inventory.
+
+Every command accepts --config PATH. Use it consistently to select another fleet:
+
+  fleetsh init --config ./lab/config.toml
+  fleetsh ls --config ./lab/config.toml
+
+More help:
+  fleetsh add --help
+  fleetsh help exec
+  fleetsh docs config
+  fleetsh docs passwords
+  fleetsh docs patching
+
+Run fleetsh version to check the installed build. See the installation page for
+Windows, macOS and Linux PATH registration:
+https://kanatalabs.github.io/fleetsh/en/installation/

@@ -50,7 +50,10 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 
 密码、密钥口令和代理密码通过隐藏输入或系统凭据库读取，TOML 只保存引用。
 配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
-所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看选项。
+所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看行为说明、选项和示例。
+`fleetsh docs` 列出九个英文离线指南；`fleetsh docs config`、`fleetsh docs passwords`、
+`fleetsh docs groups` 和 `fleetsh docs patching` 分别说明配置、密码、分组和批量补丁。
+帮助和离线指南无需配置文件或网络；在线文档继续提供独立的中、英、日文版本。
 
 VPS 配置保存在本机当前用户的配置目录：Windows 为 `%APPDATA%\fleetsh\config.toml`，
 macOS 为 `~/Library/Application Support/fleetsh/config.toml`，
