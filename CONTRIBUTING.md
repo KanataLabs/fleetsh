@@ -33,8 +33,8 @@ selection, refresh and offline modes are described in the installation pages.
 CI pins the bundled tag for deterministic binary smoke tests; selector tests use
 controlled fixtures. Use `node scripts/npm-release-manifest.mjs vVERSION` only to
 refresh the embedded fallback intentionally; it does not change the npm version.
-Bump `package.json` when changing the launcher, then publish under `alpha` while
-it remains a preview. npm authentication is separate from the GitHub Publisher App.
+Bump `package.json` when changing the launcher, then publish under `latest`. The launcher and Go program have independent
+release lifecycles. npm authentication is separate from the GitHub Publisher App.
 Do not commit npm credentials.
 
 Add tests for credential handling, selector behavior, transport failures,

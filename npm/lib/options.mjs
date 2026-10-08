@@ -29,11 +29,11 @@ export const launcherHelp = `fleetsh npm launcher options (place before the Go c
   --launcher-help      Print these options without downloading a binary
 
 Examples:
-  npx fleetsh@alpha stats
-  npx fleetsh@alpha --release bundled version
-  npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-  npx fleetsh@alpha --refresh version
-  npx fleetsh@alpha --offline stats
+  npx fleetsh stats
+  npx fleetsh --release bundled version
+  npx fleetsh --release v0.1.0-alpha.1 stats
+  npx fleetsh --refresh version
+  npx fleetsh --offline stats
 
 Environment: FLEETSH_RELEASE, FLEETSH_REFRESH=1, FLEETSH_OFFLINE=1,
              FLEETSH_NPM_CACHE (optional cache directory).

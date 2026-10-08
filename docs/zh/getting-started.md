@@ -16,20 +16,20 @@ fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 需要 Node.js 22 或更新版本：
 
 ```sh
-npx fleetsh@alpha init
-npx fleetsh@alpha add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
-npx fleetsh@alpha ssh hk1
-npx fleetsh@alpha alive
-npx fleetsh@alpha stats
+npx fleetsh init
+npx fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+npx fleetsh ssh hk1
+npx fleetsh alive
+npx fleetsh stats
 ```
 
-也可先 `npm install -g fleetsh@alpha` 全局安装，把所有示例的
-`npx fleetsh@alpha` 前缀替换为 `fleetsh`。两种方式与直接运行二进制共用主机清单和系统凭据库。
+也可先 `npm install -g fleetsh` 全局安装，把所有示例的
+`npx fleetsh` 前缀替换为 `fleetsh`。两种方式与直接运行二进制共用主机清单和系统凭据库。
 
 启动器自动跟随 GitHub Release，优先正式版，没有正式版时才使用预览版。
-启动器选项放在子命令前：`npx fleetsh@alpha --release bundled version` 使用原版，
+启动器选项放在子命令前：`npx fleetsh --release bundled version` 使用原版，
 `--release v0.1.0-alpha.1` 固定某个 Go 版本。
-可运行 `npx fleetsh@alpha --launcher-help`，或阅读
+可运行 `npx fleetsh --launcher-help`，或阅读
 [版本选择、缓存和 PATH](../installation/)。
 
 ## 帮助与离线指南

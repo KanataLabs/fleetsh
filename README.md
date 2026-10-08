@@ -9,32 +9,33 @@ One Go binary for Windows, macOS and Linux, without a central server or remote a
 [Documentation](https://kanatalabs.github.io/fleetsh/en/) · [Install / PATH](https://kanatalabs.github.io/fleetsh/en/installation/) · [日本語](https://kanatalabs.github.io/fleetsh/ja/) · [中文](README.zh-CN.md) · [Roadmap](docs/en/roadmap.md)
 
 > **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
-> update and reboot are implemented. There is no stable release yet.
+> update and reboot are implemented. There is no stable Go release yet.
 
 ## Install
 
 With Node.js 22 or newer:
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha stats
-npm install -g fleetsh@alpha
+npx fleetsh version
+npx fleetsh stats
+npm install -g fleetsh
 ```
 
 The single npm package is a persistent launcher: it automatically follows GitHub
 Releases, preferring stable versions and using previews only while none exist.
 New Go releases do not need npm publications. There are no runtime npm dependencies
-or install hooks. Go and npm launcher versions are independent.
+or install hooks. Go and npm launcher versions are independent. npm's `latest`
+tag delivers launcher `0.1.0`; the selected Go program may still be a preview.
 
 Select an original or exact Go version from the command line:
 
 ```sh
-npx fleetsh@alpha --release bundled version
-npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-npx fleetsh@alpha --release preview stats
-npx fleetsh@alpha --refresh version
-npx fleetsh@alpha --offline stats
-npx fleetsh@alpha --launcher-help
+npx fleetsh --release bundled version
+npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release preview stats
+npx fleetsh --refresh version
+npx fleetsh --offline stats
+npx fleetsh --launcher-help
 ```
 
 The original npm launcher `0.1.0-alpha.1` is pinned; update it once to launcher

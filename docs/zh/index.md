@@ -31,9 +31,9 @@ fleetsh reboot '@all' --parallel 2 --sudo
 已有 Node.js 22+ 时，可使用 [npm 包](https://www.npmjs.com/package/fleetsh)：
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha stats
-npm install -g fleetsh@alpha
+npx fleetsh version
+npx fleetsh stats
+npm install -g fleetsh
 ```
 
 启动器自动跟随 GitHub Release。命令前加 `--release bundled` 使用原版，

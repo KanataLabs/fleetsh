@@ -11,24 +11,26 @@ page_key: 'installation/'
 実行ファイルを常設ディレクトリに配置し、その**ディレクトリ**を PATH に追加すると、
 どの作業ディレクトリからでも `fleetsh` を実行できます。
 実行時に Go、Python、Node.js のランタイムは不要です。
-現在はソースから開発版をビルドできます。安定版はまだありません。
+現在はソースから開発版をビルドできます。Go プログラムの安定版はまだありません。
 
 ## npx で実行、または npm でインストールする
 
 Node.js 22 以降があれば、単一の [npm パッケージ](https://www.npmjs.com/package/fleetsh)で実行できます。
+npm の `latest` タグは独立したランチャー `0.1.0` を提供します。
+ダウンロードする Go プログラムはプレビュー版の場合もあります。
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha init
-npx fleetsh@alpha alive
-npx fleetsh@alpha stats
-npx fleetsh@alpha ssh hk1
+npx fleetsh version
+npx fleetsh init
+npx fleetsh alive
+npx fleetsh stats
+npx fleetsh ssh hk1
 ```
 
 一度グローバルにインストールすると、コマンドを直接実行できます。
 
 ```sh
-npm install -g fleetsh@alpha
+npm install -g fleetsh
 fleetsh version
 fleetsh stats
 ```
@@ -48,13 +50,13 @@ npm パッケージの再公開はランチャー自体を変更するときだ�
 ランチャーのオプションは Go サブコマンドの**前**に指定します。
 
 ```sh
-npx fleetsh@alpha --release latest stats
-npx fleetsh@alpha --release preview stats
-npx fleetsh@alpha --release bundled version
-npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-npx fleetsh@alpha --refresh version
-npx fleetsh@alpha --offline stats
-npx fleetsh@alpha --launcher-help
+npx fleetsh --release latest stats
+npx fleetsh --release preview stats
+npx fleetsh --release bundled version
+npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --refresh version
+npx fleetsh --offline stats
+npx fleetsh --launcher-help
 ```
 
 | オプション | 動作 |
@@ -74,10 +76,10 @@ npx fleetsh@alpha --launcher-help
 
 `fleetsh version` は実行中の **Go プログラム**のバージョン、
 `npm ls -g fleetsh --depth=0` は **npm ランチャー**のバージョンを表示します。
-`npx fleetsh@0.1.0-alpha.2` はランチャーだけを固定します。
+`npx fleetsh@0.1.0` はランチャーだけを固定します。
 Go も固定する場合は `--release vVERSION` を併用してください。
 元の npm ランチャー `0.1.0-alpha.1` は Go `v0.1.0-alpha.1` に固定され、
-これらのオプションをサポートしません。一度 `npm install -g fleetsh@alpha` で更新してください。
+これらのオプションをサポートしません。一度 `npm install -g fleetsh` で更新してください。
 
 ### ダウンロード、キャッシュとオフライン実行
 

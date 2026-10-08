@@ -13,9 +13,9 @@ macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 已有 Node.js 22 或更新版本时，可使用单个 npm 包：
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha stats
-npm install -g fleetsh@alpha
+npx fleetsh version
+npx fleetsh stats
+npm install -g fleetsh
 ```
 
 npm 包作为长期使用的启动器自动跟随 GitHub Release，优先正式版，
@@ -25,13 +25,15 @@ npm 包作为长期使用的启动器自动跟随 GitHub Release，优先正式�
 命令行可选择原版或固定某个 Go 版本：
 
 ```sh
-npx fleetsh@alpha --release bundled version
-npx fleetsh@alpha --release v0.1.0-alpha.1 stats
-npx fleetsh@alpha --release preview stats
-npx fleetsh@alpha --refresh version
-npx fleetsh@alpha --offline stats
-npx fleetsh@alpha --launcher-help
+npx fleetsh --release bundled version
+npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release preview stats
+npx fleetsh --refresh version
+npx fleetsh --offline stats
+npx fleetsh --launcher-help
 ```
+
+npm 的 `latest` 标签提供独立的启动器 `0.1.0`，它下载的 Go 程序仍可能是预览版。
 
 旧 npm 启动器 `0.1.0-alpha.1` 为固定版本模式，先更新一次至
 `0.1.0-alpha.2` 或更新版本。发行信息默认缓存一小时，详细策略见

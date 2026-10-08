@@ -32,9 +32,9 @@ fleetsh reboot '@all' --parallel 2 --sudo
 With Node.js 22+, run through [npm](https://www.npmjs.com/package/fleetsh):
 
 ```sh
-npx fleetsh@alpha version
-npx fleetsh@alpha stats
-npm install -g fleetsh@alpha
+npx fleetsh version
+npx fleetsh stats
+npm install -g fleetsh
 ```
 
 The launcher follows GitHub Releases automatically. Use `--release bundled`
