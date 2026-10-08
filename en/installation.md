@@ -15,52 +15,100 @@ from source; no stable release is available yet.
 
 ## Run with npx or install with npm
 
-With Node.js 22 or newer, use the single npm package:
+With Node.js 22 or newer, run the single [npm package](https://www.npmjs.com/package/fleetsh):
 
 ```sh
 npx fleetsh@alpha version
 npx fleetsh@alpha init
+npx fleetsh@alpha alive
 npx fleetsh@alpha stats
 npx fleetsh@alpha ssh hk1
 ```
 
-To install the command globally:
+Or install once and use the command directly:
 
 ```sh
 npm install -g fleetsh@alpha
 fleetsh version
+fleetsh stats
 ```
 
-npm installs a command shim in its global executable directory. On Windows this
-is the directory reported by `npm config get prefix`; on macOS/Linux it is that
-prefix's `bin` directory. Add the appropriate directory to PATH if your Node.js
-installation has not already done so. No manual binary PATH registration is needed
-when npm's global executable directory is already on PATH.
+npm puts the command in its global executable directory. Windows uses the output
+of `npm config get prefix`; macOS/Linux use that prefix's `bin` directory.
+If necessary, add that directory to PATH. You do not need to copy the Go binary
+manually when npm's executable directory is already on PATH.
 
-The current npm version is `0.1.0-alpha.1`; `alpha` selects the preview channel.
-Pin it with `npx fleetsh@0.1.0-alpha.1 version`. The package downloads the matching
-Go binary from GitHub Releases on first **execution**, verifies pinned archive
-and executable SHA256 hashes, and caches it. There are no installation hooks,
-runtime npm dependencies or separate platform packages. Initial execution needs
-access to GitHub and a writable cache; later launcher runs reuse the verified binary.
-npx may still contact the npm registry when resolving a package version.
+### Automatic Go releases and command-line version selection
 
-| OS | Binary cache |
+Starting with npm launcher `0.1.0-alpha.2`, the npm version and the Go version are
+independent. The default `latest` selector prefers the newest stable GitHub Release;
+if no stable release exists, it selects the most recently published preview.
+New Go releases need no new npm publication. Only launcher changes require npm updates.
+
+Place launcher options **before** the Go command:
+
+```sh
+npx fleetsh@alpha --release latest stats
+npx fleetsh@alpha --release preview stats
+npx fleetsh@alpha --release bundled version
+npx fleetsh@alpha --release v0.1.0-alpha.1 stats
+npx fleetsh@alpha --refresh version
+npx fleetsh@alpha --offline stats
+npx fleetsh@alpha --launcher-help
+```
+
+| Selector or option | Behavior |
+| --- | --- |
+| `--release latest` | Stable first; preview only while no stable release exists (default) |
+| `--release preview` | Most recently published release, including previews |
+| `--release bundled` | Original binary pinned in this launcher: `v0.1.0-alpha.1` |
+| `--release vVERSION` | Exact Go release, regardless of the npm launcher version |
+| `--refresh` | Check GitHub immediately, bypassing the one-hour metadata cache |
+| `--offline` | Use cached metadata/binary; make no GitHub requests |
+| `--launcher-help` | Show launcher help without downloading or starting Go |
+
+The same options work after global installation:
+`fleetsh --release bundled version` or `fleetsh --release v0.1.0-alpha.1 stats`.
+Environment alternatives are `FLEETSH_RELEASE`, `FLEETSH_REFRESH=1` and
+`FLEETSH_OFFLINE=1`; command-line options take precedence.
+
+`fleetsh version` prints the selected **Go** version. `npm ls -g fleetsh --depth=0`
+shows the installed **launcher** version. Pinning `npx fleetsh@0.1.0-alpha.2`
+pins the launcher; add `--release vVERSION` to pin the Go program too.
+The original npm launcher `0.1.0-alpha.1` always selects Go `v0.1.0-alpha.1` and
+does not support these options. Update it once with `npm install -g fleetsh@alpha`.
+
+### Downloads, cache and offline use
+
+Release information is checked at most once per hour in normal online use.
+New selected versions are downloaded automatically and cached separately.
+GitHub publishes a manifest with archive and executable SHA256 hashes; the launcher
+verifies it against GitHub's asset digest, then verifies the archive, executable
+and every cached execution. The initial release uses its embedded verified manifest.
+
+Network outages or rate limiting reuse previously verified release metadata, or
+the bundled manifest on first use. Invalid hashes or release formats fail explicitly.
+Offline use requires the selected binary to have been downloaded earlier; npx
+may still contact npm to resolve/install its launcher. Global installation avoids
+that npx resolution step. `--offline` controls the launcher's GitHub traffic.
+
+| OS | Binary and release-metadata cache |
 | --- | --- |
 | Windows | `%LOCALAPPDATA%\fleetsh\Cache\npm` |
 | macOS | `~/Library/Caches/fleetsh/npm` |
 | Linux | `$XDG_CACHE_HOME/fleetsh/npm` or `~/.cache/fleetsh/npm` |
 
-Set `FLEETSH_NPM_CACHE` to use a different cache directory. Downloads do not use
-the inventory's SSH proxy setting. Supported targets are Windows, macOS and Linux,
-each on x64 or ARM64. Arguments, interactive input/output and exit codes are
-forwarded to the Go program; inventory and credential locations are unchanged.
-Download messages go to stderr, preserving JSON output on stdout.
+Use `FLEETSH_NPM_CACHE` for another writable cache directory. Downloads do not use
+the inventory's SSH proxy. Windows, macOS and Linux each support x64 and ARM64.
+There are no runtime npm dependencies, platform packages or install hooks.
+Arguments, interactive input/output and exit codes pass through to Go.
+Inventory, host trust and credential locations are the same as with the direct binary.
+Download/status messages use stderr, preserving JSON stdout.
 
-If the launcher reports a cached checksum mismatch, remove only the cache
-directory named in the error and retry. For environments without Node.js or
-GitHub access, download a [release archive](https://github.com/KanataLabs/fleetsh/releases)
-elsewhere and use the binary/PATH instructions below.
+For a cached checksum mismatch, remove only the cache directory named in the
+error and retry online. Without Node.js or GitHub access, download a
+[release archive](https://github.com/KanataLabs/fleetsh/releases) elsewhere and
+use the binary/PATH instructions below.
 
 ## Build from source
 

@@ -11,6 +11,29 @@ page_key: 'getting-started/'
 fleetsh は v0.1 の基本的な操作を実装しています。現在は開発版です。
 [インストールと PATH の設定](../installation/)を行うと、どのディレクトリからでも実行できます。
 
+## npx または npm で実行する
+
+Node.js 22 以降を使用します。
+
+```sh
+npx fleetsh@alpha init
+npx fleetsh@alpha add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+npx fleetsh@alpha ssh hk1
+npx fleetsh@alpha alive
+npx fleetsh@alpha stats
+```
+
+または `npm install -g fleetsh@alpha` でグローバルにインストールし、
+すべての例の `npx fleetsh@alpha` を `fleetsh` に置き換えてください。
+直接バイナリーと同じホスト一覧、OS の資格情報ストアを使用します。
+
+ランチャーは GitHub Release を自動で追従し、正式版を優先します。
+正式版がない場合のみプレビューを使用します。
+子コマンドの前に `npx fleetsh@alpha --release bundled version` を指定すると元の版を、
+`--release v0.1.0-alpha.1` を指定すると特定の Go 版を選択します。
+`npx fleetsh@alpha --launcher-help` または
+[バージョン選択、キャッシュと PATH](../installation/)を参照してください。
+
 ## ヘルプとオフラインガイド
 
 実行ファイルには、例付きの英語コマンドヘルプと 11 のオフラインガイドが含まれます。

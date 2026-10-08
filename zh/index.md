@@ -28,6 +28,17 @@ fleetsh update '@all' --dry-run --sudo
 fleetsh reboot '@all' --parallel 2 --sudo
 ```
 
+已有 Node.js 22+ 时，可使用 [npm 包](https://www.npmjs.com/package/fleetsh)：
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha stats
+npm install -g fleetsh@alpha
+```
+
+启动器自动跟随 GitHub Release。命令前加 `--release bundled` 使用原版，
+或 `--release vVERSION` 固定 Go 版本。详见 [npx/npm 运行和版本选择](installation/)。
+
 ## 设计原则
 
 - 单个二进制文件，无需语言运行时或远程代理。

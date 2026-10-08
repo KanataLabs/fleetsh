@@ -29,6 +29,18 @@ fleetsh update '@all' --dry-run --sudo
 fleetsh reboot '@all' --parallel 2 --sudo
 ```
 
+With Node.js 22+, run through [npm](https://www.npmjs.com/package/fleetsh):
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha stats
+npm install -g fleetsh@alpha
+```
+
+The launcher follows GitHub Releases automatically. Use `--release bundled`
+for the original binary or `--release vVERSION` for a fixed Go version.
+See [npx/npm usage and version selection](installation/).
+
 ## Principles
 
 - A single binary, without a language runtime or remote agent.

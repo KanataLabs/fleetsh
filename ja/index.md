@@ -28,6 +28,18 @@ fleetsh update '@all' --dry-run --sudo
 fleetsh reboot '@all' --parallel 2 --sudo
 ```
 
+Node.js 22+ があれば、[npm パッケージ](https://www.npmjs.com/package/fleetsh)を使用できます。
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha stats
+npm install -g fleetsh@alpha
+```
+
+ランチャーは GitHub Release を自動で追従します。`--release bundled` で元の版、
+`--release vVERSION` で特定の Go 版を選べます。
+[npx/npm の実行とバージョン選択](installation/)を参照してください。
+
 ## 基本方針
 
 - 単一の実行ファイルで動作し、言語ランタイムやリモート Agent は不要。
