@@ -27,7 +27,9 @@ function checkAssets(manifest, info) {
 
 async function manifestFor(info, downloader) {
   if (!info || typeof info !== 'object' || info.draft || !validTag(info.tag_name)) throw new Error('Invalid published release');
-  if (!Array.isArray(info.assets)) throw new Error('Invalid release assets');
+  if (!Array.isArray(info.assets) || info.assets.some((entry) => !entry || typeof entry !== 'object')) {
+    throw new Error('Invalid release assets');
+  }
   const source = info.assets.find((entry) => entry.name === 'fleetsh-manifest.json');
   if (!source) {
     // Compatibility with the initial release made before dynamic launchers existed.
@@ -48,7 +50,9 @@ async function manifestFor(info, downloader) {
 
 async function newestPublished(downloader) {
   const releases = await jsonDownload(API + '?per_page=100', downloader);
-  if (!Array.isArray(releases)) throw new Error('Invalid release list');
+  if (!Array.isArray(releases) || releases.some((info) => !info || typeof info !== 'object')) {
+    throw new Error('Invalid release list');
+  }
   const published = releases.filter((info) => !info.draft && validTag(info.tag_name) &&
     Number.isFinite(Date.parse(info.published_at)));
   published.sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));

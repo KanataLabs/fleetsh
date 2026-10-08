@@ -134,16 +134,18 @@ test('bad manifest checksums, archive digests and malformed API data fail instea
   const root = await fixture(t);
   const manifest = future();
   const info = infoFor(manifest);
-  for (const mode of ['checksum', 'archive', 'malformed']) {
+  for (const mode of ['checksum', 'archive', 'malformed', 'null-asset']) {
     const altered = structuredClone(info);
     if (mode === 'checksum') altered.assets.at(-1).digest = 'sha256:' + '0'.repeat(64);
     if (mode === 'archive') altered.assets[0].digest = 'sha256:' + '0'.repeat(64);
     if (mode === 'malformed') altered.assets = {};
+    if (mode === 'null-asset') altered.assets.unshift(null);
     const downloader = async (url) => url === API + '/latest' ? encode(altered) : encode(manifest);
     await assert.rejects(resolveRelease({ root, downloader, refresh: true }),
       /checksum mismatch|asset mismatch|Invalid release assets/);
   }
   await assert.rejects(resolveRelease({ root, downloader: async () => encode(null) }), /Invalid published release/);
+  await assert.rejects(resolveRelease({ root, selector: 'preview', downloader: async () => encode([null]) }), /Invalid release list/);
   assert.deepEqual(await fs.readdir(root), []);
 });
 

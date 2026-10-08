@@ -89,9 +89,19 @@ func TestLocalRemoteAndDynamicTraffic(t *testing.T) {
 			case <-time.After(2 * time.Second):
 				t.Fatal("cancellation did not close active streams")
 			}
-			if c, err := net.DialTimeout("tcp", address, 100*time.Millisecond); err == nil {
-				c.Close()
-				t.Fatal("listener survived cancellation")
+			// A remote listener closes after the SSH peer observes the disconnect.
+			// Session.Wait only waits for resources owned by this client.
+			deadline := time.Now().Add(2 * time.Second)
+			for {
+				c, err := net.DialTimeout("tcp", address, 100*time.Millisecond)
+				if err != nil {
+					break
+				}
+				_ = c.Close()
+				if kind != "remote" || time.Now().After(deadline) {
+					t.Fatal("listener survived cancellation")
+				}
+				time.Sleep(10 * time.Millisecond)
 			}
 			_ = conn.SetReadDeadline(time.Now().Add(time.Second))
 			if _, err := conn.Read(make([]byte, 1)); err == nil {
