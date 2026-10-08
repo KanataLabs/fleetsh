@@ -43,6 +43,11 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 更新和重启需要确认，自动化显式使用 `--yes`。重启必须看到新的 boot ID 和健康探测成功。
 内置更新/重启动作面向 Linux VPS。
 
+`add --auth password` 未指定凭据引用时会直接询问并自动保存密码；
+用 `edit HOST --save-password` 重新保存。系统条目带 fleetsh 命名空间和来源备注，
+自动引用以 `fleetsh-ssh-` 开头。`edit HOST --add-groups web,production` 与
+`--remove-groups GROUPS` 可在保留其他分组的同时增删成员关系。
+
 密码、密钥口令和代理密码通过隐藏输入或系统凭据库读取，TOML 只保存引用。
 配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
 所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看选项。

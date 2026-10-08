@@ -161,6 +161,28 @@ SSH ホストにはユーザー名、鍵認証には鍵のパスが必要です�
 英数字で始まる 128 文字以内の名前にします。別名 `all` は予約済みです。
 並列数は 1〜256、タイムアウトは正の時間を指定します。
 
+<a id="groups"></a>
+
+## グループへの所属を変更する
+
+1 台のホストを複数のグループに所属させられます。グループはホストの所属情報から決まるため、
+事前に別の登録は不要です。ホスト追加後も変更できます。
+
+```sh
+fleetsh edit hk1 --add-groups production,monitoring
+fleetsh edit hk1 --remove-groups asia
+fleetsh edit hk1 --groups web,production
+fleetsh edit hk1 --groups ""
+fleetsh ls '@production'
+```
+
+`--add-groups` は既存の所属を保持し、重複した追加を無視します。
+`--remove-groups` は指定した所属だけを削除します。未所属の名前は無視します。
+`--groups` は一覧全体を置き換え、空の値を指定するとすべて解除します。
+異なる名前の追加と削除は同時に指定できますが、`--groups` と組み合わせたり、
+同じ名前を追加と削除の両方に指定したりすることはできません。
+グループの編集でホストのパスワードを入力・変更することはありません。
+
 ## 対象の選択
 
 | 指定 | 意味 |
@@ -173,6 +195,45 @@ SSH ホストにはユーザー名、鍵認証には鍵のパスが必要です�
 
 未知のホストやグループ、空のリモート対象はローカルエラーになります。
 コンソール専用のホストは一覧に表示し、リモート操作ではスキップします。
+
+<a id="passwords"></a>
+
+## ホストのパスワードを保存する
+
+`--auth password` で SSH ホストを追加し、`--credential` を省略すると、非表示の入力で
+パスワードを 2 回確認します。fleetsh が一意の `fleetsh-ssh-ALIAS-RANDOM` 参照を生成し、
+OS ストアに秘密値を保存してホストに関連付けます。先に `credential add` を実行する必要はありません。
+
+```sh
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia,web
+fleetsh edit sg1 --save-password
+fleetsh show sg1
+```
+
+`edit --save-password` は新しい参照にパスワードを保存します。
+以前の認証情報は残すため、共有するほかのホストには影響しません。
+明示的な参照なしでパスワード認証に切り替える場合も、入力を確認して保存します。
+`show` または `credential ls` で参照を確認し、不要な古い参照は
+`credential rm REFERENCE` で削除できます。ホストの削除だけでは認証情報を削除しません。
+
+接続のたびに入力する場合は `--no-save-password` を使います。
+編集ではホストの参照を解除し、OS ストアの保存済み項目は保持します。
+非対話で追加する場合は、既存の `--credential REFERENCE` を指定するか、
+`--no-save-password` を明示してください。空でない参照とパスワード保存オプションは併用できません。
+
+入力前にホスト設定を検証します。入力や保存が失敗してもホスト一覧は変更しません。
+ホスト一覧の書き込みに失敗した場合、新しく保存した秘密値を削除します。
+
+### fleetsh が作成した認証情報の識別
+
+| プラットフォーム | 表示される識別情報 |
+| --- | --- |
+| Windows Credential Manager | 対象名 `fleetsh:REFERENCE`、コメント `Created by fleetsh (KanataLabs). Managed VPS credential.` |
+| macOS Keychain | サービス `fleetsh`、ラベル `fleetsh:REFERENCE`、同じ作成元コメント |
+| Linux Secret Service | サービス属性 `fleetsh`、`fleetsh:REFERENCE` で始まるラベルと作成元の説明 |
+
+自動保存と手動の `credential add` は、新規または置き換えた項目にこの識別情報を付けます。
+既存の参照と `fleetsh` サービスは引き続き使えます。古い項目は置換時に説明が追加されます。
 
 ## 認証情報ストア
 

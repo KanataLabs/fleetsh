@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/zalando/go-keyring"
 )
 
 func TestPromptRejectsEchoedInput(t *testing.T) {
@@ -29,16 +31,25 @@ func TestNativeRoundTrip(t *testing.T) {
 	}
 	ref := "fleetsh-test-" + hex.EncodeToString(data)
 	store := Native{}
-	if err := store.Set(ref, "fixture-secret"); err != nil {
+	if err := keyring.Set(Service, ref, "legacy-fixture"); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = store.Delete(ref) })
-	if value, err := store.Get(ref); err != nil || value != "fixture-secret" {
+	if value, err := store.Get(ref); err != nil || value != "legacy-fixture" {
+		t.Fatal("legacy credential cannot be read")
+	}
+	const fixtureSecret = "fixture's \"quoted\" €\nnext line"
+	if err := store.Set(ref, fixtureSecret); err != nil {
+		t.Fatal(err)
+	}
+	assertNativeMetadata(t, ref)
+	if value, err := store.Get(ref); err != nil || value != fixtureSecret {
 		t.Fatalf("native get failed: %v", err)
 	}
 	if err := store.Set(ref, "replacement-fixture"); err != nil {
 		t.Fatal(err)
 	}
+	assertNativeMetadata(t, ref)
 	if value, err := store.Get(ref); err != nil || value != "replacement-fixture" {
 		t.Fatalf("native replacement failed: %v", err)
 	}

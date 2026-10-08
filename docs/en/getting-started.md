@@ -22,8 +22,7 @@ See [storage locations, custom inventories and backup](../configuration/#storage
 ```sh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
-fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --credential sg1-login --groups asia
-fleetsh credential add sg1-login
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls
 fleetsh ls '@asia' --json
 fleetsh show hk1
@@ -33,6 +32,11 @@ fleetsh edit hk1 --port 2222
 The password prompt is hidden. Credential values are stored in the OS credential
 store; inventory stores only reference names. Key passphrases can use the same
 `--credential` field; without a reference they are prompted privately.
+
+Adding a password-authenticated host now prompts twice and saves the password automatically.
+The generated reference has a `fleetsh-ssh-` prefix; the inventory holds only its name.
+Use `fleetsh edit sg1 --save-password` to update the password without managing references.
+See [password storage](../configuration/#passwords) and [changing groups](../configuration/#groups).
 
 Every command accepts `--config PATH`. Paths beginning with `~/` are expanded.
 The inventory file is validated strictly; unknown fields and plaintext

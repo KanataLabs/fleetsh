@@ -60,6 +60,13 @@ package updates across the fleet, inspect results and reboot selected hosts.
 
 ## Credentials and proxies
 
+`add --auth password` prompts and saves automatically when no reference is supplied.
+Use `edit HOST --save-password` to save a new password. Entries carry the `fleetsh`
+namespace and creator notes; generated references start with `fleetsh-ssh-`.
+`edit HOST --add-groups web,production` and `--remove-groups GROUPS` change
+memberships without replacing other groups. See [host configuration](docs/en/configuration.md#passwords).
+
+
 Passwords/passphrases use hidden input or Windows Credential Manager, macOS Keychain
 and Linux Secret Service. Inventory holds only credential references.
 Authenticated SOCKS5 stores `username:password` by reference; URL secrets are rejected.

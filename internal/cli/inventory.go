@@ -64,7 +64,13 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 	}})
 	for _, action := range []string{"add", "edit"} {
 		h := inventory.Host{}
+		options := hostOptions{}
 		cmd := &cobra.Command{Use: action + " HOST", Short: action + " a host", Args: cobra.ExactArgs(1)}
+		if action == "add" {
+			cmd.Long = "Add a host. Password authentication prompts twice and saves to the OS credential store\nwhen no --credential is supplied. Use --no-save-password for per-connection prompts."
+		} else {
+			cmd.Long = "Edit a host. Use --add-groups/--remove-groups to change selected memberships,\nor --groups to replace all groups. Use --save-password to prompt and save a new password."
+		}
 		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP")
 		cmd.Flags().IntVar(&h.Port, "port", 22, "SSH port")
 		cmd.Flags().StringVar(&h.User, "user", "", "SSH username")
@@ -76,41 +82,17 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		cmd.Flags().StringVar(&h.ProxyJump, "proxy-jump", "", "jump-host alias")
 		cmd.Flags().StringVar(&h.ProxyCredential, "proxy-credential", "", "username:password credential reference")
 		cmd.Flags().StringVar(&h.SudoCredential, "sudo-credential", "", "sudo password reference")
-		cmd.Flags().StringSliceVar(&h.Groups, "groups", nil, "comma-separated groups")
+		cmd.Flags().StringSliceVar(&h.Groups, "groups", nil, "all group memberships (edit replaces the list)")
 		cmd.Flags().StringSliceVar(&h.Tags, "tags", nil, "comma-separated tags")
 		cmd.Flags().StringVar(&h.Description, "description", "", "host description")
+		cmd.Flags().BoolVar(&options.savePassword, "save-password", false, "prompt and save a new SSH password for this host")
+		cmd.Flags().BoolVar(&options.noSavePassword, "no-save-password", false, "prompt on each connection instead of storing the SSH password")
+		if action == "edit" {
+			cmd.Flags().StringSliceVar(&options.addGroups, "add-groups", nil, "add group memberships without replacing existing groups")
+			cmd.Flags().StringSliceVar(&options.removeGroups, "remove-groups", nil, "remove selected group memberships")
+		}
 		cmd.RunE = func(cmd *cobra.Command, args []string) error {
-			if !inventory.ValidName(args[0]) || args[0] == "all" {
-				return errors.New("invalid or reserved host alias")
-			}
-			return a.change(func(inv *inventory.Inventory) error {
-				old, exists := inv.Hosts[args[0]]
-				if action == "add" {
-					if exists {
-						return errors.New("host already exists")
-					}
-					inv.Hosts[args[0]] = h
-					return nil
-				}
-				if !exists {
-					return errors.New("unknown host")
-				}
-				changes := map[string]func(){
-					"host": func() { old.Host = h.Host }, "port": func() { old.Port = h.Port }, "user": func() { old.User = h.User },
-					"auth": func() { old.Auth = h.Auth }, "connection": func() { old.Connection = h.Connection },
-					"credential": func() { old.Credential = h.Credential }, "key": func() { old.Key = h.Key },
-					"proxy": func() { old.Proxy = h.Proxy }, "proxy-jump": func() { old.ProxyJump = h.ProxyJump },
-					"proxy-credential": func() { old.ProxyCredential = h.ProxyCredential }, "sudo-credential": func() { old.SudoCredential = h.SudoCredential },
-					"groups": func() { old.Groups = h.Groups }, "tags": func() { old.Tags = h.Tags }, "description": func() { old.Description = h.Description },
-				}
-				for flag, apply := range changes {
-					if cmd.Flags().Changed(flag) {
-						apply()
-					}
-				}
-				inv.Hosts[args[0]] = old
-				return nil
-			})
+			return a.mutateHost(cmd, args[0], action, h, options)
 		}
 		root.AddCommand(cmd)
 	}

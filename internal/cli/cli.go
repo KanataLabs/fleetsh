@@ -30,6 +30,7 @@ type application struct {
 	path         string
 	json         bool
 	promptFailed bool
+	readSecret   func(string) (string, error)
 }
 type exitError struct{ code int }
 
@@ -159,5 +160,5 @@ func (a *application) manager(inv *inventory.Inventory) (*transport.Manager, err
 	if err != nil {
 		return nil, err
 	}
-	return &transport.Manager{Inventory: inv, Keys: keys, Store: a.store, Prompt: func(label string) (string, error) { return credentials.ReadSecretContext(a.ctx, a.in, a.errOut, label) }}, nil
+	return &transport.Manager{Inventory: inv, Keys: keys, Store: a.store, Prompt: func(label string) (string, error) { return a.secretInput(label) }}, nil
 }

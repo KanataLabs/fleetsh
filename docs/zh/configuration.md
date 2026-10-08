@@ -157,6 +157,27 @@ SSH 主机必须指定用户名，密钥认证必须指定密钥路径。
 必须以字母或数字开头，最多 128 个字符。别名 `all` 为保留名称。
 并发数范围为 1 至 256；超时长度必须为正数。
 
+<a id="groups"></a>
+
+## 后续修改分组
+
+一台主机可以同时属于多个分组。分组由主机的成员关系决定，无需预先建立独立的分组记录。
+添加主机后也可以继续修改：
+
+```sh
+fleetsh edit hk1 --add-groups production,monitoring
+fleetsh edit hk1 --remove-groups asia
+fleetsh edit hk1 --groups web,production
+fleetsh edit hk1 --groups ""
+fleetsh ls '@production'
+```
+
+`--add-groups` 保留已有分组，重复添加会去重。
+`--remove-groups` 只移除指定成员关系；主机不属于该组时会忽略。
+`--groups` 整体替换分组列表，空值清空全部分组。
+不同名称的追加与移除可以同时指定，但不能与 `--groups` 混用，也不能同时追加和移除同一名称。
+只修改分组不会要求输入密码，也不会改变主机密码。
+
 ## 选择器
 
 | 选择器 | 含义 |
@@ -169,6 +190,44 @@ SSH 主机必须指定用户名，密钥认证必须指定密钥路径。
 
 未知主机、未知分组以及空的远程目标集合会返回本地错误。
 仅控制台资产会出现在列表中，远程操作时跳过。
+
+<a id="passwords"></a>
+
+## 自动保存主机密码
+
+使用 `--auth password` 添加 SSH 主机时，如果没有指定 `--credential`，会通过隐藏输入
+询问两次密码。fleetsh 自动生成唯一的 `fleetsh-ssh-ALIAS-RANDOM` 引用，将秘密值存入
+系统凭据库，并关联主机。无需先手动执行 `credential add`。
+
+```sh
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia,web
+fleetsh edit sg1 --save-password
+fleetsh show sg1
+```
+
+`edit --save-password` 会使用新引用保存密码，保留原凭据，避免影响共用它的其他主机。
+未显式指定引用、切换为密码认证时，也会询问并保存。
+可用 `show` 或 `credential ls` 查看引用，不再需要的旧引用可通过 `credential rm REFERENCE` 删除。
+删除主机不会自动删除其凭据。
+
+希望每次连接时输入密码，可使用 `--no-save-password`。
+编辑时该选项解除主机的凭据引用，但保留系统中已保存的条目。
+非交互添加应传入已有的 `--credential REFERENCE`，或显式指定 `--no-save-password`。
+非空凭据引用不能与密码保存选项同时指定。
+
+主机设置会在输入密码前完成校验。输入或存储失败不会改变清单；
+如果清单写入失败，会删除此次新保存的秘密值。
+
+### 在系统中识别 fleetsh 创建的凭据
+
+| 平台 | 可见标识 |
+| --- | --- |
+| Windows Credential Manager | 目标名 `fleetsh:REFERENCE`；备注 `Created by fleetsh (KanataLabs). Managed VPS credential.` |
+| macOS Keychain | 服务名 `fleetsh`、标签 `fleetsh:REFERENCE`，以及相同的创建来源备注 |
+| Linux Secret Service | 服务属性 `fleetsh`；标签以 `fleetsh:REFERENCE` 开头，并包含创建来源说明 |
+
+自动保存和手动 `credential add` 都会为新建、替换的条目添加上述标识。
+现有引用与 `fleetsh` 服务命名空间保持兼容，旧条目在替换时补上备注。
 
 ## 凭据库
 

@@ -21,7 +21,7 @@ type Native struct{}
 var ErrNotFound = errors.New("credential not found")
 
 func (Native) Get(ref string) (string, error) {
-	secret, err := keyring.Get("fleetsh", ref)
+	secret, err := keyring.Get(Service, ref)
 	if errors.Is(err, keyring.ErrNotFound) {
 		return "", ErrNotFound
 	}
@@ -31,16 +31,16 @@ func (Native) Get(ref string) (string, error) {
 	return secret, nil
 }
 func (Native) Set(ref, secret string) error {
-	if secret == "" || len(secret) > 2560 {
-		return errors.New("secret must contain 1 to 2560 bytes")
+	if err := ValidateSecret(secret); err != nil {
+		return err
 	}
-	if err := keyring.Set("fleetsh", ref, secret); err != nil {
+	if err := setNative(ref, secret); err != nil {
 		return errors.New("cannot save to system credential store (unavailable, locked, or secret too large)")
 	}
 	return nil
 }
 func (Native) Delete(ref string) error {
-	if err := keyring.Delete("fleetsh", ref); err != nil {
+	if err := keyring.Delete(Service, ref); err != nil {
 		if errors.Is(err, keyring.ErrNotFound) {
 			return ErrNotFound
 		}

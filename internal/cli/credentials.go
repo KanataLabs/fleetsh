@@ -28,11 +28,11 @@ func (a *application) credentialCommands(root *cobra.Command) {
 		} else if err != nil && !errors.Is(err, credentials.ErrNotFound) {
 			return err
 		}
-		s, err := credentials.ReadSecretContext(a.ctx, a.in, a.errOut, "Secret (proxy: username:password)")
+		s, err := a.secretInput("Secret (proxy: username:password)")
 		if err != nil {
 			return err
 		}
-		confirmation, err := credentials.ReadSecretContext(a.ctx, a.in, a.errOut, "Confirm")
+		confirmation, err := a.secretInput("Confirm")
 		if err != nil {
 			return err
 		}

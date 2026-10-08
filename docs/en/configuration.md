@@ -163,6 +163,28 @@ Aliases, groups, tags and references use letters/digits/dot/underscore/hyphen,
 start with a letter or digit and are at most 128 characters. Alias `all` is reserved.
 Parallelism ranges from 1 to 256; durations must be positive.
 
+<a id="groups"></a>
+
+## Change group memberships
+
+One host can belong to multiple groups. Groups are derived from host memberships;
+there is no separate group registry to create first. You can update them after adding a host.
+
+```sh
+fleetsh edit hk1 --add-groups production,monitoring
+fleetsh edit hk1 --remove-groups asia
+fleetsh edit hk1 --groups web,production
+fleetsh edit hk1 --groups ""
+fleetsh ls '@production'
+```
+
+`--add-groups` preserves existing groups and ignores duplicate additions.
+`--remove-groups` removes only the named memberships; absent names are harmless.
+`--groups` replaces the entire list, and an empty value clears it.
+You can combine additions and removals for different names, but cannot combine
+them with `--groups` or add and remove the same name. Editing groups does not prompt
+for or change the host's password.
+
 ## Selectors
 
 | Selector | Meaning |
@@ -175,6 +197,48 @@ Parallelism ranges from 1 to 256; durations must be positive.
 
 Unknown hosts/groups and empty remote selections are local errors.
 Console-only assets appear in lists and are skipped for remote operations.
+
+<a id="passwords"></a>
+
+## Save a host password
+
+Adding an SSH host with `--auth password` and no `--credential` prompts twice using
+hidden terminal input. fleetsh creates a unique `fleetsh-ssh-ALIAS-RANDOM` reference,
+saves the secret in the OS store and associates the reference with the host.
+You do not need to run `credential add` first.
+
+```sh
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia,web
+fleetsh edit sg1 --save-password
+fleetsh show sg1
+```
+
+`edit --save-password` stores a new password under a new reference. It leaves the
+previous credential intact so other hosts sharing it keep working. Switching to
+password authentication without an explicit reference also prompts and saves.
+Inspect references with `show` or `credential ls`; remove an unused old reference
+with `credential rm REFERENCE` when you no longer need it.
+Removing a host does not automatically delete its credentials.
+
+Use `--no-save-password` to prompt at each connection instead. On edit this detaches
+the host's reference and keeps the saved OS entry. For noninteractive creation,
+supply an existing `--credential REFERENCE` or explicitly use `--no-save-password`.
+Do not combine a nonempty reference with password-saving options.
+
+Host settings are validated before prompting. Failed input or storage leaves the
+inventory unchanged; a newly saved secret is removed if inventory persistence fails.
+
+### Recognize fleetsh credentials
+
+| Platform | Visible identification |
+| --- | --- |
+| Windows Credential Manager | Target `fleetsh:REFERENCE`; comment `Created by fleetsh (KanataLabs). Managed VPS credential.` |
+| macOS Keychain | Service `fleetsh`, label `fleetsh:REFERENCE`, and the same creator comment |
+| Linux Secret Service | Service attribute `fleetsh`; label starts with `fleetsh:REFERENCE` and includes the creator note |
+
+Both automatic saving and manual `credential add` apply this identification to new
+or replaced entries. Existing references and the `fleetsh` service namespace remain
+compatible. Older entries gain the note when replaced.
 
 ## Credential store
 

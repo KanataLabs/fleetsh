@@ -22,8 +22,7 @@ Linux は `$XDG_CONFIG_HOME/fleetsh/config.toml` または `~/.config/fleetsh/co
 ```sh
 fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
-fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --credential sg1-login --groups asia
-fleetsh credential add sg1-login
+fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls
 fleetsh ls '@asia' --json
 fleetsh show hk1
@@ -33,6 +32,11 @@ fleetsh edit hk1 --port 2222
 パスワード入力は表示されません。秘密値は OS の認証情報ストアに保存し、
 ホスト一覧には参照名だけを保存します。秘密鍵のパスフレーズも同じ `--credential` で参照できます。
 参照がなければ、非表示の入力で確認します。
+
+パスワード認証のホスト追加では、非表示の入力で 2 回確認し、自動で保存します。
+生成した参照は `fleetsh-ssh-` で始まり、ホスト一覧には名前だけを保持します。
+`fleetsh edit sg1 --save-password` で、参照を手動管理せずに更新できます。
+[パスワード保存](../configuration/#passwords)と[グループ変更](../configuration/#groups)も参照してください。
 
 すべてのコマンドで `--config PATH` を指定できます。`~/` で始まるパスは展開されます。
 ホスト一覧は厳密に検証し、未知のフィールドや平文の `password` フィールドを拒否します。
