@@ -53,6 +53,37 @@ jobs:
             export FLEETSH_TEST_KEYRING=1
             go test ./internal/credentials -run TestNativeRoundTrip -count=1 -timeout 60s
           '
+
+  npm-launcher:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      FLEETSH_NPM_CACHE: ${{ runner.temp }}/fleetsh-npm-smoke
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - run: npm test
+      - name: Pack the single dependency-free npm package
+        shell: bash
+        run: |
+          mkdir -p dist
+          npm pack --pack-destination dist
+      - name: Run the packaged binary through npm exec
+        shell: bash
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          archive="./dist/fleetsh-$version.tgz"
+          output="$(npm exec --yes --ignore-scripts --package="$archive" -- fleetsh version)"
+          test "$output" = "fleetsh v$version"
+          npm exec --yes --offline --ignore-scripts --package="$archive" -- fleetsh docs forwarding
+      - name: Verify warm launcher works without downloading
+        run: node npm/test/cached-smoke.mjs
+
   cross-build:
     runs-on: ubuntu-latest
     steps:

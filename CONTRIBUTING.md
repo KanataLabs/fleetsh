@@ -13,6 +13,19 @@ go vet ./...
 go build ./cmd/fleetsh
 ```
 
+The single npm package wraps the released Go binary. It requires Node.js 22 or
+newer and has no runtime dependencies or install hooks. Run `npm test` and
+`npm pack --pack-destination dist` to verify changes. CI tests the launcher and
+packed artifacts on three operating systems.
+
+Before an npm release, run `node scripts/npm-release-manifest.mjs vVERSION`
+after the six Go archives and SHA256SUMS have been published. The script verifies
+every archive, extracts and hashes the binaries in memory, then updates the npm
+version and embedded manifest. Review these changes and commit them before
+publishing. Use `npm publish --tag alpha` for previews; promote a stable version
+to `latest` only when a stable Go release exists. npm authentication is separate
+from the GitHub Publisher App. Do not commit npm credentials.
+
 Add tests for credential handling, selector behavior, transport failures,
 cancellation and filesystem safety. Use local test SSH servers rather than real
 VPS credentials. Test new dependencies for Windows, macOS and Linux compatibility.

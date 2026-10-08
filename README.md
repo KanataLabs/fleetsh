@@ -13,6 +13,20 @@ One Go binary for Windows, macOS and Linux, without a central server or remote a
 
 ## Install
 
+With Node.js 22 or newer:
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha stats
+npm install -g fleetsh@alpha
+```
+
+The single npm package downloads and verifies the matching Go release on first
+execution, then caches it. There are no runtime npm dependencies or install hooks.
+The preview channel is `alpha`; pin `fleetsh@0.1.0-alpha.1` for reproducible runs.
+Direct binaries do not require Node.js; [release archives](https://github.com/KanataLabs/fleetsh/releases)
+and source builds remain available.
+
 Build with Go 1.27 or newer:
 
 ```sh

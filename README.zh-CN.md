@@ -10,6 +10,19 @@ macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 
 ## 安装与 PATH
 
+已有 Node.js 22 或更新版本时，可使用单个 npm 包：
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha stats
+npm install -g fleetsh@alpha
+```
+
+首次运行时下载并校验对应版本的 Go 二进制，之后复用本机缓存。
+没有运行时 npm 依赖、安装钩子或平台子包。`alpha` 为预览通道，
+可用 `fleetsh@0.1.0-alpha.1` 固定版本。直接运行二进制不需要 Node.js；
+也可从[发行页](https://github.com/KanataLabs/fleetsh/releases)下载，或从源码构建：
+
 ```sh
 git clone https://github.com/KanataLabs/fleetsh.git
 cd fleetsh

@@ -1,0 +1,47 @@
+{
+  "name": "fleetsh",
+  "version": "0.1.0-alpha.1",
+  "description": "Lightweight, agentless VPS fleet manager: SSH, monitoring and port forwarding",
+  "license": "GPL-3.0-only",
+  "author": "Kanata Labs <contact@kanatalabs.com>",
+  "homepage": "https://kanatalabs.github.io/fleetsh/en/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KanataLabs/fleetsh.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KanataLabs/fleetsh/issues"
+  },
+  "keywords": [
+    "ssh",
+    "vps",
+    "fleet",
+    "monitoring",
+    "cli",
+    "golang"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "fleetsh": "npm/bin/fleetsh.mjs"
+  },
+  "files": [
+    "npm/bin/",
+    "npm/lib/",
+    "npm/release.json",
+    "npm/check-release.mjs",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "licenses/"
+  ],
+  "scripts": {
+    "test": "node --test npm/test/*.test.mjs",
+    "prepack": "node npm/check-release.mjs"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "alpha"
+  }
+}

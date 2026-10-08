@@ -12,6 +12,50 @@ page_key: 'installation/'
 `fleetsh`。运行时不需要 Go、Python 或 Node.js；目前可从源码构建开发版，
 还没有发布稳定版。
 
+## 使用 npx 或通过 npm 安装
+
+安装 Node.js 22 或更新版本后，只需使用一个 npm 包：
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha init
+npx fleetsh@alpha stats
+npx fleetsh@alpha ssh hk1
+```
+
+全局安装后即可直接运行：
+
+```sh
+npm install -g fleetsh@alpha
+fleetsh version
+```
+
+npm 会在全局可执行文件目录建立命令入口。Windows 对应 `npm config get prefix`
+的输出目录；macOS/Linux 对应该目录下的 `bin`。若 Node.js 安装程序没有将其
+加入 PATH，请补充这个目录；已在 PATH 中时无需手动复制二进制或注册路径。
+
+当前 npm 版本为 `0.1.0-alpha.1`，`alpha` 是预览通道。
+用 `npx fleetsh@0.1.0-alpha.1 version` 可以固定版本。首次**运行**时，
+启动器从 GitHub Releases 下载对应版本的 Go 二进制，校验包内固定的归档和
+可执行文件 SHA256，再缓存到本机。没有安装钩子、运行时 npm 依赖或平台子包。
+首次运行需要访问 GitHub 并有可写缓存目录；之后启动器复用已校验的二进制。
+npx 解析包版本时仍可能访问 npm registry。
+
+| 系统 | 二进制缓存 |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\fleetsh\Cache\npm` |
+| macOS | `~/Library/Caches/fleetsh/npm` |
+| Linux | `$XDG_CACHE_HOME/fleetsh/npm` 或 `~/.cache/fleetsh/npm` |
+
+可通过 `FLEETSH_NPM_CACHE` 指定其他缓存目录。下载过程不会使用主机清单的
+SSH 代理配置。支持 Windows、macOS、Linux 的 x64 和 ARM64 架构。
+参数、交互输入输出和退出码原样交给 Go 程序，主机清单和凭据位置保持一致。
+下载提示写入 stderr，因此不会混入 stdout 的 JSON。
+
+若提示缓存校验失败，只删除错误中指出的缓存目录，再重试。
+没有 Node.js 或无法访问 GitHub 的环境，可以在其他机器下载
+[发行归档](https://github.com/KanataLabs/fleetsh/releases)，再按下文配置二进制及 PATH。
+
 ## 从源码构建
 
 构建需要 Go 1.27 或更新版本：

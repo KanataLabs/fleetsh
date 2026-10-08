@@ -1,0 +1,41 @@
+{
+  "tag": "v0.1.0-alpha.1",
+  "assets": {
+    "darwin-amd64": {
+      "name": "fleetsh_v0.1.0-alpha.1_darwin_amd64.tar.gz",
+      "size": 4281851,
+      "sha256": "70dc6165319ace50ec58a2715e5db1540490384a75e2fb9cc7877794dbe81ee4",
+      "binarySha256": "508d022e4da7dbe8fe303788c820cbe07670eefef2bc14438bf5f4b0bef01e56"
+    },
+    "darwin-arm64": {
+      "name": "fleetsh_v0.1.0-alpha.1_darwin_arm64.tar.gz",
+      "size": 3913200,
+      "sha256": "3f439310ba3a658c2a4cf5cea79d43c109f640f89d171fa9074da96b59e6f04a",
+      "binarySha256": "4c8755954dfa8c1cbd43710c8d49317a13f825f2d7bf67199c4665bc51cca550"
+    },
+    "linux-amd64": {
+      "name": "fleetsh_v0.1.0-alpha.1_linux_amd64.tar.gz",
+      "size": 4332155,
+      "sha256": "0906aa39a68dde2cc32a8d405998dd931ee144b365822861dfe052a881b5fa9a",
+      "binarySha256": "0d4205b7ca6f6ee11eb619d823f0d249888de683ab7a71dddad1eda38f03d87e"
+    },
+    "linux-arm64": {
+      "name": "fleetsh_v0.1.0-alpha.1_linux_arm64.tar.gz",
+      "size": 3874633,
+      "sha256": "f0badb0790c1585af3164089940fa383ee066739ac54664229322a62b4978352",
+      "binarySha256": "7c45f821a3c4494b5ae68716ea6a764f3c502694542fe44536a2f7c61322865c"
+    },
+    "windows-amd64": {
+      "name": "fleetsh_v0.1.0-alpha.1_windows_amd64.zip",
+      "size": 4304830,
+      "sha256": "e5164a4dcec902a37aacf73d80f4e46a5d67997f5fa50a1031c4f3d44f050fec",
+      "binarySha256": "ca12d4a2545a97131dd0ae5c07e4225dd54549c966a2e31d913b871131a88439"
+    },
+    "windows-arm64": {
+      "name": "fleetsh_v0.1.0-alpha.1_windows_arm64.zip",
+      "size": 3816058,
+      "sha256": "07febd3c02ac30e0d382b985b735348dd913f3f92090bf7c1b345abdfe2197e6",
+      "binarySha256": "c688411b315046a9efbcf7c45d68c2db514e5be065e3eba8876af1ba92c0b63d"
+    }
+  }
+}
