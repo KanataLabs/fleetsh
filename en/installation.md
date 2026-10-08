@@ -13,6 +13,55 @@ to run `fleetsh` from any working directory. No Go, Python or Node.js runtime
 is required to run the binary. You can currently build the development version
 from source; no stable release is available yet.
 
+## Run with npx or install with npm
+
+With Node.js 22 or newer, use the single npm package:
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha init
+npx fleetsh@alpha stats
+npx fleetsh@alpha ssh hk1
+```
+
+To install the command globally:
+
+```sh
+npm install -g fleetsh@alpha
+fleetsh version
+```
+
+npm installs a command shim in its global executable directory. On Windows this
+is the directory reported by `npm config get prefix`; on macOS/Linux it is that
+prefix's `bin` directory. Add the appropriate directory to PATH if your Node.js
+installation has not already done so. No manual binary PATH registration is needed
+when npm's global executable directory is already on PATH.
+
+The current npm version is `0.1.0-alpha.1`; `alpha` selects the preview channel.
+Pin it with `npx fleetsh@0.1.0-alpha.1 version`. The package downloads the matching
+Go binary from GitHub Releases on first **execution**, verifies pinned archive
+and executable SHA256 hashes, and caches it. There are no installation hooks,
+runtime npm dependencies or separate platform packages. Initial execution needs
+access to GitHub and a writable cache; later launcher runs reuse the verified binary.
+npx may still contact the npm registry when resolving a package version.
+
+| OS | Binary cache |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\fleetsh\Cache\npm` |
+| macOS | `~/Library/Caches/fleetsh/npm` |
+| Linux | `$XDG_CACHE_HOME/fleetsh/npm` or `~/.cache/fleetsh/npm` |
+
+Set `FLEETSH_NPM_CACHE` to use a different cache directory. Downloads do not use
+the inventory's SSH proxy setting. Supported targets are Windows, macOS and Linux,
+each on x64 or ARM64. Arguments, interactive input/output and exit codes are
+forwarded to the Go program; inventory and credential locations are unchanged.
+Download messages go to stderr, preserving JSON output on stdout.
+
+If the launcher reports a cached checksum mismatch, remove only the cache
+directory named in the error and retry. For environments without Node.js or
+GitHub access, download a [release archive](https://github.com/KanataLabs/fleetsh/releases)
+elsewhere and use the binary/PATH instructions below.
+
 ## Build from source
 
 Building requires Go 1.27 or newer:

@@ -13,6 +13,56 @@ page_key: 'installation/'
 実行時に Go、Python、Node.js のランタイムは不要です。
 現在はソースから開発版をビルドできます。安定版はまだありません。
 
+## npx で実行、または npm でインストールする
+
+Node.js 22 以降があれば、単一の npm パッケージを使用できます。
+
+```sh
+npx fleetsh@alpha version
+npx fleetsh@alpha init
+npx fleetsh@alpha stats
+npx fleetsh@alpha ssh hk1
+```
+
+グローバルにインストールすると、コマンドを直接実行できます。
+
+```sh
+npm install -g fleetsh@alpha
+fleetsh version
+```
+
+npm はグローバル実行ファイルディレクトリにコマンドを作成します。
+Windows では `npm config get prefix` の出力先、macOS/Linux ではその配下の
+`bin` です。Node.js のインストールで PATH に追加されていない場合は、
+該当ディレクトリを追加してください。すでに PATH にあれば手動のコピーは不要です。
+
+現在の npm バージョンは `0.1.0-alpha.1` で、`alpha` はプレビューのチャンネルです。
+`npx fleetsh@0.1.0-alpha.1 version` でバージョンを固定できます。
+初回の**実行**時に対応する Go バイナリーを GitHub Releases からダウンロードし、
+パッケージ内で固定したアーカイブと実行ファイルの SHA256 を検証してキャッシュします。
+インストールフック、実行時 npm 依存、プラットフォーム別パッケージはありません。
+初回は GitHub への接続と書き込み可能なキャッシュが必要です。
+以後、ランチャーは検証済みのバイナリーを再利用します。
+npx によるバージョンの解決では npm レジストリーへの接続が発生する場合があります。
+
+| OS | バイナリーのキャッシュ |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\fleetsh\Cache\npm` |
+| macOS | `~/Library/Caches/fleetsh/npm` |
+| Linux | `$XDG_CACHE_HOME/fleetsh/npm` または `~/.cache/fleetsh/npm` |
+
+`FLEETSH_NPM_CACHE` で別のディレクトリを指定できます。
+ダウンロードはホスト一覧の SSH プロキシ設定を使用しません。
+Windows、macOS、Linux の x64 と ARM64 をサポートします。
+引数、対話入出力、終了コードを Go プログラムに引き渡し、
+ホスト一覧と資格情報の保存先は変わりません。
+ダウンロードの通知は stderr に出力するため、stdout の JSON を妨げません。
+
+キャッシュの検証エラーが出た場合は、エラーに示されたディレクトリだけを削除し、
+再実行してください。Node.js や GitHub への接続がない環境では、
+別の環境で[リリースアーカイブ](https://github.com/KanataLabs/fleetsh/releases)を取得し、
+以下のバイナリーと PATH の手順を使用できます。
+
 ## ソースからビルドする
 
 ビルドには Go 1.27 以降が必要です。
