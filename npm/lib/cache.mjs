@@ -31,7 +31,7 @@ async function readCached(binary, asset) {
 }
 
 export async function ensureBinary(manifest, {
-  platform = process.platform, arch = process.arch, root = cacheRoot(),
+  platform = process.platform, arch = process.arch, root = cacheRoot(), offline = false,
   downloader = download, log = (message) => process.stderr.write(message + '\n')
 } = {}) {
   const target = targetFor(platform, arch);
@@ -45,6 +45,7 @@ export async function ensureBinary(manifest, {
   const binary = path.join(directory, name);
   const cached = await readCached(binary, asset);
   if (cached) return cached;
+  if (offline) throw new Error('No cached binary for ' + manifest.tag + '; run once online before --offline.');
   const parent = path.dirname(directory);
   await fs.mkdir(parent, { recursive: true, mode: 0o700 });
   const staging = await fs.mkdtemp(path.join(parent, '.install-'));

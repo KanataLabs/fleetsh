@@ -10,7 +10,7 @@ export async function download(url, options = {}) {
   }
 }
 
-async function downloadAttempt(url, { expectedSize, fetchImpl = fetch, timeoutMs = 120000 } = {}) {
+async function downloadAttempt(url, { expectedSize, fetchImpl = fetch, timeoutMs = 120000, maxSize = 16 * 1024 * 1024 } = {}) {
   const signal = AbortSignal.timeout(timeoutMs);
   for (let redirects = 0; redirects <= 5; redirects++) {
     if (new URL(url).protocol !== 'https:') throw new Error('Release downloads require HTTPS');
@@ -25,10 +25,11 @@ async function downloadAttempt(url, { expectedSize, fetchImpl = fetch, timeoutMs
     if (!response.ok || !response.body) {
       await response.body?.cancel();
       const error = new Error('Release download failed (HTTP ' + response.status + ')');
+      error.status = response.status;
       error.retryable = [408, 429].includes(response.status) || response.status >= 500;
       throw error;
     }
-    const limit = expectedSize ?? 16 * 1024 * 1024;
+    const limit = Math.min(expectedSize ?? maxSize, maxSize);
     const declared = response.headers.get('content-length');
     if (declared && (!/^\d+$/.test(declared) || Number(declared) > limit)) {
       await response.body.cancel();

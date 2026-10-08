@@ -78,8 +78,9 @@ jobs:
         run: |
           version="$(node -p 'require("./package.json").version')"
           archive="./dist/fleetsh-$version.tgz"
+          export FLEETSH_RELEASE="$(node -p 'require("./npm/release.json").tag')"
           output="$(npm exec --yes --ignore-scripts --package="$archive" -- fleetsh version)"
-          test "$output" = "fleetsh v$version"
+          test "$output" = "fleetsh $FLEETSH_RELEASE"
           npm exec --yes --offline --ignore-scripts --package="$archive" -- fleetsh docs forwarding
       - name: Verify warm launcher works without downloading
         run: node npm/test/cached-smoke.mjs

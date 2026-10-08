@@ -4,9 +4,10 @@ import { readFileSync } from 'node:fs';
 export const release = JSON.parse(readFileSync(new URL('../release.json', import.meta.url), 'utf8'));
 export const targets = ['darwin-amd64', 'darwin-arm64', 'linux-amd64', 'linux-arm64', 'windows-amd64', 'windows-arm64'];
 
-export function validateRelease(manifest, version) {
-  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version) || manifest.tag !== 'v' + version) {
-    throw new Error('npm version must match the pinned Go release');
+export function validateRelease(manifest) {
+  if (!manifest || !/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.tag || '') ||
+      !manifest.assets || typeof manifest.assets !== 'object' || Array.isArray(manifest.assets)) {
+    throw new Error('Invalid Go release manifest');
   }
   if (Object.keys(manifest.assets).length !== targets.length) throw new Error('Expected six release targets');
   for (const target of targets) {

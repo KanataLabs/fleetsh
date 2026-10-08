@@ -18,13 +18,24 @@ newer and has no runtime dependencies or install hooks. Run `npm test` and
 `npm pack --pack-destination dist` to verify changes. CI tests the launcher and
 packed artifacts on three operating systems.
 
-Before an npm release, run `node scripts/npm-release-manifest.mjs vVERSION`
-after the six Go archives and SHA256SUMS have been published. The script verifies
-every archive, extracts and hashes the binaries in memory, then updates the npm
-version and embedded manifest. Review these changes and commit them before
-publishing. Use `npm publish --tag alpha` for previews; promote a stable version
-to `latest` only when a stable Go release exists. npm authentication is separate
-from the GitHub Publisher App. Do not commit npm credentials.
+The npm launcher version is independent of the Go version. Normal Go releases
+do not require npm publications. The Release workflow calls
+`node scripts/build-release-manifest.mjs vVERSION dist` after building the six
+archives, then publishes `fleetsh-manifest.json` alongside archives and SHA256SUMS.
+This manifest is required for automatic selection of future releases and contains
+both archive and binary hashes. If publishing locally with the Publisher App,
+upload it with the other artifacts. Draft/incomplete releases must stay unpublished
+until all assets are ready.
+
+The launcher prefers stable releases and falls back to previews only if no stable
+release exists. Release metadata is cached for one hour; exact Go tags, bundled
+selection, refresh and offline modes are described in the installation pages.
+CI pins the bundled tag for deterministic binary smoke tests; selector tests use
+controlled fixtures. Use `node scripts/npm-release-manifest.mjs vVERSION` only to
+refresh the embedded fallback intentionally; it does not change the npm version.
+Bump `package.json` when changing the launcher, then publish under `alpha` while
+it remains a preview. npm authentication is separate from the GitHub Publisher App.
+Do not commit npm credentials.
 
 Add tests for credential handling, selector behavior, transport failures,
 cancellation and filesystem safety. Use local test SSH servers rather than real

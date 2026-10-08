@@ -21,9 +21,25 @@ npx fleetsh@alpha stats
 npm install -g fleetsh@alpha
 ```
 
-The single npm package downloads and verifies the matching Go release on first
-execution, then caches it. There are no runtime npm dependencies or install hooks.
-The preview channel is `alpha`; pin `fleetsh@0.1.0-alpha.1` for reproducible runs.
+The single npm package is a persistent launcher: it automatically follows GitHub
+Releases, preferring stable versions and using previews only while none exist.
+New Go releases do not need npm publications. There are no runtime npm dependencies
+or install hooks. Go and npm launcher versions are independent.
+
+Select an original or exact Go version from the command line:
+
+```sh
+npx fleetsh@alpha --release bundled version
+npx fleetsh@alpha --release v0.1.0-alpha.1 stats
+npx fleetsh@alpha --release preview stats
+npx fleetsh@alpha --refresh version
+npx fleetsh@alpha --offline stats
+npx fleetsh@alpha --launcher-help
+```
+
+The original npm launcher `0.1.0-alpha.1` is pinned; update it once to launcher
+`0.1.0-alpha.2` or newer. See [installation](docs/en/installation.md) for
+one-hour metadata caching, offline behavior and global PATH setup.
 Direct binaries do not require Node.js; [release archives](https://github.com/KanataLabs/fleetsh/releases)
 and source builds remain available.
 

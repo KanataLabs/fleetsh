@@ -18,9 +18,24 @@ npx fleetsh@alpha stats
 npm install -g fleetsh@alpha
 ```
 
-首次运行时下载并校验对应版本的 Go 二进制，之后复用本机缓存。
-没有运行时 npm 依赖、安装钩子或平台子包。`alpha` 为预览通道，
-可用 `fleetsh@0.1.0-alpha.1` 固定版本。直接运行二进制不需要 Node.js；
+npm 包作为长期使用的启动器自动跟随 GitHub Release，优先正式版，
+没有正式版时使用预览版。以后 Go 更新无需再发 npm 包；仅启动器自身更新才发 npm。
+没有运行时 npm 依赖、安装钩子或平台子包，npm 与 Go 程序的版本独立。
+
+命令行可选择原版或固定某个 Go 版本：
+
+```sh
+npx fleetsh@alpha --release bundled version
+npx fleetsh@alpha --release v0.1.0-alpha.1 stats
+npx fleetsh@alpha --release preview stats
+npx fleetsh@alpha --refresh version
+npx fleetsh@alpha --offline stats
+npx fleetsh@alpha --launcher-help
+```
+
+旧 npm 启动器 `0.1.0-alpha.1` 为固定版本模式，先更新一次至
+`0.1.0-alpha.2` 或更新版本。发行信息默认缓存一小时，详细策略见
+[安装文档](docs/zh/installation.md)。直接运行二进制不需要 Node.js；
 也可从[发行页](https://github.com/KanataLabs/fleetsh/releases)下载，或从源码构建：
 
 ```sh

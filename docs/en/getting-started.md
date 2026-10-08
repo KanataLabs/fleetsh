@@ -12,6 +12,29 @@ fleetsh now implements the core v0.1 workflow. It is a development build, not a
 stable release. See [installation and PATH registration](../installation/) to make
 the command available from any directory.
 
+## Run with npx or npm
+
+Use Node.js 22 or newer:
+
+```sh
+npx fleetsh@alpha init
+npx fleetsh@alpha add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+npx fleetsh@alpha ssh hk1
+npx fleetsh@alpha alive
+npx fleetsh@alpha stats
+```
+
+Or install globally with `npm install -g fleetsh@alpha` and replace the
+`npx fleetsh@alpha` prefix with `fleetsh` in every example. Both use the same
+inventory and OS credential store as the direct binary.
+
+The launcher automatically follows GitHub Releases, preferring stable releases
+and using previews only while no stable release exists. Place launcher options
+before the command: `npx fleetsh@alpha --release bundled version` selects the
+original binary; `--release v0.1.0-alpha.1` selects an exact Go version.
+Run `npx fleetsh@alpha --launcher-help` or read
+[version selection, caching and PATH](../installation/).
+
 ## Help and offline guides
 
 The binary includes English command help with examples and eleven offline guides.

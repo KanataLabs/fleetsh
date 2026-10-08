@@ -1,6 +1,6 @@
 {
   "name": "fleetsh",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Lightweight, agentless VPS fleet manager: SSH, monitoring and port forwarding",
   "license": "GPL-3.0-only",
   "author": "Kanata Labs <contact@kanatalabs.com>",

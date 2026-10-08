@@ -11,6 +11,27 @@ page_key: 'getting-started/'
 fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 先参考 [安装与全局 PATH 注册](../installation/)，让命令在任意目录可用。
 
+## 使用 npx 或 npm 运行
+
+需要 Node.js 22 或更新版本：
+
+```sh
+npx fleetsh@alpha init
+npx fleetsh@alpha add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
+npx fleetsh@alpha ssh hk1
+npx fleetsh@alpha alive
+npx fleetsh@alpha stats
+```
+
+也可先 `npm install -g fleetsh@alpha` 全局安装，把所有示例的
+`npx fleetsh@alpha` 前缀替换为 `fleetsh`。两种方式与直接运行二进制共用主机清单和系统凭据库。
+
+启动器自动跟随 GitHub Release，优先正式版，没有正式版时才使用预览版。
+启动器选项放在子命令前：`npx fleetsh@alpha --release bundled version` 使用原版，
+`--release v0.1.0-alpha.1` 固定某个 Go 版本。
+可运行 `npx fleetsh@alpha --launcher-help`，或阅读
+[版本选择、缓存和 PATH](../installation/)。
+
 ## 帮助与离线指南
 
 程序内置带示例的英文命令帮助和十一个离线指南。执行 `init` 前即可查看，

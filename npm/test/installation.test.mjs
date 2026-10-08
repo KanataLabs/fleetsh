@@ -11,9 +11,8 @@ import { download } from '../lib/download.mjs';
 import { release, targetFor, validateRelease } from '../lib/release.mjs';
 
 test('published manifest pins six complete archives and binaries', () => {
-  const version = release.tag.slice(1);
-  validateRelease(release, version);
-  assert.throws(() => validateRelease(release, '0.0.0'), /must match/);
+  validateRelease(release);
+  assert.throws(() => validateRelease({ ...release, tag: '../bad' }), /Invalid Go/);
   assert.equal(targetFor('win32', 'x64'), 'windows-amd64');
   assert.equal(targetFor('darwin', 'arm64'), 'darwin-arm64');
   assert.throws(() => targetFor('linux', 'ia32'), /Unsupported platform/);

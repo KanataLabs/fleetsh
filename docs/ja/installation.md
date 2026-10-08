@@ -15,53 +15,101 @@ page_key: 'installation/'
 
 ## npx で実行、または npm でインストールする
 
-Node.js 22 以降があれば、単一の npm パッケージを使用できます。
+Node.js 22 以降があれば、単一の [npm パッケージ](https://www.npmjs.com/package/fleetsh)で実行できます。
 
 ```sh
 npx fleetsh@alpha version
 npx fleetsh@alpha init
+npx fleetsh@alpha alive
 npx fleetsh@alpha stats
 npx fleetsh@alpha ssh hk1
 ```
 
-グローバルにインストールすると、コマンドを直接実行できます。
+一度グローバルにインストールすると、コマンドを直接実行できます。
 
 ```sh
 npm install -g fleetsh@alpha
 fleetsh version
+fleetsh stats
 ```
 
 npm はグローバル実行ファイルディレクトリにコマンドを作成します。
-Windows では `npm config get prefix` の出力先、macOS/Linux ではその配下の
-`bin` です。Node.js のインストールで PATH に追加されていない場合は、
-該当ディレクトリを追加してください。すでに PATH にあれば手動のコピーは不要です。
+Windows では `npm config get prefix` の出力先、macOS/Linux ではその配下の `bin` です。
+必要に応じて、このディレクトリを PATH に追加してください。
+すでに PATH にあれば Go バイナリーを手動でコピーする必要はありません。
 
-現在の npm バージョンは `0.1.0-alpha.1` で、`alpha` はプレビューのチャンネルです。
-`npx fleetsh@0.1.0-alpha.1 version` でバージョンを固定できます。
-初回の**実行**時に対応する Go バイナリーを GitHub Releases からダウンロードし、
-パッケージ内で固定したアーカイブと実行ファイルの SHA256 を検証してキャッシュします。
-インストールフック、実行時 npm 依存、プラットフォーム別パッケージはありません。
-初回は GitHub への接続と書き込み可能なキャッシュが必要です。
-以後、ランチャーは検証済みのバイナリーを再利用します。
-npx によるバージョンの解決では npm レジストリーへの接続が発生する場合があります。
+### GitHub Release の自動追従とコマンドラインでのバージョン選択
 
-| OS | バイナリーのキャッシュ |
+npm ランチャー `0.1.0-alpha.2` 以降では、npm と Go プログラムのバージョンは独立しています。
+既定の `latest` は最新の正式な GitHub Release を優先し、正式版がない場合のみ
+最後に公開されたプレビューを使用します。Go の更新には GitHub Release の公開だけが必要で、
+npm パッケージの再公開はランチャー自体を変更するときだけ行います。
+
+ランチャーのオプションは Go サブコマンドの**前**に指定します。
+
+```sh
+npx fleetsh@alpha --release latest stats
+npx fleetsh@alpha --release preview stats
+npx fleetsh@alpha --release bundled version
+npx fleetsh@alpha --release v0.1.0-alpha.1 stats
+npx fleetsh@alpha --refresh version
+npx fleetsh@alpha --offline stats
+npx fleetsh@alpha --launcher-help
+```
+
+| オプション | 動作 |
+| --- | --- |
+| `--release latest` | 正式版を優先し、正式版がない場合のみプレビューを使用（既定） |
+| `--release preview` | プレビューを含めて最後に公開されたリリース |
+| `--release bundled` | ランチャーで固定した元のバイナリー。現在は `v0.1.0-alpha.1` |
+| `--release vVERSION` | npm のバージョンとは独立して Go のリリースを固定 |
+| `--refresh` | 1 時間のメタデータキャッシュを無視して GitHub を確認 |
+| `--offline` | 既存のキャッシュのみを使用し、GitHub に接続しない |
+| `--launcher-help` | Go のダウンロードや起動なしでランチャーのヘルプを表示 |
+
+グローバルインストール後も `fleetsh --release bundled version` または
+`fleetsh --release v0.1.0-alpha.1 stats` を使用できます。
+環境変数 `FLEETSH_RELEASE`、`FLEETSH_REFRESH=1`、`FLEETSH_OFFLINE=1` でも設定でき、
+コマンドラインの指定が優先されます。
+
+`fleetsh version` は実行中の **Go プログラム**のバージョン、
+`npm ls -g fleetsh --depth=0` は **npm ランチャー**のバージョンを表示します。
+`npx fleetsh@0.1.0-alpha.2` はランチャーだけを固定します。
+Go も固定する場合は `--release vVERSION` を併用してください。
+元の npm ランチャー `0.1.0-alpha.1` は Go `v0.1.0-alpha.1` に固定され、
+これらのオプションをサポートしません。一度 `npm install -g fleetsh@alpha` で更新してください。
+
+### ダウンロード、キャッシュとオフライン実行
+
+通常のオンライン実行では、GitHub のリリース情報を最大 1 時間に一度確認します。
+新しいバージョンを選ぶと自動でダウンロードし、バージョン別にキャッシュします。
+リリースのマニフェストにはアーカイブと実行ファイルの SHA256 が含まれます。
+GitHub のアセットダイジェストでマニフェストを検証し、続いてアーカイブとバイナリーを検証します。
+キャッシュのバイナリーも実行ごとに検証します。最初のリリースでは既存の固定マニフェストを使用します。
+
+ネットワーク障害やレート制限では、検証済みのリリース情報を再利用します。
+初回は固定した元のマニフェストに戻れます。形式やハッシュの不一致はエラーになります。
+オフライン実行には、選択したバイナリーを事前にダウンロードしておく必要があります。
+npx はランチャーの解決やインストールで npm レジストリーに接続する場合があります。
+グローバルインストールなら、その npx の処理を避けられます。
+`--offline` はランチャーによる GitHub への接続を制御します。
+
+| OS | バイナリーとリリース情報のキャッシュ |
 | --- | --- |
 | Windows | `%LOCALAPPDATA%\fleetsh\Cache\npm` |
 | macOS | `~/Library/Caches/fleetsh/npm` |
 | Linux | `$XDG_CACHE_HOME/fleetsh/npm` または `~/.cache/fleetsh/npm` |
 
-`FLEETSH_NPM_CACHE` で別のディレクトリを指定できます。
-ダウンロードはホスト一覧の SSH プロキシ設定を使用しません。
+`FLEETSH_NPM_CACHE` で別の書き込み可能なディレクトリを指定できます。
+ダウンロードはホスト一覧の SSH プロキシ設定を使いません。
 Windows、macOS、Linux の x64 と ARM64 をサポートします。
-引数、対話入出力、終了コードを Go プログラムに引き渡し、
-ホスト一覧と資格情報の保存先は変わりません。
-ダウンロードの通知は stderr に出力するため、stdout の JSON を妨げません。
+実行時の npm 依存、プラットフォーム別パッケージ、インストールフックはありません。
+引数、対話入出力、終了コードを Go に引き渡し、設定、ホスト鍵、資格情報の保存先は変わりません。
+ダウンロードと状態の通知は stderr を使うため、stdout の JSON を妨げません。
 
-キャッシュの検証エラーが出た場合は、エラーに示されたディレクトリだけを削除し、
-再実行してください。Node.js や GitHub への接続がない環境では、
-別の環境で[リリースアーカイブ](https://github.com/KanataLabs/fleetsh/releases)を取得し、
-以下のバイナリーと PATH の手順を使用できます。
+キャッシュの検証エラーでは、エラーに示されたディレクトリだけを削除してオンラインで再実行します。
+Node.js または GitHub への接続がない環境では、別の環境で
+[リリースアーカイブ](https://github.com/KanataLabs/fleetsh/releases)を取得し、以下の PATH の手順を使用してください。
 
 ## ソースからビルドする
 

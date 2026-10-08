@@ -15,6 +15,9 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
       - run: go test ./... -timeout 120s
       - name: Package six targets with licenses and checksums
         shell: bash
@@ -37,6 +40,8 @@ jobs:
             done
           done
           (cd dist && sha256sum *.tar.gz *.zip > SHA256SUMS)
+      - name: Generate verified binary manifest for the persistent npm launcher
+        run: node scripts/build-release-manifest.mjs "$GITHUB_REF_NAME" dist
       - name: Upload release packages
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -45,6 +50,7 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
             dist/SHA256SUMS
+            dist/fleetsh-manifest.json
       - name: Create organization Publisher App token
         if: env.PUBLISHER_PRIVATE_KEY != ''
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
@@ -65,7 +71,7 @@ jobs:
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then
             args+=(--prerelease --latest=false)
           fi
-          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.zip dist/SHA256SUMS "${args[@]}"
+          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.zip dist/SHA256SUMS dist/fleetsh-manifest.json "${args[@]}"
       - name: Explain local App publication when CI credentials are absent
         if: env.PUBLISHER_PRIVATE_KEY == ''
         run: |

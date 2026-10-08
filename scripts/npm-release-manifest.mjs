@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Verify a release's checksum list and binaries before updating the one npm package.
-import { readFile, writeFile } from 'node:fs/promises';
+// Optionally refresh the launcher's bundled fallback; normal Go releases do not need an npm update.
+import { writeFile } from 'node:fs/promises';
 import { extractBinary } from '../npm/lib/archive.mjs';
 import { download } from '../npm/lib/download.mjs';
 import { sha256 } from '../npm/lib/cache.mjs';
@@ -31,9 +31,5 @@ for (const target of targets) {
   };
   console.log('Verified ' + name);
 }
-const packageFile = new URL('../package.json', import.meta.url);
-const pkg = JSON.parse(await readFile(packageFile, 'utf8'));
-pkg.version = tag.slice(1);
-validateRelease(manifest, pkg.version);
+validateRelease(manifest);
 await writeFile(new URL('../npm/release.json', import.meta.url), JSON.stringify(manifest, null, 2) + '\n');
-await writeFile(packageFile, JSON.stringify(pkg, null, 2) + '\n');
