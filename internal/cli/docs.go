@@ -44,7 +44,7 @@ func (a *application) documentationCommand(root *cobra.Command) {
 						return err
 					}
 				}
-				_, err := fmt.Fprintln(a.out, "\nCommand help: fleetsh COMMAND --help\n\nOnline editions:\n  English: "+documentationURL+"\n  Japanese: https://kanatalabs.github.io/fleetsh/ja/\n  Chinese: https://kanatalabs.github.io/fleetsh/zh/")
+				_, err := fmt.Fprintln(a.out, "\nCommand help: fleetsh COMMAND --help\n\nOnline editions:\n  English: "+documentationURL+"\n  Japanese: "+documentationSiteURL+"ja/\n  Chinese: "+documentationSiteURL+"zh/")
 				return err
 			}
 			for _, topic := range offlineTopics {

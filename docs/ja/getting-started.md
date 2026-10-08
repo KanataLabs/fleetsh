@@ -40,6 +40,14 @@ npx fleetsh stats
 `init` の実行前でも、設定ファイル、ネットワーク接続、資格情報ストアなしで参照できます。
 オンライン文書は言語ごとに分かれており、既定は英語です。
 
+位置引数の不足・過剰や不正なフラグがある場合、エラーと構文・使用例・
+フラグのヘルプを標準エラー出力に表示し、終了コード 2 を返します。
+`npx fleetsh exec` と `npx fleetsh exec whoami` はヘルプを表示します。
+`exec` にはホスト・グループの指定と、一つに引用したコマンドが必要です。
+例: `npx fleetsh exec '@all' "whoami"`。
+ヘルプのリンクは HTTPS の配信先を直接使用し、GitHub Pages の既定 URL
+から継承される HTTP リダイレクトを避けます。
+
 ```sh
 fleetsh --help
 fleetsh help exec

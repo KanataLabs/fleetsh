@@ -3,7 +3,17 @@ package cli
 
 import "github.com/spf13/cobra"
 
-const documentationURL = "https://kanatalabs.github.io/fleetsh/en/"
+const documentationSiteURL = "https://kanatalabs.com/fleetsh/"
+const documentationURL = documentationSiteURL + "en/"
+
+// usageError distinguishes command syntax errors from configuration/remote failures.
+type usageError struct {
+	command *cobra.Command
+	cause   error
+}
+
+func (e usageError) Error() string { return e.cause.Error() }
+func (e usageError) Unwrap() error { return e.cause }
 
 type commandGuide struct {
 	long, example, page string
@@ -199,6 +209,8 @@ Run docs troubleshooting for host-key and authentication issues.`,
 	},
 	"fleetsh exec": {
 		long: `Execute COMMAND through the remote shell on every selected SSH host immediately.
+Both arguments are required: SELECTOR is a host alias or group; COMMAND is the
+remote shell command. Use '@all' to explicitly select every host.
 Quote the entire command as one argument; quote @ selectors in PowerShell.
 Console-only hosts are reported as skipped. Commands receive no interactive stdin.
 
@@ -211,7 +223,8 @@ connection deadline (normally 10s). Positive durations include 30s, 5m and 1h.
 --json emits per-host results and a summary; output is bounded at 4 MiB per stream
 per host. Inspect each result and the process exit code. Failed commands are not
 automatically retried. Run docs exec for automation and shell quoting examples.`,
-		example: `  fleetsh exec hk1 "df -h"
+		example: `  fleetsh exec '@all' "whoami"
+  fleetsh exec hk1 "df -h"
   fleetsh exec '@web' "uptime" --parallel 5 --timeout 30s
   fleetsh exec 'hk1,sg1' "id -un && uname -s" --serial --json
   fleetsh exec '@all' "systemctl status nginx --no-pager" --sudo --tag production`,
@@ -346,6 +359,17 @@ func documentCommands(cmd *cobra.Command) {
 		cmd.Long = guide.long + "\n\nDocumentation: " + documentationURL + guide.page
 		cmd.Example = guide.example
 	}
+	if validate := cmd.Args; validate != nil {
+		cmd.Args = func(command *cobra.Command, args []string) error {
+			if err := validate(command, args); err != nil {
+				return usageError{command: command, cause: err}
+			}
+			return nil
+		}
+	}
+	cmd.SetFlagErrorFunc(func(command *cobra.Command, err error) error {
+		return usageError{command: command, cause: err}
+	})
 	for _, child := range cmd.Commands() {
 		documentCommands(child)
 	}

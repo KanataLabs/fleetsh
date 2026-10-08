@@ -37,6 +37,13 @@ npx fleetsh stats
 程序内置带示例的英文命令帮助和十一个离线指南。执行 `init` 前即可查看，
 无需配置文件、网络连接或系统凭据库。在线文档继续按语言分开，默认英语。
 
+位置参数缺失、过多或选项无效时，会在标准错误输出中显示具体错误及该命令的
+语法、示例和选项，并返回退出码 2。`npx fleetsh exec` 和
+`npx fleetsh exec whoami` 都会显示帮助；`exec` 需要同时提供目标主机或组，以及
+一个带引号的远程命令，例如 `npx fleetsh exec '@all' "whoami"`。
+程序内帮助链接使用可直接访问的 HTTPS 文档地址，避开 GitHub Pages 默认地址
+继承的 HTTP 跳转。
+
 ```sh
 fleetsh --help
 fleetsh help exec

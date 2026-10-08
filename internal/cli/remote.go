@@ -143,7 +143,12 @@ func (a *application) remoteCommands(root *cobra.Command) {
 	sshCmd.Flags().DurationVar(&sshTimeout, "connect-timeout", 0, "connection timeout (default: inventory)")
 	root.AddCommand(sshCmd)
 	execOptions := remoteOptions{}
-	execCmd := &cobra.Command{Use: "exec SELECTOR COMMAND", Short: "Execute a quoted shell command on selected hosts", Args: cobra.ExactArgs(2), RunE: func(cmd *cobra.Command, args []string) error {
+	execCmd := &cobra.Command{Use: "exec SELECTOR COMMAND", Short: "Execute a quoted shell command on selected hosts", Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 2 {
+			return errors.New("exec requires a host/group SELECTOR and exactly one quoted COMMAND")
+		}
+		return nil
+	}, RunE: func(cmd *cobra.Command, args []string) error {
 		inv, ids, n, err := a.targets(cmd, args, execOptions)
 		if err != nil {
 			return err

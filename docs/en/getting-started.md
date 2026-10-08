@@ -69,6 +69,14 @@ Use `fleetsh docs TOPIC` to open a guide. Guides print plain text; `--json` appl
 to supported inventory and batch-result commands, not documentation. Reading help
 never executes its examples or opens the printed documentation links.
 
+Missing/extra positional arguments and invalid flags print an error plus the
+command help (syntax, examples and flags) to stderr, with exit code 2.
+For example, `npx fleetsh exec` and `npx fleetsh exec whoami` show help because
+`exec` requires both a host/group selector and one quoted command:
+`npx fleetsh exec '@all' "whoami"`.
+Help links use the directly served HTTPS documentation address, avoiding the
+HTTP redirect inherited by the default GitHub Pages URL.
+
 ## Initialize an inventory
 
 The inventory is stored locally for your OS user: `%APPDATA%\fleetsh\config.toml`

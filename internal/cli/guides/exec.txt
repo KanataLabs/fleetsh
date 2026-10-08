@@ -1,6 +1,13 @@
 Batch execution
 ===============
-exec immediately runs one quoted shell command on selected SSH hosts:
+Usage: fleetsh exec SELECTOR COMMAND [flags]
+
+Both SELECTOR (a host alias or group) and one quoted COMMAND are required.
+To print the remote user on all configured hosts:
+
+  fleetsh exec '@all' "whoami"
+
+exec immediately runs the command on selected SSH hosts:
 
   fleetsh exec '@web' "uptime" --parallel 5 --timeout 30s
   fleetsh exec hk1 "df -h" --json

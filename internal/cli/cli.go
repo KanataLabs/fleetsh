@@ -54,6 +54,14 @@ func RunContext(ctx context.Context, args []string, version string, in io.Reader
 		return code.code
 	}
 	fmt.Fprintf(errOut, "fleetsh: %v\n", err)
+	var usage usageError
+	if errors.As(err, &usage) {
+		fmt.Fprintln(errOut)
+		previousOut := usage.command.OutOrStdout()
+		usage.command.SetOut(errOut)
+		_ = usage.command.Help()
+		usage.command.SetOut(previousOut)
+	}
 	return 2
 }
 func (a *application) root(version string) *cobra.Command {

@@ -35,4 +35,4 @@ More help:
 
 Run fleetsh version to check the installed build. See the installation page for
 Windows, macOS and Linux PATH registration:
-https://kanatalabs.github.io/fleetsh/en/installation/
+https://kanatalabs.com/fleetsh/en/installation/
