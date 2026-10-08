@@ -1,0 +1,51 @@
+SSH port forwarding
+===================
+Add named profiles to a host in config.toml. Each profile needs name, type and
+listen; local and remote also need destination. Example:
+
+  [[hosts.hk1.forwards]]
+  name = "web"
+  type = "local"
+  listen = "127.0.0.1:8080"
+  destination = "127.0.0.1:80"
+
+  [[hosts.hk1.forwards]]
+  name = "reverse"
+  type = "remote"
+  listen = "127.0.0.1:9000"
+  destination = "127.0.0.1:3000"
+
+  [[hosts.hk1.forwards]]
+  name = "socks"
+  type = "dynamic"
+  listen = "127.0.0.1:1080"
+
+local: this machine:8080 -> VPS -> destination as seen from the VPS.
+remote: VPS:9000 -> SSH -> destination as seen from this machine.
+dynamic: this machine:1080 offers SOCKS5 TCP CONNECT through the VPS.
+Dynamic destination names are resolved remotely. IPv4/IPv6 addresses work too.
+Dynamic forwarding has no authentication, BIND or UDP ASSOCIATE support.
+
+  fleetsh forward hk1 --dry-run
+  fleetsh forward hk1 web
+  fleetsh forward hk1 socks
+  fleetsh forward hk1
+  fleetsh forward hk1 --dry-run --json
+
+HOST is one exact SSH alias. A supplied NAME selects just that profile; otherwise
+all configured profiles start together. Port 0 requests a free listen port and
+the actual address is printed. Names must be valid and unique within the host.
+Listen addresses must include an IP/localhost and numeric port, with brackets
+for IPv6. Destination ports must be 1-65535; listen ports may be 0-65535.
+
+The dry run reads config only. It makes no connections, opens no ports and
+does not access passwords. Actual forwarding uses verified SSH and inherits
+the host's proxy routing. It stays in the foreground until Ctrl+C or disconnect.
+Startup failure rolls back all listeners; shutdown closes active streams.
+--connect-timeout bounds connection/setup/destination dialing. Existing streams
+have no artificial lifetime limit. Sessions allow 128 simultaneous connections.
+
+Prefer loopback binds. An explicit 0.0.0.0 or :: bind exposes the listener to other
+machines; dynamic forwarding is unauthenticated. Remote binds depend on sshd's
+AllowTcpForwarding/GatewayPorts policy; fleetsh does not change that policy.
+Profiles are not started automatically by ssh, exec or monitoring commands.

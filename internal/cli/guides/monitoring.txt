@@ -1,0 +1,34 @@
+One-command remote monitoring
+=============================
+Check authenticated SSH liveness or collect one Linux resource snapshot:
+
+  fleetsh alive
+  fleetsh stats
+
+Both commands default to every inventory host. They accept the same selectors,
+tag filters, concurrency, timeout, sudo and JSON flags as exec. Console-only
+assets are skipped; SSH fingerprint verification and configured proxies apply.
+
+  fleetsh alive '@web' --parallel 5 --timeout 10s
+  fleetsh stats '@web' --tag production --parallel 5 --timeout 15s
+  fleetsh monitor hk1
+  fleetsh stats --json
+
+alive verifies SSH authentication and the ability to execute a small command.
+It is not ICMP ping; an unreachable or unauthorized SSH endpoint is a failure.
+stats (alias monitor) prints:
+  USER: current remote identity from whoami
+  CPU: busy percentage across host CPUs, sampled for one second
+  MEMORY: used/total MiB and used percentage
+  SWAP: used/total MiB and used percentage (zero when swap is disabled)
+  DISK: df -h -P, including available space on each filesystem
+
+stats requires Linux /proc, awk, sleep, whoami and df. It does not install an
+agent or require sudo. CPU excludes duplicate guest counters and treats iowait
+as idle. Memory usage is total minus available, with a free/buffers/cache
+fallback on old kernels. These are host values, not container quota metrics.
+--sudo changes the execution identity and may make USER report root.
+
+JSON is the standard batch report: each host's snapshot is in its stdout field,
+with success/error fields and an aggregate summary. Exit codes match exec.
+Each invocation collects one snapshot. No background scheduler is installed.

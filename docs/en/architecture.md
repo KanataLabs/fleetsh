@@ -18,9 +18,10 @@ transport, execution and built-in actions.
 | `internal/config/` | Exclusive initial configuration creation |
 | `internal/inventory/` | Strict TOML, validation, selectors, locked atomic saves |
 | `internal/credentials/` | OS keyring, hidden terminal input, known-secret redaction |
-| `internal/transport/` | SSH auth, Agent, jump/SOCKS5, known_hosts, keepalive |
+| `internal/transport/` | SSH auth, Agent, jump, SOCKS5/HTTP/HTTPS proxies, known_hosts, keepalive |
 | `internal/executor/` | Worker pool, deadlines, capped output, PTY, sudo |
-| `internal/actions/` | OS-aware update and verified Linux reboot |
+| `internal/actions/` | Linux resource snapshots, updates and verified reboot |
+| `internal/forwarding/` | Local/remote/dynamic tunnels, bounded streams and cancellation |
 | `internal/testutil/` | Local-only SSH/Agent/proxy fixtures |
 | `docs/` | Jekyll source; published through gh-pages |
 

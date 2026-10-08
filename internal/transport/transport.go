@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -150,8 +149,9 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 			}
 			m.Auth[id] = []ssh.AuthMethod{ssh.PublicKeys(bounded...)}
 		}
-		if h.ProxyCredential != "" {
-			s, err := m.secret(h.ProxyCredential, "Proxy credential for "+id)
+		_, proxyCredential := m.Inventory.ProxyFor(h)
+		if proxyCredential != "" {
+			s, err := m.secret(proxyCredential, "Proxy credential for "+id)
 			if err != nil {
 				return err
 			}
@@ -205,27 +205,15 @@ func (m *Manager) dial(ctx context.Context, id string) (*Client, error) {
 	var conn net.Conn
 	var err error
 	var parent *Client
+	proxyURL, _ := m.Inventory.ProxyFor(h)
 	if h.ProxyJump != "" {
 		parent, err = m.dial(ctx, h.ProxyJump)
 		if err != nil {
 			return nil, fmt.Errorf("jump host: %w", err)
 		}
 		conn, err = parent.DialContext(ctx, "tcp", h.Address())
-	} else if h.Proxy != "" {
-		u, _ := url.Parse(h.Proxy)
-		port := u.Port()
-		if port == "" {
-			port = "1080"
-		}
-		d, e := proxy.SOCKS5("tcp", net.JoinHostPort(u.Hostname(), port), m.ProxyAuth[id], &net.Dialer{})
-		if e != nil {
-			return nil, errors.New("proxy initialization failed")
-		}
-		cd, ok := d.(proxy.ContextDialer)
-		if !ok {
-			return nil, errors.New("proxy does not support cancellation")
-		}
-		conn, err = cd.DialContext(ctx, "tcp", h.Address())
+	} else if proxyURL != "" {
+		conn, err = dialProxy(ctx, proxyURL, h.Address(), m.ProxyAuth[id])
 		if err != nil {
 			err = fmt.Errorf("proxy connection failed: %w", err)
 		}

@@ -103,7 +103,8 @@ func StartSSH(t *testing.T, handler Handler) *Server {
 				ctx, cancel := context.WithCancel(context.Background())
 				defer cancel()
 				go func() { _ = sshConn.Wait(); cancel() }()
-				go ssh.DiscardRequests(requests)
+				s.wg.Add(1)
+				go s.forwardingRequests(ctx, sshConn, requests)
 				for channel := range channels {
 					switch channel.ChannelType() {
 					case "session":
@@ -155,7 +156,7 @@ func StartSSH(t *testing.T, handler Handler) *Server {
 							Origin     string
 							OriginPort uint32
 						}
-						if ssh.Unmarshal(channel.ExtraData(), &request) != nil || request.Host != "127.0.0.1" {
+						if ssh.Unmarshal(channel.ExtraData(), &request) != nil || (request.Host != "127.0.0.1" && request.Host != "::1" && request.Host != "localhost") {
 							_ = channel.Reject(ssh.Prohibited, "local targets only")
 							continue
 						}
@@ -178,9 +179,15 @@ func StartSSH(t *testing.T, handler Handler) *Server {
 							stop := context.AfterFunc(ctx, func() { target.Close() })
 							defer stop()
 							done := make(chan struct{})
-							go func() { _, _ = io.Copy(target, ch); target.Close(); close(done) }()
+							go func() {
+								_, _ = io.Copy(target, ch)
+								if tcp, ok := target.(*net.TCPConn); ok {
+									_ = tcp.CloseWrite()
+								}
+								close(done)
+							}()
 							_, _ = io.Copy(ch, target)
-							ch.Close()
+							_ = ch.CloseWrite()
 							<-done
 						}()
 					default:

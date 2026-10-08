@@ -66,7 +66,7 @@ func (a *application) root(version string) *cobra.Command {
 	root.SetErr(a.errOut)
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().StringVar(&a.path, "config", "", "inventory file (default: OS user config directory)")
-	root.PersistentFlags().BoolVar(&a.json, "json", false, "JSON output for ls, show, credential ls and batch actions")
+	root.PersistentFlags().BoolVar(&a.json, "json", false, "JSON for inventory/batch results and forward --dry-run")
 	root.Version = version
 	root.SetVersionTemplate("fleetsh {{.Version}}\n")
 	root.AddCommand(&cobra.Command{Use: "version", Short: "Print the build version", Args: cobra.NoArgs, Run: func(*cobra.Command, []string) { fmt.Fprintf(a.out, "fleetsh %s\n", version) }})
@@ -84,6 +84,8 @@ func (a *application) root(version string) *cobra.Command {
 	a.inventoryCommands(root)
 	a.credentialCommands(root)
 	a.remoteCommands(root)
+	a.monitoringCommands(root)
+	a.forwardingCommand(root)
 	a.hostkeyCommands(root)
 	a.documentationCommand(root)
 	documentCommands(root)

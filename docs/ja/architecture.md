@@ -18,9 +18,10 @@ CLI が引数と表示を担当し、ホスト一覧、認証情報、通信、�
 | `internal/config/` | 既存ファイルを上書きしない設定の初期化 |
 | `internal/inventory/` | 厳密な TOML 解析、検証、対象選択、ロック付きアトミック保存 |
 | `internal/credentials/` | OS の認証情報ストア、端末の非表示入力、既知の秘密値のマスキング |
-| `internal/transport/` | SSH 認証、Agent、踏み台と SOCKS5、known_hosts、接続維持 |
+| `internal/transport/` | SSH 認証、Agent、踏み台、SOCKS5/HTTP/HTTPS プロキシ、known_hosts、接続維持 |
 | `internal/executor/` | ワーカープール、期限、出力制限、PTY、sudo |
-| `internal/actions/` | OS に応じた更新、検証付き Linux 再起動 |
+| `internal/actions/` | Linux のリソース確認、OS に応じた更新、検証付き再起動 |
+| `internal/forwarding/` | ローカル・リモート・動的転送、接続数制限とキャンセル |
 | `internal/testutil/` | ローカルの SSH、Agent、プロキシのテスト環境 |
 | `docs/` | Jekyll のソース。gh-pages から公開 |
 

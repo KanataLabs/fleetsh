@@ -22,8 +22,10 @@ var offlineTopics = []offlineTopic{
 	{"groups", "Multiple groups and incremental host edits", "configuration/#groups"},
 	{"selectors", "Target hosts, group unions and tag filters", "getting-started/"},
 	{"exec", "Parallel execution, quoting, sudo and JSON", "getting-started/"},
-	{"proxies", "ProxyJump, SOCKS5 and proxy credential references", "configuration/"},
+	{"proxies", "Global/per-host SOCKS5 and HTTP/HTTPS CONNECT, ProxyJump", "configuration/"},
 	{"patching", "Preview and apply package updates across the fleet", "cases/patch-all-vps/"},
+	{"monitoring", "SSH liveness and Linux CPU/memory/swap/disk snapshots", "getting-started/"},
+	{"forwarding", "Local, remote and dynamic SSH tunnel configuration", "configuration/#forwarding"},
 	{"troubleshooting", "Exit codes, host keys, authentication and keyrings", "security/"},
 }
 

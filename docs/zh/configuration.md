@@ -243,20 +243,100 @@ Linux 需要运行中的用户 D-Bus 会话，以及已解锁的 Secret Service 
 顶层 `credentials` 数组记录通过当前清单添加的名称。
 从凭据库删除条目不会删除主机引用，请按需修改相关主机。
 
-## 代理与 SSH Agent
+<a id="proxies"></a>
 
-使用 `proxy_jump` 指向清单中的跳板主机，或使用 `proxy` 指定 SOCKS5，
-二者不能同时设置。循环跳板和不存在的跳板主机会被拒绝。
-目标和跳板主机都要验证主机密钥。SOCKS5 会在代理端解析目标域名。
+## 全局与单台主机的 SSH 代理
 
-需要 SOCKS5 认证时，通过 `credential add` 保存 `username:password`，
-并设置 `proxy_credential`；代理 URL 不允许包含用户名和密码。
+修改现有 `[defaults]` 段，为 SSH 设置全局代理：
 
-Unix 使用 `SSH_AUTH_SOCK`。Windows 默认使用
-`\\.\pipe\openssh-ssh-agent`，也可通过 `SSH_AUTH_SOCK` 指定套接字或命名管道。
-Agent 中至少需要加载一把密钥。
+```toml
+[defaults]
+proxy = "socks5://127.0.0.1:1080"
+# proxy_credential = "local-proxy"
+```
 
-HTTP CONNECT、自定义命令别名、OpenSSH 导入导出和端口转发见 [路线图](../roadmap/)。
+支持 `socks5://`、`http://`、`https://`，HTTP/HTTPS 通过 CONNECT 建立隧道，
+HTTPS 会验证代理证书。三种协议的默认端口分别为 1080、80、443。
+URL 不允许包含认证信息、路径、查询参数或片段。需要认证时，通过
+`fleetsh credential add local-proxy` 隐藏输入 `username:password`，再设置
+`proxy_credential` 引用；不要把密码写进 TOML。
+
+单机未指定代理 URL 时继承全局设置。单机指定 URL 则覆盖全局，并只使用该主机的
+`proxy_credential`，不会把全局凭据带到另一个代理地址。继承全局 URL 的主机可以单独
+覆盖凭据引用。`proxy = "direct"` 表示绕过全局代理，直接连接 SSH。
+
+```sh
+fleetsh edit hk1 --proxy http://127.0.0.1:7890
+fleetsh edit hk1 --proxy socks5://127.0.0.1:1080 --proxy-credential local-proxy
+fleetsh edit hk1 --proxy direct --proxy-credential ""
+fleetsh edit hk1 --proxy "" --proxy-credential ""
+```
+
+最后一条恢复继承。代理适用于 `ssh`、`exec`、`alive`、`stats`、`update`、
+`reboot` 和 `forward`，在连接时解析；修改其他配置不会把继承值写成单机覆盖。
+
+`proxy_jump` 让目标经过清单里的跳板主机，而不直接使用全局代理；跳板自己仍继承全局
+代理，除非另行覆盖。单台主机不能同时设置 `proxy` 和 `proxy_jump`，
+循环或不存在的跳板会被拒绝。目标和跳板的 SSH 指纹均需独立验证。
+
+Unix Agent 使用 `SSH_AUTH_SOCK`；Windows 默认使用
+`\\.\pipe\openssh-ssh-agent`，也可通过 `SSH_AUTH_SOCK` 指定其他套接字或管道。
+Agent 至少需要加载一把可用密钥。离线说明见 `fleetsh docs proxies`。
+
+<a id="forwarding"></a>
+
+## 三种 SSH 端口转发
+
+在已有 SSH 主机的配置下增加命名转发：
+
+```toml
+[[hosts.hk1.forwards]]
+name = "web"
+type = "local"
+listen = "127.0.0.1:8080"
+destination = "127.0.0.1:80"
+
+[[hosts.hk1.forwards]]
+name = "reverse"
+type = "remote"
+listen = "127.0.0.1:9000"
+destination = "127.0.0.1:3000"
+
+[[hosts.hk1.forwards]]
+name = "socks"
+type = "dynamic"
+listen = "127.0.0.1:1080"
+```
+
+| 类型 | 在哪里监听 | 从哪里连接目标 |
+| --- | --- | --- |
+| `local` | 本机 | VPS |
+| `remote` | VPS | 本机 |
+| `dynamic` | 本机 SOCKS5 入口 | VPS；目标由 SOCKS 客户端请求 |
+
+```sh
+fleetsh forward hk1 --dry-run
+fleetsh forward hk1 web
+fleetsh forward hk1 socks
+fleetsh forward hk1
+fleetsh forward hk1 --dry-run --json
+```
+
+指定名称只启动一条，省略名称则一起启动全部配置。预演仅读取配置，不连接 SSH、
+不读取密码、不监听端口。实际转发保持前台运行，Ctrl+C 或断线后关闭监听和连接，
+启动失败会撤销全部已启动配置。其他命令不会自动开启转发，普通 `edit` 会保留转发配置。
+
+名称须符合命名规则，且在同一主机内唯一。监听地址须明确写 IP 或 `localhost` 和
+0–65535 的端口；0 会分配空闲端口并打印实际地址。目标端口须为 1–65535。
+IPv6 使用 `[::1]:1080` 等带方括号的写法。`--connect-timeout` 限制 SSH 连接、
+启动及目标拨号时间，已建立的连接没有固定寿命限制；每个会话最多 128 个同时连接。
+
+私有访问使用回环地址监听。显式绑定 `0.0.0.0`/`::` 会让其他机器也能访问。
+动态转发提供无认证 SOCKS5 TCP CONNECT，不支持 BIND 和 UDP，域名在 VPS 端解析。
+远程监听受 sshd 的 `AllowTcpForwarding`/`GatewayPorts` 策略约束，fleetsh 不修改服务端配置。
+离线示例见 `fleetsh docs forwarding`。
+
+自定义命令别名和 OpenSSH 导入导出仍在 [路线图](../roadmap/) 中。
 
 ## 文件与权限
 

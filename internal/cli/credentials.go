@@ -72,6 +72,9 @@ func (a *application) credentialCommands(root *cobra.Command) {
 			return err
 		}
 		refs := append([]string{}, inv.Credentials...)
+		if ref := inv.Defaults.ProxyCredential; ref != "" && !slices.Contains(refs, ref) {
+			refs = append(refs, ref)
+		}
 		for _, h := range inv.Hosts {
 			for _, ref := range []string{h.Credential, h.ProxyCredential, h.SudoCredential} {
 				if ref != "" && !slices.Contains(refs, ref) {

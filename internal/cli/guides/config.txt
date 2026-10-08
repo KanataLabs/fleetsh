@@ -34,6 +34,11 @@ controls. Inventory metadata can reveal addresses and usernames. Credential
 references are not passwords: OS-store secrets must be restored separately on
 another machine. Exporting TOML does not migrate those secrets.
 
+SSH proxy defaults can be set as proxy and proxy_credential in [defaults].
+Per-host proxy URLs override them; proxy = "direct" bypasses the global route.
+Named [[hosts.ALIAS.forwards]] profiles configure local, remote and dynamic
+TCP forwarding. Run docs proxies and docs forwarding for complete examples.
+
 Credential storage:
   Windows Credential Manager; macOS Keychain; Linux Secret Service.
   New entries have a fleetsh namespace and creator notes.

@@ -6,6 +6,9 @@
 connect_timeout = "10s"
 command_timeout = "30m"
 parallel = 10
+# Optional global SSH proxy (SOCKS5 or HTTP/HTTPS CONNECT, no URL userinfo).
+# proxy = "socks5://127.0.0.1:1080"
+# proxy_credential = "local-proxy"
 
 # Uncomment and adapt the host examples, or use fleetsh add.
 # [hosts.hk1]
@@ -18,6 +21,25 @@ parallel = 10
 # groups = ["asia", "web"]
 # tags = ["production"]
 # description = "Hong Kong web server"
+
+# Named tunnels start only with fleetsh forward hk1 [NAME].
+# Listen on loopback unless access from other machines is intended.
+# [[hosts.hk1.forwards]]
+# name = "web"
+# type = "local"
+# listen = "127.0.0.1:8080"
+# destination = "127.0.0.1:80"
+
+# [[hosts.hk1.forwards]]
+# name = "reverse"
+# type = "remote"
+# listen = "127.0.0.1:9000"
+# destination = "127.0.0.1:3000"
+
+# [[hosts.hk1.forwards]]
+# name = "socks"
+# type = "dynamic"
+# listen = "127.0.0.1:1080"
 
 # [hosts.sg1]
 # host = "sg1.example.com"
@@ -42,7 +64,8 @@ parallel = 10
 # connection = "console-only"
 # description = "Inventory only; never selected for remote execution"
 
-# SOCKS5 URL userinfo is forbidden; proxy secrets use credential references.
+# Proxy URL userinfo is forbidden; proxy secrets use credential references.
+# A per-host proxy overrides defaults.proxy; proxy = "direct" bypasses it.
 # [hosts.proxy1]
 # host = "proxy-target.example.com"
 # user = "ubuntu"

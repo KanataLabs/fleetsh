@@ -44,9 +44,10 @@ Batch automation rejects unknown/changed keys. Updates/reboots require confirmat
 and health probe. Built-in update/reboot actions target Linux VPSs.
 
 Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
-`exec`, `update`, `reboot`, `credential add/ls/rm`, `hostkey show/reset`, `docs`.
+`exec`, `alive`, `stats` (alias `monitor`), `forward`, `update`, `reboot`,
+`credential add/ls/rm`, `hostkey show/reset`, `docs`.
 All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for behavior,
-flags and examples. `fleetsh docs` lists nine English offline guides, including
+flags and examples. `fleetsh docs` lists eleven English offline guides, including
 `config`, `passwords`, `groups` and `patching`. Help and guides need no inventory
 or network; online documentation has separate English, Japanese and Chinese editions.
 
@@ -55,6 +56,26 @@ VPS configuration is local to your OS user, in `%APPDATA%\fleetsh\config.toml`
 `$XDG_CONFIG_HOME/fleetsh/config.toml` / `~/.config/fleetsh/config.toml` (Linux).
 See [storage locations and backup](docs/en/configuration.md#storage) for custom
 inventories, host trust files and migrating credentials.
+
+## One-command monitoring and tunnels
+
+```sh
+fleetsh alive
+fleetsh stats
+fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh forward hk1 --dry-run
+fleetsh forward hk1 web
+```
+
+`alive` checks authenticated SSH liveness; `stats` prints Linux CPU, memory,
+swap, current user and free disk space. Both default to all hosts. `monitor`
+is an alias for `stats`. No agent installation is required.
+
+Configure a global SSH proxy in `[defaults]`; per-host `proxy` overrides it,
+and `proxy = "direct"` opts out. SOCKS5 and HTTP/HTTPS CONNECT are supported.
+Named `[[hosts.ALIAS.forwards]]` profiles support local, remote and dynamic TCP
+forwarding. See [proxy inheritance and tunnel configuration](docs/en/configuration.md#proxies)
+or `fleetsh docs proxies` / `fleetsh docs forwarding`.
 
 ## Use cases
 

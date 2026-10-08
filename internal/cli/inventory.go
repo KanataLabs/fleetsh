@@ -73,7 +73,7 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		cmd.Flags().StringVar(&h.Connection, "connection", "ssh", "ssh or console-only")
 		cmd.Flags().StringVar(&h.Credential, "credential", "", "password/key-passphrase reference")
 		cmd.Flags().StringVar(&h.Key, "key", "", "private key file path")
-		cmd.Flags().StringVar(&h.Proxy, "proxy", "", "SOCKS5 URL without credentials")
+		cmd.Flags().StringVar(&h.Proxy, "proxy", "", "SOCKS5/HTTP/HTTPS proxy URL, direct, or empty to inherit")
 		cmd.Flags().StringVar(&h.ProxyJump, "proxy-jump", "", "jump-host alias")
 		cmd.Flags().StringVar(&h.ProxyCredential, "proxy-credential", "", "username:password credential reference")
 		cmd.Flags().StringVar(&h.SudoCredential, "sudo-credential", "", "sudo password reference")

@@ -3,10 +3,12 @@ on:
   push:
     tags: ['v*']
 permissions:
-  contents: write
+  contents: read
 jobs:
   package:
     runs-on: ubuntu-latest
+    env:
+      PUBLISHER_PRIVATE_KEY: ${{ secrets.KANATALABS_PUBLISHER_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -35,7 +37,36 @@ jobs:
             done
           done
           (cd dist && sha256sum *.tar.gz *.zip > SHA256SUMS)
-      - name: Create release
+      - name: Upload release packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: fleetsh-release
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS
+      - name: Create organization Publisher App token
+        if: env.PUBLISHER_PRIVATE_KEY != ''
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        id: app
+        with:
+          app-id: '5232049'
+          private-key: ${{ secrets.KANATALABS_PUBLISHER_PRIVATE_KEY }}
+          owner: KanataLabs
+          repositories: fleetsh
+          permission-contents: write
+      - name: Publish with organization App identity
+        if: env.PUBLISHER_PRIVATE_KEY != ''
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.zip dist/SHA256SUMS --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        shell: bash
+        run: |
+          args=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            args+=(--prerelease --latest=false)
+          fi
+          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.zip dist/SHA256SUMS "${args[@]}"
+      - name: Explain local App publication when CI credentials are absent
+        if: env.PUBLISHER_PRIVATE_KEY == ''
+        run: |
+          echo "Packages are available in the fleetsh-release artifact. Publish with the local KanataLabs Publisher utility; releases must use the organization App identity." >> "$GITHUB_STEP_SUMMARY"

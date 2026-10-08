@@ -9,6 +9,7 @@ page_key: 'product/'
 > 这是原始产品方案，已统一项目及命令名为 fleetsh。已实现与规划中的功能范围见路线图。
 > 版本范围以 [路线图](../roadmap/) 为准，本文保留原始讨论中的优先级差异。
 > 下文包含尚未实现的命令和配置示意。当前支持的接口见 [配置](../configuration/) 和 [快速开始](../getting-started/)。
+> 已实现 `alive`、`stats`（别名 `monitor`）、全局/单机 SOCKS5 与 HTTP/HTTPS CONNECT，以及 `forward` 的本地、远程、动态转发。下文历史版本划分不代表当前实现状态。
 
 # 轻量 VPS 管理工具 fleetsh
 

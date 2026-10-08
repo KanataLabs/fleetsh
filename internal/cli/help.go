@@ -18,7 +18,7 @@ Getting started:
   Initialize an inventory, add a host, then connect to verify its SSH fingerprint.
   Use --help on any command for flags and examples, or docs TOPIC for offline guides.
 
-Selectors (ls, exec, update, reboot):
+Selectors (ls, exec, alive, stats, update, reboot):
   hk1          one host alias
   hk1,sg1      several hosts
   '@web'       every host in group web
@@ -46,6 +46,54 @@ Offline guides: fleetsh docs`,
   fleetsh update '@all' --dry-run --sudo
   fleetsh docs passwords`,
 		page: "",
+	},
+	"fleetsh alive": {
+		long: `Check whether selected hosts can authenticate over SSH and execute a small command.
+With no selector, check @all. This is SSH liveness, not an ICMP ping.
+Uses configured keys, credentials, global/per-host proxies and strict host trust.
+Console-only assets are skipped. Supports --tag, --parallel, --serial, --timeout,
+--connect-timeout and --json with the same results/exit codes as exec.`,
+		example: `  fleetsh alive
+  fleetsh alive '@web' --timeout 10s
+  fleetsh alive --json`,
+		page: "getting-started/",
+	},
+	"fleetsh stats": {
+		long: `Print one Linux resource snapshot per selected SSH host; default selector is @all.
+Includes whoami, CPU busy percentage sampled over one second, memory/swap usage
+in MiB and percentages, and free disk space from df -h -P.
+Uses /proc, awk, sleep, whoami and df; no remote agent or sudo is required.
+Memory usage uses MemAvailable (or free/buffers/cache on older kernels).
+Swap disabled is shown as zero. CPU is total host CPU, not a container quota.
+The monitor alias runs the same command. --json emits the standard batch report
+with each snapshot in stdout. Use docs monitoring for examples.`,
+		example: `  fleetsh stats
+  fleetsh stats '@web' --parallel 5 --timeout 15s
+  fleetsh monitor hk1
+  fleetsh stats --json`,
+		page: "getting-started/",
+	},
+	"fleetsh forward": {
+		long: `Start named TCP port-forward profiles from hosts.HOST.forwards in the inventory.
+With NAME, start that profile; otherwise start all profiles for this exact alias.
+local: listen on this machine and connect to a destination from the VPS.
+remote: listen on the VPS and connect to a destination from this machine.
+dynamic: offer local SOCKS5 TCP CONNECT through the VPS (no auth, BIND or UDP).
+Use explicit loopback listen addresses unless broader access is intended.
+Remote listening depends on sshd forwarding/GatewayPorts policy.
+
+--dry-run displays the profiles without SSH, credentials or listeners; --json
+is supported for dry-run output only. Actual forwarding uses verified SSH and
+configured global/per-host proxies. It runs until Ctrl+C or SSH disconnects,
+then closes listeners and streams. Failed startup rolls back every profile.
+Port 0 asks for an available listen port; actual bound addresses are printed.
+Up to 128 connections are active per session. Run docs forwarding for TOML.`,
+		example: `  fleetsh forward hk1 --dry-run
+  fleetsh forward hk1 web
+  fleetsh forward hk1
+  fleetsh forward hk1 socks --connect-timeout 30s
+  fleetsh forward hk1 --dry-run --json`,
+		page: "configuration/#forwarding",
 	},
 	"fleetsh init": {
 		long: `Create an example TOML inventory at --config PATH or the OS user config directory.
@@ -137,7 +185,7 @@ may share them. Use credential rm or hostkey reset separately when appropriate.`
 	},
 	"fleetsh ssh": {
 		long: `Open an interactive SSH shell for one inventory alias, with terminal support.
-Supports agent, private-key and password authentication, ProxyJump and SOCKS5.
+Supports agent, private-key and password authentication, ProxyJump and SOCKS5/HTTP/HTTPS proxies.
 HOST is an exact alias; group selectors and --json are not supported.
 
 On the first connection, independently verify the displayed fingerprint before
@@ -208,7 +256,7 @@ New entries have a fleetsh namespace and creator notes. No plaintext fallback.
 
 For a host's SSH password, add --auth password or edit --save-password saves it
 automatically. These commands remain useful for shared SSH passwords, encrypted-key
-passphrases, sudo passwords and SOCKS5 credentials. Run docs passwords for examples.`,
+passphrases, sudo passwords and proxy credentials. Run docs passwords for examples.`,
 		example: `  fleetsh credential ls
   fleetsh credential add shared-login
   fleetsh edit hk1 --auth password --credential shared-login`,
@@ -219,7 +267,7 @@ passphrases, sudo passwords and SOCKS5 credentials. Run docs passwords for examp
 Run init first. Reference names follow the same naming rules as host aliases.
 Use --replace to overwrite an existing secret; every host using it sees the change.
 
-For SOCKS5, enter username:password at the prompt. For an encrypted private key,
+For proxy authentication, enter username:password at the prompt. For an encrypted private key,
 enter its passphrase. For sudo, enter the sudo password. Do not put secret values
 in command arguments or inventory files. The native store must be available.`,
 		example: `  fleetsh credential add shared-login

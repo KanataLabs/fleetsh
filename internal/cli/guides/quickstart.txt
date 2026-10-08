@@ -9,6 +9,8 @@ These are examples; replace example.com addresses and usernames with your own.
   fleetsh ls '@web'
   fleetsh show hk1
   fleetsh exec '@web' "uptime" --parallel 5
+  fleetsh alive
+  fleetsh stats
 
 Adding a password host prompts twice and saves automatically in the OS store.
 For key authentication, use:

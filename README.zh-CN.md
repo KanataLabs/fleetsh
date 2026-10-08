@@ -27,6 +27,22 @@ go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 
 安装后运行 `fleetsh version` 验证，可在任意目录使用。
 
+## 一键监控与 SSH 隧道
+
+```sh
+fleetsh alive
+fleetsh stats
+fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh forward hk1 --dry-run
+fleetsh forward hk1 web
+```
+
+`alive` 检查 SSH 认证和执行是否可用；`stats`（别名 `monitor`）一次打印 Linux
+CPU、内存、swap、当前用户和磁盘空余，默认选择所有主机，无需安装远程组件。
+在 `[defaults]` 设置全局 SSH 代理；单机可覆盖，或用 `proxy = "direct"` 绕过。
+支持 SOCKS5、HTTP/HTTPS CONNECT。`[[hosts.ALIAS.forwards]]` 配置本地、远程、
+动态 TCP 转发，详见 [代理继承与端口转发](docs/zh/configuration.md#proxies)。
+
 ## 使用
 
 ```sh
@@ -51,7 +67,7 @@ fleetsh reboot '@all' --parallel 2 --sudo --wait-timeout 5m
 密码、密钥口令和代理密码通过隐藏输入或系统凭据库读取，TOML 只保存引用。
 配置及命令细节见 [快速开始](docs/zh/getting-started.md) 和 [配置](docs/zh/configuration.md)。
 所有命令支持 `--config PATH`；`fleetsh COMMAND --help` 可查看行为说明、选项和示例。
-`fleetsh docs` 列出九个英文离线指南；`fleetsh docs config`、`fleetsh docs passwords`、
+`fleetsh docs` 列出十一个英文离线指南；`fleetsh docs config`、`fleetsh docs passwords`、
 `fleetsh docs groups` 和 `fleetsh docs patching` 分别说明配置、密码、分组和批量补丁。
 帮助和离线指南无需配置文件或网络；在线文档继续提供独立的中、英、日文版本。
 

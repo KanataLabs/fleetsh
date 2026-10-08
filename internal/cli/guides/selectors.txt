@@ -1,6 +1,6 @@
 Selecting targets
 =================
-ls, exec, update and reboot accept SELECTOR:
+ls, exec, alive, stats, update and reboot accept SELECTOR:
 
   hk1           one inventory alias
   hk1,sg1       a union of aliases

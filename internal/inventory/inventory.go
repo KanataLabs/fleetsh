@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,25 +20,28 @@ import (
 )
 
 type Defaults struct {
-	ConnectTimeout string `toml:"connect_timeout" json:"connect_timeout"`
-	CommandTimeout string `toml:"command_timeout" json:"command_timeout"`
-	Parallel       int    `toml:"parallel" json:"parallel"`
+	ConnectTimeout  string `toml:"connect_timeout" json:"connect_timeout"`
+	CommandTimeout  string `toml:"command_timeout" json:"command_timeout"`
+	Parallel        int    `toml:"parallel" json:"parallel"`
+	Proxy           string `toml:"proxy,omitempty" json:"proxy,omitempty"`
+	ProxyCredential string `toml:"proxy_credential,omitempty" json:"proxy_credential,omitempty"`
 }
 type Host struct {
-	Host            string   `toml:"host" json:"host"`
-	Port            int      `toml:"port,omitempty" json:"port"`
-	User            string   `toml:"user,omitempty" json:"user"`
-	Connection      string   `toml:"connection,omitempty" json:"connection"`
-	Auth            string   `toml:"auth,omitempty" json:"auth"`
-	Credential      string   `toml:"credential,omitempty" json:"credential,omitempty"`
-	Key             string   `toml:"key,omitempty" json:"key,omitempty"`
-	Proxy           string   `toml:"proxy,omitempty" json:"proxy,omitempty"`
-	ProxyJump       string   `toml:"proxy_jump,omitempty" json:"proxy_jump,omitempty"`
-	ProxyCredential string   `toml:"proxy_credential,omitempty" json:"proxy_credential,omitempty"`
-	SudoCredential  string   `toml:"sudo_credential,omitempty" json:"sudo_credential,omitempty"`
-	Groups          []string `toml:"groups,omitempty" json:"groups,omitempty"`
-	Tags            []string `toml:"tags,omitempty" json:"tags,omitempty"`
-	Description     string   `toml:"description,omitempty" json:"description,omitempty"`
+	Host            string    `toml:"host" json:"host"`
+	Port            int       `toml:"port,omitempty" json:"port"`
+	User            string    `toml:"user,omitempty" json:"user"`
+	Connection      string    `toml:"connection,omitempty" json:"connection"`
+	Auth            string    `toml:"auth,omitempty" json:"auth"`
+	Credential      string    `toml:"credential,omitempty" json:"credential,omitempty"`
+	Key             string    `toml:"key,omitempty" json:"key,omitempty"`
+	Proxy           string    `toml:"proxy,omitempty" json:"proxy,omitempty"`
+	ProxyJump       string    `toml:"proxy_jump,omitempty" json:"proxy_jump,omitempty"`
+	ProxyCredential string    `toml:"proxy_credential,omitempty" json:"proxy_credential,omitempty"`
+	SudoCredential  string    `toml:"sudo_credential,omitempty" json:"sudo_credential,omitempty"`
+	Groups          []string  `toml:"groups,omitempty" json:"groups,omitempty"`
+	Tags            []string  `toml:"tags,omitempty" json:"tags,omitempty"`
+	Description     string    `toml:"description,omitempty" json:"description,omitempty"`
+	Forwards        []Forward `toml:"forwards,omitempty" json:"forwards,omitempty"`
 }
 
 func (h Host) Address() string { return net.JoinHostPort(h.Host, strconv.Itoa(h.Port)) }
@@ -96,6 +98,12 @@ func (inv *Inventory) Validate() error {
 			return errors.New("timeouts must be positive durations")
 		}
 	}
+	if err := validateProxy(inv.Defaults.Proxy); err != nil {
+		return fmt.Errorf("defaults: %w", err)
+	}
+	if inv.Defaults.ProxyCredential != "" && (!ValidName(inv.Defaults.ProxyCredential) || inv.Defaults.Proxy == "" || inv.Defaults.Proxy == "direct") {
+		return errors.New("defaults: proxy_credential requires a proxy and valid reference")
+	}
 	for _, ref := range inv.Credentials {
 		if !ValidName(ref) {
 			return errors.New("invalid credential reference")
@@ -135,22 +143,14 @@ func (inv *Inventory) Validate() error {
 		if h.Auth == "key" && h.Key == "" {
 			return fmt.Errorf("host %s: key path is required", id)
 		}
-		if h.Proxy != "" {
-			u, err := url.Parse(h.Proxy)
-			if err != nil || u.Scheme != "socks5" || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawQuery != "" || u.Fragment != "" {
-				return fmt.Errorf("host %s: use a SOCKS5 URL without userinfo; store secrets by reference", id)
-			}
-			if p := u.Port(); p != "" {
-				n, e := strconv.Atoi(p)
-				if e != nil || n < 1 || n > 65535 {
-					return fmt.Errorf("host %s: invalid proxy port", id)
-				}
-			}
+		if err := validateProxy(h.Proxy); err != nil {
+			return fmt.Errorf("host %s: %w", id, err)
 		}
 		if h.Proxy != "" && h.ProxyJump != "" {
 			return fmt.Errorf("host %s: choose proxy or proxy_jump", id)
 		}
-		if h.ProxyCredential != "" && h.Proxy == "" {
+		proxyURL, _ := inv.ProxyFor(h)
+		if h.ProxyCredential != "" && proxyURL == "" {
 			return fmt.Errorf("host %s: proxy_credential requires proxy", id)
 		}
 		for _, ref := range []string{h.Credential, h.ProxyCredential, h.SudoCredential} {
@@ -162,6 +162,12 @@ func (inv *Inventory) Validate() error {
 			if !ValidName(n) {
 				return fmt.Errorf("host %s: invalid group/tag", id)
 			}
+		}
+		if err := validateForwards(h.Forwards); err != nil {
+			return fmt.Errorf("host %s: %w", id, err)
+		}
+		if h.Connection == "console-only" && len(h.Forwards) != 0 {
+			return fmt.Errorf("host %s: port forwards require SSH", id)
 		}
 		inv.Hosts[id] = h
 	}
