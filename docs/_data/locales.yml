@@ -1,5 +1,7 @@
 en:
   lang: en
+  name: English
+  languages: Documentation language
   description: Lightweight, agentless VPS fleet management.
   skip: Skip to content
   docs: docs
@@ -16,11 +18,30 @@ en:
   security: Security design
   roadmap: Roadmap
   development: Development build
-  other_locale: zh
-  other_lang: zh-CN
-  switch: 中文
+ja:
+  lang: ja
+  name: 日本語
+  languages: ドキュメントの言語
+  description: Agent 不要の軽量 VPS 管理ツール。
+  skip: 本文へ移動
+  docs: ドキュメント
+  navigation: ドキュメントのナビゲーション
+  start: 使い始める
+  cases: 利用例
+  project: プロジェクト
+  overview: 概要
+  installation: インストールと PATH
+  getting-started: 使い始める
+  configuration: 設定
+  product: 製品設計
+  architecture: アーキテクチャ
+  security: セキュリティ設計
+  roadmap: ロードマップ
+  development: 開発版
 zh:
   lang: zh-CN
+  name: 中文
+  languages: 文档语言
   description: 轻量、无需远程代理的 VPS 管理工具。
   skip: 跳转到正文
   docs: 文档
@@ -37,6 +58,3 @@ zh:
   security: 安全设计
   roadmap: 路线图
   development: 开发版
-  other_locale: en
-  other_lang: en
-  switch: English

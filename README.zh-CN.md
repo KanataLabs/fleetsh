@@ -3,7 +3,7 @@
 面向个人开发者和小团队的轻量 VPS 管理工具。Go 单个二进制文件，在 Windows、
 macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 
-[文档站](https://kanatalabs.github.io/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md)
+[文档站](https://kanatalabs.github.io/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md) · [日本語](https://kanatalabs.github.io/fleetsh/ja/)
 
 **当前为开发版。** 已实现主机管理、SSH、系统凭据、跳板/SOCKS5、并发命令、更新和
 重启验证；尚未发布稳定版。

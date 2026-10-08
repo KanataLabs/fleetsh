@@ -1,4 +1,4 @@
-{% assign locale = page.locale | default: 'en' %}{% assign labels = site.data.locales[locale] %}{% assign prefix = '/' | append: locale | append: '/' %}{% assign alternate = '/' | append: labels.other_locale | append: '/' | append: page.page_key %}
+{% assign locale = page.locale | default: 'en' %}{% assign labels = site.data.locales[locale] %}{% assign prefix = '/' | append: locale | append: '/' %}
 <!doctype html>
 <html lang="{{ labels.lang }}">
 <head>
@@ -8,8 +8,9 @@
 <meta name="description" content="{{ page.description | default: labels.description | escape }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 {% assign english_path = "/en/" | append: page.page_key %}<link rel="alternate" hreflang="x-default" href="{{ english_path | absolute_url }}">
-<link rel="alternate" hreflang="{{ labels.lang }}" href="{{ page.url | absolute_url }}">
-<link rel="alternate" hreflang="{{ labels.other_lang }}" href="{{ alternate | absolute_url }}">
+{% for entry in site.data.locales %}{% assign alternate = '/' | append: entry[0] | append: '/' | append: page.page_key %}
+<link rel="alternate" hreflang="{{ entry[1].lang }}" href="{{ alternate | absolute_url }}">
+{% endfor %}
 <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
 </head>
 <body>
@@ -17,7 +18,11 @@
 <header>
 <a class="brand" href="{{ prefix | relative_url }}">fleetsh<span> / {{ labels.docs }}</span></a>
 <div class="header-links">
-<a class="language-switch" href="{{ alternate | relative_url }}" lang="{{ labels.other_lang }}" hreflang="{{ labels.other_lang }}">{{ labels.switch }}</a>
+<div class="language-menu" role="navigation" aria-label="{{ labels.languages }}">
+{% for entry in site.data.locales %}{% assign alternate = '/' | append: entry[0] | append: '/' | append: page.page_key %}
+<a class="language-switch" href="{{ alternate | relative_url }}" lang="{{ entry[1].lang }}" hreflang="{{ entry[1].lang }}"{% if locale == entry[0] %} aria-current="page"{% endif %}>{{ entry[1].name }}</a>
+{% endfor %}
+</div>
 <a href="https://github.com/KanataLabs/fleetsh">GitHub ↗</a>
 </div>
 </header>
