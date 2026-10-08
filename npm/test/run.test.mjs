@@ -54,7 +54,7 @@ async function childFixture(t) {
 process.stdout.write(JSON.stringify({args: process.argv.slice(2), input, cwd: process.cwd()}));
 process.stderr.write('child stderr');
 process.exitCode = 3;`);
-  return { runner, child, directory };
+  return { runner, child, directory: await fs.realpath(directory) };
 }
 
 test('real child preserves stdin, literal arguments, working directory, stdout/stderr and exit code', async (t) => {
@@ -81,9 +81,10 @@ test('real runner forwards SIGTERM to the child', { skip: process.platform === '
     const wrapper = spawn(process.execPath, [runner, JSON.stringify([child])]);
     t.after(() => { if (wrapper.exitCode === null) wrapper.kill('SIGKILL'); });
     let stdout = '';
+    let signaled = false;
     wrapper.stdout.on('data', (chunk) => {
       stdout += chunk;
-      if (stdout.includes('ready')) wrapper.kill('SIGTERM');
+      if (!signaled && stdout.includes('ready')) { signaled = true; wrapper.kill('SIGTERM'); }
     });
     wrapper.on('error', reject);
     wrapper.on('close', (code) => resolve({ code, stdout }));
