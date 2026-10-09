@@ -67,7 +67,7 @@ func TestAgentAuthentication(t *testing.T) {
 	}
 }
 
-func TestAgentPreparationErrorsExplainAuthenticationAndRecovery(t *testing.T) {
+func TestAgentErrors(t *testing.T) {
 	for _, scenario := range []struct{ name, message string }{
 		{"unavailable", "SSH agent unavailable"},
 		{"empty", "SSH agent has no usable keys"},
