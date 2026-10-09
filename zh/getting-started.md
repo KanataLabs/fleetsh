@@ -102,7 +102,12 @@ fleetsh edit hk1 --port 2222
 | `--user USER` | SSH 主机必填；默认是 `--connection ssh` |
 | `--key PATH` | 使用 `--auth key` 时必填 |
 
-`--auth` 可省略，默认 `agent`；`--port` 默认 22。
+新建主机时 `--auth` 可省略，默认 `password`；`--port` 默认 22。
+省略 `--auth` 时会隐藏询问两次密码，并自动保存到操作系统凭据库。
+`--auth agent` 需要已启动且加载了密钥的 SSH agent；私钥文件使用 `--auth key --key PATH`。
+已有主机保留原认证方式。若旧主机提示 `SSH agent unavailable`，且你使用密码登录，
+先运行 `fleetsh edit HOST --auth password`，再运行 `fleetsh ssh HOST`。
+使用自定义清单时，两条命令均需带相同的 `--config PATH`。
 密码会通过隐藏输入询问，不需要提供密码选项。
 添加主机时，必填选项缺失或为空，会在读取清单、询问凭据之前列出所有缺失项并显示帮助。
 主机选项值无效时也会显示帮助。
