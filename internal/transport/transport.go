@@ -132,7 +132,10 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 			conn, err := dialAgent(agentCtx)
 			cancel()
 			if err != nil {
-				return fmt.Errorf("host %s: SSH agent unavailable", id)
+				if ctx.Err() != nil {
+					return ctx.Err()
+				}
+				return agentPreparationError(id, "SSH agent unavailable")
 			}
 			if err = m.register(conn); err != nil {
 				return err
@@ -140,8 +143,14 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 			_ = conn.SetDeadline(time.Now().Add(10 * time.Second))
 			signers, err := agent.NewClient(conn).Signers()
 			_ = conn.SetDeadline(time.Time{})
-			if err != nil || len(signers) == 0 {
-				return fmt.Errorf("host %s: SSH agent has no usable keys", id)
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if err != nil {
+				return agentPreparationError(id, "cannot read keys from SSH agent")
+			}
+			if len(signers) == 0 {
+				return agentPreparationError(id, "SSH agent has no usable keys")
 			}
 			bounded := make([]ssh.Signer, 0, len(signers))
 			for _, signer := range signers {
@@ -180,6 +189,10 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 		}
 	}
 	return nil
+}
+
+func agentPreparationError(id, reason string) error {
+	return fmt.Errorf("host %s: %s (auth=agent); for password login, run 'fleetsh edit %s --auth password'; for key-file login, run 'fleetsh edit %s --auth key --key PATH'; otherwise start SSH agent and load a key", id, reason, id, id)
 }
 
 type Client struct {

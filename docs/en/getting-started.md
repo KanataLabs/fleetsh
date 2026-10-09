@@ -107,7 +107,12 @@ fleetsh edit hk1 --port 2222
 | `--user USER` | SSH hosts; `--connection ssh` is the default |
 | `--key PATH` | When `--auth key` is selected |
 
-`--auth` is optional and defaults to `agent`; `--port` defaults to 22.
+For new hosts, `--auth` is optional and defaults to `password`; `--port` defaults to 22.
+Omitting `--auth` prompts twice and saves the password in the OS credential store.
+Use `--auth agent` only with a running SSH agent and a loaded key, or `--auth key --key PATH` for a private key.
+Existing hosts keep their saved authentication mode. If an older host reports `SSH agent unavailable`,
+switch it to password login with `fleetsh edit HOST --auth password`, then retry `fleetsh ssh HOST`.
+Use the same `--config PATH` on both commands for a custom inventory.
 Password authentication prompts privately; no password option is required.
 When adding a host, missing or empty required options are listed with command help before inventory
 loading or credential prompts. Invalid host options also show help.

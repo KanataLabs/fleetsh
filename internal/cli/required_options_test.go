@@ -70,7 +70,7 @@ func TestEditRequiredValuesUseMergedHostAndPreserveInventoryOnFailure(t *testing
 			path := emptyInventory(t)
 			flags := []string{"add", "racknerd", "--host", "vps.example", "--connection", test.connection}
 			if test.connection == "ssh" {
-				flags = append(flags, "--user", "ubuntu")
+				flags = append(flags, "--user", "ubuntu", "--auth", "agent")
 			}
 			if _, err := hostCommand(t, path, &recordingStore{values: map[string]string{}}, nil, flags...); err != nil {
 				t.Fatal(err)

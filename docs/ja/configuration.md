@@ -152,7 +152,11 @@ host = "console.example.com"
 connection = "console-only"
 ```
 
-ホストの既定値は、ポート 22、接続方式 `ssh`、認証方式 `agent` です。
+`fleetsh add` の既定値は、ポート 22、接続方式 `ssh`、認証方式 `password` で、パスワードは自動保存します。
+既存ホストの認証方式は維持します。互換性のため、TOML で `auth` を省略したホストは従来どおり `agent` を使います。
+Agent は `--auth agent`、秘密鍵ファイルは `--auth key --key PATH` で明示してください。
+既存ホストで `SSH agent unavailable` が表示され、パスワードでログインする場合は、
+`fleetsh edit HOST --auth password` の後に `fleetsh ssh HOST` を実行してください。
 SSH ホストにはユーザー名、鍵認証には鍵のパスが必要です。
 鍵の相対パスは現在の作業ディレクトリから解決し、`~/` も展開します。
 参照を指定しないパスワードと秘密鍵のパスフレーズは対話的に入力できます。

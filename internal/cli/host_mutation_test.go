@@ -118,7 +118,7 @@ func TestPasswordHostFailureLeavesInventoryAndStoreUnchanged(t *testing.T) {
 				args = append(args, "--port", "-1")
 			}
 			if name == "duplicate" {
-				if _, err := hostCommand(t, path, store, nil, "add", "vps", "--host", "existing.example", "--user", "ubuntu"); err != nil {
+				if _, err := hostCommand(t, path, store, nil, "add", "vps", "--host", "existing.example", "--user", "ubuntu", "--auth", "agent"); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -221,7 +221,7 @@ func TestInventorySaveFailureRemovesNewCredential(t *testing.T) {
 func TestPasswordPromptRejectsConcurrentHostChange(t *testing.T) {
 	path := emptyInventory(t)
 	store := &recordingStore{values: map[string]string{}}
-	if _, err := hostCommand(t, path, store, nil, "add", "vps", "--host", "original.example", "--user", "ubuntu"); err != nil {
+	if _, err := hostCommand(t, path, store, nil, "add", "vps", "--host", "original.example", "--user", "ubuntu", "--auth", "agent"); err != nil {
 		t.Fatal(err)
 	}
 	changed := false
@@ -301,7 +301,7 @@ func TestAutomaticallySavedPasswordAuthenticatesGroupedExecution(t *testing.T) {
 	})
 	host := server.Host()
 	if _, err := hostCommand(t, path, store, passwordPrompt(testutil.Password), "add", "vps",
-		"--host", host.Host, "--port", fmt.Sprint(host.Port), "--user", host.User, "--auth", "password", "--groups", "lab"); err != nil {
+		"--host", host.Host, "--port", fmt.Sprint(host.Port), "--user", host.User, "--groups", "lab"); err != nil {
 		t.Fatal(err)
 	}
 	trust := knownhosts.Line([]string{knownhosts.Normalize(server.Address)}, server.Key.PublicKey()) + "\n"
@@ -311,5 +311,72 @@ func TestAutomaticallySavedPasswordAuthenticatesGroupedExecution(t *testing.T) {
 	out, err := hostCommand(t, path, store, nil, "exec", "@lab", "uptime", "--json")
 	if err != nil || !strings.Contains(out, "fixture uptime") {
 		t.Fatalf("saved credential did not authenticate: %v %s", err, out)
+	}
+}
+
+func TestDefaultPasswordHostSavesWithoutAuthFlag(t *testing.T) {
+	path := emptyInventory(t)
+	store := &recordingStore{values: map[string]string{}}
+	prompts := 0
+	output, err := hostCommand(t, path, store, func(string) (string, error) {
+		prompts++
+		return "default-auth-fixture", nil
+	}, "add", "racknerd", "--host", "vps.example", "--user", "root")
+	if err != nil {
+		t.Fatal(err)
+	}
+	inv, err := inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	host := inv.Hosts["racknerd"]
+	if host.Auth != "password" || prompts != 2 || !strings.HasPrefix(host.Credential, credentials.ReferencePrefix) || store.values[host.Credential] != "default-auth-fixture" {
+		t.Fatal("omitted auth did not select password and save a generated reference")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "default-auth-fixture") || strings.Contains(output, "default-auth-fixture") {
+		t.Fatal("password leaked")
+	}
+	if _, err := hostCommand(t, path, store, func(string) (string, error) { t.Fatal("group edit prompted for password"); return "", nil }, "edit", "racknerd", "--add-groups", "web"); err != nil {
+		t.Fatal(err)
+	}
+	inv, err = inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inv.Hosts["racknerd"].Auth != "password" || inv.Hosts["racknerd"].Credential != host.Credential {
+		t.Fatal("unrelated edit changed authentication")
+	}
+}
+
+func TestExistingAgentHostKeepsModeUntilPasswordEdit(t *testing.T) {
+	path := emptyInventory(t)
+	store := &recordingStore{values: map[string]string{}}
+	if _, err := hostCommand(t, path, store, nil, "add", "racknerd", "--host", "vps.example", "--user", "root", "--auth", "agent"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := hostCommand(t, path, store, nil, "edit", "racknerd", "--add-groups", "web"); err != nil {
+		t.Fatal(err)
+	}
+	inv, err := inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inv.Hosts["racknerd"].Auth != "agent" || len(store.values) != 0 {
+		t.Fatal("unrelated edit changed agent authentication")
+	}
+	if _, err := hostCommand(t, path, store, passwordPrompt("migration-fixture"), "edit", "racknerd", "--auth", "password"); err != nil {
+		t.Fatal(err)
+	}
+	inv, err = inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	host := inv.Hosts["racknerd"]
+	if host.Auth != "password" || store.values[host.Credential] != "migration-fixture" || !slices.Contains(host.Groups, "web") {
+		t.Fatal("password migration did not save or retain host fields")
 	}
 }

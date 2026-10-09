@@ -154,8 +154,10 @@ Required arguments/options (values must not be empty):
 Console-only hosts still need --host; --user is optional for them.
 Missing/empty required options are listed together with this help before reading
 inventory or prompting for credentials. Invalid host options also show help.
-Defaults are port 22, SSH and agent authentication. --auth is optional;
-use --auth password for password authentication, or --auth key with --key PATH.
+Defaults for new hosts are port 22, SSH and password authentication.
+--auth is optional. Use --auth key with --key PATH for a private key, or --auth
+agent for a running SSH agent with a loaded key. Existing hosts keep their mode;
+to switch one to password login, run edit HOST --auth password.
 
 Password hosts without --credential prompt twice using hidden terminal input and
 save automatically to the OS credential store. Generated references start with

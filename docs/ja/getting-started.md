@@ -107,7 +107,13 @@ fleetsh edit hk1 --port 2222
 | `--user USER` | SSH ホスト。既定は `--connection ssh` |
 | `--key PATH` | `--auth key` を選択した場合 |
 
-`--auth` は省略可能で既定は `agent`、`--port` の既定は 22 です。
+新規ホストでは `--auth` は省略可能で既定は `password`、`--port` の既定は 22 です。
+`--auth` を省略するとパスワードを 2 回確認し、OS の認証情報ストアに保存します。
+`--auth agent` は鍵を読み込んだ SSH Agent が動作している場合に使います。
+秘密鍵ファイルには `--auth key --key PATH` を指定してください。
+既存ホストの認証方式は維持します。`SSH agent unavailable` が表示され、パスワードでログインする場合は、
+`fleetsh edit HOST --auth password` の後に `fleetsh ssh HOST` を実行してください。
+別のホスト一覧を使う場合は、両方のコマンドに同じ `--config PATH` を指定します。
 パスワードは非表示の入力で確認するため、パスワード用の必須オプションはありません。
 追加時に必須値が不足または空の場合、ホスト一覧の読み込みや秘密値の入力より前に、
 不足しているオプションとヘルプを表示します。不正なホスト設定でもヘルプを表示します。

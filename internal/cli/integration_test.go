@@ -31,7 +31,7 @@ func TestInventoryCommandsEndToEnd(t *testing.T) {
 		errOut.Reset()
 		return RunContext(context.Background(), append([]string{"--config", path}, args...), "test", strings.NewReader(""), &out, &errOut)
 	}
-	if code := invoke("add", "hk1", "--host", "hk.example", "--user", "ubuntu", "--groups", "asia,web", "--tags", "prod"); code != 0 {
+	if code := invoke("add", "hk1", "--host", "hk.example", "--user", "ubuntu", "--auth", "agent", "--groups", "asia,web", "--tags", "prod"); code != 0 {
 		t.Fatalf("add: %d %s", code, &errOut)
 	}
 	if code := invoke("edit", "hk1", "--port", "2222"); code != 0 {

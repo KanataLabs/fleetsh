@@ -4,6 +4,7 @@ package transport_test
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 	"testing"
 
@@ -63,5 +64,49 @@ func TestAgentAuthentication(t *testing.T) {
 	r := executor.Run(context.Background(), m, "a", "uptime", executor.Options{})
 	if !r.Success {
 		t.Fatalf("agent authentication failed: %+v", r)
+	}
+}
+
+func TestAgentPreparationErrorsExplainAuthenticationAndRecovery(t *testing.T) {
+	for _, scenario := range []struct{ name, message string }{
+		{"unavailable", "SSH agent unavailable"},
+		{"empty", "SSH agent has no usable keys"},
+		{"broken", "cannot read keys from SSH agent"},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			listener := agentListener(t)
+			t.Setenv("SSH_AUTH_SOCK", listener.Addr().String())
+			if scenario.name == "unavailable" {
+				listener.Close()
+			} else {
+				done := make(chan struct{})
+				go func() {
+					defer close(done)
+					conn, err := listener.Accept()
+					if err != nil {
+						return
+					}
+					defer conn.Close()
+					if scenario.name == "empty" {
+						_ = agent.ServeAgent(agent.NewKeyring(), conn)
+					}
+				}()
+				t.Cleanup(func() { listener.Close(); <-done })
+			}
+			m := testutil.Manager(t, map[string]inventory.Host{"racknerd": {Host: "vps.example", User: "root", Auth: "agent"}})
+			m.Prompt = func(string) (string, error) { t.Fatal("agent mode unexpectedly requested a password"); return "", nil }
+			err := m.Prepare(context.Background(), []string{"racknerd"}, false)
+			if err == nil {
+				t.Fatal("agent failure accepted")
+			}
+			for _, text := range []string{scenario.message, "auth=agent", "fleetsh edit racknerd --auth password", "fleetsh edit racknerd --auth key --key PATH", "start SSH agent and load a key"} {
+				if !strings.Contains(err.Error(), text) {
+					t.Fatalf("missing recovery text %q: %v", text, err)
+				}
+			}
+			if m.Inventory.Hosts["racknerd"].Auth != "agent" {
+				t.Fatal("agent failure silently changed saved mode")
+			}
+		})
 	}
 }

@@ -154,7 +154,11 @@ host = "console.example.com"
 connection = "console-only"
 ```
 
-Host defaults are port 22, connection `ssh`, auth `agent`.
+`fleetsh add` defaults to port 22, connection `ssh`, and auth `password`, with automatic password saving.
+Existing hosts retain their saved mode. For compatibility, TOML hosts with no `auth` field still use `agent`.
+Select `--auth agent` explicitly for agent login, or `--auth key --key PATH` for a private key.
+If an existing host reports `SSH agent unavailable` and you use password login,
+run `fleetsh edit HOST --auth password`, then `fleetsh ssh HOST`.
 SSH hosts require a username; key auth requires a key path.
 Key paths resolve relative to the current directory, or expand `~/`.
 Passwords and key passphrases can be prompted interactively when no reference is set.

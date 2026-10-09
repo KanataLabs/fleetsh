@@ -148,7 +148,11 @@ host = "console.example.com"
 connection = "console-only"
 ```
 
-主机默认端口为 22，连接类型为 `ssh`，认证类型为 `agent`。
+`fleetsh add` 默认端口为 22，连接类型为 `ssh`，认证类型为 `password`，并自动保存密码。
+已有主机保留原认证方式；为兼容旧清单，TOML 中省略 `auth` 字段仍按 `agent` 处理。
+Agent 认证需显式指定 `--auth agent`；私钥文件使用 `--auth key --key PATH`。
+旧主机若提示 `SSH agent unavailable`，且你使用密码登录，先运行
+`fleetsh edit HOST --auth password`，再运行 `fleetsh ssh HOST`。
 SSH 主机必须指定用户名，密钥认证必须指定密钥路径。
 密钥路径相对于当前工作目录解析，也支持展开 `~/`。
 未指定凭据引用时，可交互输入密码和密钥口令。

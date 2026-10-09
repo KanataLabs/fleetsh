@@ -31,7 +31,16 @@ which known_hosts file is used. Shared/wildcard trust may require manual review.
 
 Authentication and credentials:
   Check the SSH username, auth mode and key path with show HOST.
-  Agent mode needs a reachable agent with an appropriate loaded key.
+  New add commands default to password authentication and automatic password saving.
+  Existing hosts keep their saved auth mode. Agent mode needs a reachable agent
+  with an appropriate loaded key. If SSH agent is unavailable and you use a password:
+
+    fleetsh edit HOST --auth password
+    fleetsh ssh HOST
+
+  The edit prompts twice and saves without a separate credential command.
+  For a private key, use edit HOST --auth key --key PATH. Keep --config PATH
+  on both commands when using a custom inventory.
   Encrypted keys can use a passphrase credential; password auth can use a stored
   reference or hidden terminal input. Batch prompts are prepared before dispatch.
   A missing/unavailable OS keyring fails without plaintext fallback.

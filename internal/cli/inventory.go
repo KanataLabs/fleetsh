@@ -77,7 +77,7 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP (required for add; edit keeps it when omitted)")
 		cmd.Flags().IntVar(&h.Port, "port", 22, "SSH port")
 		cmd.Flags().StringVar(&h.User, "user", "", "SSH username (required for SSH; edit keeps the saved value)")
-		cmd.Flags().StringVar(&h.Auth, "auth", "agent", "agent, key or password")
+		cmd.Flags().StringVar(&h.Auth, "auth", "password", "password (add default), key or agent; edit keeps the saved mode when omitted")
 		cmd.Flags().StringVar(&h.Connection, "connection", "ssh", "ssh or console-only")
 		cmd.Flags().StringVar(&h.Credential, "credential", "", "password/key-passphrase reference")
 		cmd.Flags().StringVar(&h.Key, "key", "", "private key file path (required with --auth key; edit keeps the saved value)")

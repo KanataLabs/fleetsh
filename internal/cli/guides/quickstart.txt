@@ -14,7 +14,7 @@ These are examples; replace example.com addresses and usernames with your own.
 
 Required for add: HOST is a local alias; --host supplies the actual address.
 SSH hosts require --user; --auth key requires --key PATH.
-Console-only hosts require --host but can omit --user. --auth defaults to agent.
+Console-only hosts require --host but can omit --user. --auth defaults to password for new hosts.
 Missing/empty required options show command help before loading inventory or
 prompting for secrets. Edits can omit flags when saved values satisfy these rules.
 
@@ -23,7 +23,9 @@ For key authentication, use:
 
   fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups web
 
-Agent authentication is the default; it requires an available SSH agent with keys.
+Use --auth agent explicitly for an available SSH agent with loaded keys.
+Existing hosts keep their saved auth mode. For an older agent host that needs
+password login, run fleetsh edit HOST --auth password; it prompts and saves.
 Verify the first fingerprint through an independently trusted channel before
 accepting it. Trust is kept in known_hosts beside your inventory.
 
