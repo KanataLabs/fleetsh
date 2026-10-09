@@ -94,6 +94,27 @@ fleetsh show hk1
 fleetsh edit hk1 --port 2222
 ```
 
+<a id="required-host-options"></a>
+
+### Required host arguments and options
+
+`HOST` in `fleetsh add HOST` is a local alias, not the address. Required values:
+
+| Argument or option | Required when |
+| --- | --- |
+| `HOST` | Always: a new local alias |
+| `--host ADDRESS` | Always, including console-only hosts |
+| `--user USER` | SSH hosts; `--connection ssh` is the default |
+| `--key PATH` | When `--auth key` is selected |
+
+`--auth` is optional and defaults to `agent`; `--port` defaults to 22.
+Password authentication prompts privately; no password option is required.
+When adding a host, missing or empty required options are listed with command help before inventory
+loading or credential prompts. Invalid host options also show help.
+`edit HOST` preserves omitted fields and checks the resulting values: changing
+`--connection` to `ssh` or `--auth` to `key` may require `--user` or `--key`.
+Console-only hosts may omit `--user`. Use `fleetsh add --help` or `fleetsh edit --help`.
+
 The password prompt is hidden. Credential values are stored in the OS credential
 store; inventory stores only reference names. Key passphrases can use the same
 `--credential` field; without a reference they are prompted privately.

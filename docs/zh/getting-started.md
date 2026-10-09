@@ -89,6 +89,27 @@ fleetsh show hk1
 fleetsh edit hk1 --port 2222
 ```
 
+<a id="required-host-options"></a>
+
+### 添加主机的必填参数和选项
+
+`fleetsh add HOST` 中的 `HOST` 是本地别名，不是连接地址。
+
+| 参数或选项 | 必填条件 |
+| --- | --- |
+| `HOST` | 始终必填：新的本地别名 |
+| `--host ADDRESS` | 始终必填，包括 console-only 主机 |
+| `--user USER` | SSH 主机必填；默认是 `--connection ssh` |
+| `--key PATH` | 使用 `--auth key` 时必填 |
+
+`--auth` 可省略，默认 `agent`；`--port` 默认 22。
+密码会通过隐藏输入询问，不需要提供密码选项。
+添加主机时，必填选项缺失或为空，会在读取清单、询问凭据之前列出所有缺失项并显示帮助。
+主机选项值无效时也会显示帮助。
+`edit HOST` 沿用省略字段的已有值，并校验合并后的结果；切换到 SSH 连接或密钥认证时，
+可能需要补充 `--user` 或 `--key`。console-only 主机可以省略 `--user`。
+完整规则可运行 `fleetsh add --help` 或 `fleetsh edit --help` 查看。
+
 密码输入不会显示。凭据值保存在操作系统凭据库中，清单仅保存引用名称。
 密钥口令也可使用 `--credential` 引用；没有引用时会通过隐藏输入询问。
 

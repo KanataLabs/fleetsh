@@ -144,8 +144,18 @@ HOST must be an exact inventory alias; groups and selectors are not accepted.`,
 	},
 	"fleetsh add": {
 		long: `Add a new host alias to the selected inventory; run init first.
-SSH hosts need --host and --user. Defaults are port 22, SSH and agent authentication.
-Use --auth key with --key PATH, or --auth password for password authentication.
+
+Required arguments/options (values must not be empty):
+  HOST          Local inventory alias, not the hostname or IP address.
+  --host ADDRESS  Hostname or IP address; required for every host.
+  --user USER     Required for SSH hosts (--connection ssh is the default).
+  --key PATH      Required when --auth key is selected.
+
+Console-only hosts still need --host; --user is optional for them.
+Missing/empty required options are listed together with this help before reading
+inventory or prompting for credentials. Invalid host options also show help.
+Defaults are port 22, SSH and agent authentication. --auth is optional;
+use --auth password for password authentication, or --auth key with --key PATH.
 
 Password hosts without --credential prompt twice using hidden terminal input and
 save automatically to the OS credential store. Generated references start with
@@ -162,11 +172,17 @@ Run docs passwords, docs groups or docs proxies for more details.`,
   fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
   fleetsh add lab1 --host lab1.example.com --user ubuntu --auth password --no-save-password
   fleetsh add console1 --host console.example.com --connection console-only --description "Provider console"`,
-		page: "configuration/#passwords",
+		page: "getting-started/#required-host-options",
 	},
 	"fleetsh edit": {
 		long: `Change only the supplied fields of an existing host; other fields are preserved.
-The host alias remains the same. This command edits local configuration.
+HOST is a required existing alias. The host alias remains the same.
+This command edits local configuration; omitted flags keep their saved values.
+
+The resulting host must still have --host, --user for SSH, and --key with key
+authentication. You can omit these flags if their saved values meet the requirements.
+Changing --connection to ssh or --auth to key may require --user or --key.
+Clearing a required value reports the missing option and shows this help.
 
 --add-groups LIST appends memberships; --remove-groups LIST removes selected ones.
 They can be combined for different names. --groups LIST replaces every membership;

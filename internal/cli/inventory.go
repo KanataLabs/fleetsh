@@ -65,14 +65,22 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 	for _, action := range []string{"add", "edit"} {
 		h := inventory.Host{}
 		options := hostOptions{}
-		cmd := &cobra.Command{Use: action + " HOST", Short: action + " a host", Args: cobra.ExactArgs(1)}
-		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP")
+		cmd := &cobra.Command{Use: action + " HOST", Short: action + " a host", Args: func(cmd *cobra.Command, args []string) error {
+			if err := cobra.ExactArgs(1)(cmd, args); err != nil {
+				return err
+			}
+			if action == "add" {
+				return requiredHostOptions(h)
+			}
+			return nil
+		}}
+		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP (required for add; edit keeps it when omitted)")
 		cmd.Flags().IntVar(&h.Port, "port", 22, "SSH port")
-		cmd.Flags().StringVar(&h.User, "user", "", "SSH username")
+		cmd.Flags().StringVar(&h.User, "user", "", "SSH username (required for SSH; edit keeps the saved value)")
 		cmd.Flags().StringVar(&h.Auth, "auth", "agent", "agent, key or password")
 		cmd.Flags().StringVar(&h.Connection, "connection", "ssh", "ssh or console-only")
 		cmd.Flags().StringVar(&h.Credential, "credential", "", "password/key-passphrase reference")
-		cmd.Flags().StringVar(&h.Key, "key", "", "private key file path")
+		cmd.Flags().StringVar(&h.Key, "key", "", "private key file path (required with --auth key; edit keeps the saved value)")
 		cmd.Flags().StringVar(&h.Proxy, "proxy", "", "SOCKS5/HTTP/HTTPS proxy URL, direct, or empty to inherit")
 		cmd.Flags().StringVar(&h.ProxyJump, "proxy-jump", "", "jump-host alias")
 		cmd.Flags().StringVar(&h.ProxyCredential, "proxy-credential", "", "username:password credential reference")
@@ -82,6 +90,9 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		cmd.Flags().StringVar(&h.Description, "description", "", "host description")
 		cmd.Flags().BoolVar(&options.savePassword, "save-password", false, "prompt and save a new SSH password for this host")
 		cmd.Flags().BoolVar(&options.noSavePassword, "no-save-password", false, "prompt on each connection instead of storing the SSH password")
+		if action == "add" {
+			_ = cmd.MarkFlagRequired("host")
+		}
 		if action == "edit" {
 			cmd.Flags().StringSliceVar(&options.addGroups, "add-groups", nil, "add group memberships without replacing existing groups")
 			cmd.Flags().StringSliceVar(&options.removeGroups, "remove-groups", nil, "remove selected group memberships")

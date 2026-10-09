@@ -12,6 +12,12 @@ These are examples; replace example.com addresses and usernames with your own.
   fleetsh alive
   fleetsh stats
 
+Required for add: HOST is a local alias; --host supplies the actual address.
+SSH hosts require --user; --auth key requires --key PATH.
+Console-only hosts require --host but can omit --user. --auth defaults to agent.
+Missing/empty required options show command help before loading inventory or
+prompting for secrets. Edits can omit flags when saved values satisfy these rules.
+
 Adding a password host prompts twice and saves automatically in the OS store.
 For key authentication, use:
 

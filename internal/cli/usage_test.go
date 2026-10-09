@@ -66,7 +66,7 @@ func TestRuntimeErrorsDoNotPrintCommandHelp(t *testing.T) {
 }
 
 func TestOfflineHelpUsesDirectHTTPSDocumentation(t *testing.T) {
-	for _, args := range [][]string{{"exec", "--help"}, {"docs"}, {"docs", "quickstart"}, {"docs", "passwords"}} {
+	for _, args := range [][]string{{"exec", "--help"}, {"add", "--help"}, {"edit", "--help"}, {"docs"}, {"docs", "quickstart"}, {"docs", "passwords"}} {
 		var out, errOut bytes.Buffer
 		code := RunContext(context.Background(), append([]string{"--config", filepath.Join(t.TempDir(), "missing.toml")}, args...),
 			"test", strings.NewReader(""), &out, &errOut)

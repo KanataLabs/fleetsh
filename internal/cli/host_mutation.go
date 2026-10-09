@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/KanataLabs/fleetsh/internal/credentials"
 	"github.com/KanataLabs/fleetsh/internal/inventory"
@@ -84,25 +85,43 @@ func hostChange(cmd *cobra.Command, action, alias string, supplied inventory.Hos
 	return old, nil
 }
 
+// requiredHostOptions checks effective values, so edits can reuse saved fields.
+func requiredHostOptions(host inventory.Host) error {
+	var missing []string
+	if strings.TrimSpace(host.Host) == "" {
+		missing = append(missing, "--host")
+	}
+	if (host.Connection == "" || host.Connection == "ssh") && strings.TrimSpace(host.User) == "" {
+		missing = append(missing, "--user (required for SSH hosts)")
+	}
+	if host.Auth == "key" && strings.TrimSpace(host.Key) == "" {
+		missing = append(missing, "--key (required with --auth key)")
+	}
+	if len(missing) != 0 {
+		return fmt.Errorf("missing or empty required options: %s", strings.Join(missing, ", "))
+	}
+	return nil
+}
+
 func (a *application) mutateHost(cmd *cobra.Command, alias, action string, supplied inventory.Host, options hostOptions) error {
 	if !inventory.ValidName(alias) || alias == "all" {
-		return errors.New("invalid or reserved host alias")
+		return usageError{command: cmd, cause: errors.New("invalid or reserved host alias")}
 	}
 	if options.savePassword && options.noSavePassword {
-		return errors.New("choose --save-password or --no-save-password")
+		return usageError{command: cmd, cause: errors.New("choose --save-password or --no-save-password")}
 	}
 	if (options.savePassword || options.noSavePassword) && cmd.Flags().Changed("credential") && supplied.Credential != "" {
-		return errors.New("choose a credential reference or a password-saving option")
+		return usageError{command: cmd, cause: errors.New("choose a credential reference or a password-saving option")}
 	}
 	if cmd.Flags().Changed("groups") && (cmd.Flags().Changed("add-groups") || cmd.Flags().Changed("remove-groups")) {
-		return errors.New("choose --groups replacement or --add-groups/--remove-groups")
+		return usageError{command: cmd, cause: errors.New("choose --groups replacement or --add-groups/--remove-groups")}
 	}
 	for _, group := range append(slices.Clone(options.addGroups), options.removeGroups...) {
 		if !inventory.ValidName(group) {
-			return errors.New("invalid group name")
+			return usageError{command: cmd, cause: errors.New("invalid group name")}
 		}
 		if slices.Contains(options.addGroups, group) && slices.Contains(options.removeGroups, group) {
-			return errors.New("cannot add and remove the same group")
+			return usageError{command: cmd, cause: errors.New("cannot add and remove the same group")}
 		}
 	}
 	inv, err := a.load()
@@ -114,13 +133,16 @@ func (a *application) mutateHost(cmd *cobra.Command, alias, action string, suppl
 	if err != nil {
 		return err
 	}
+	if err := requiredHostOptions(host); err != nil {
+		return usageError{command: cmd, cause: err}
+	}
 	inv.Hosts[alias] = host
 	if err := inv.Validate(); err != nil {
-		return err
+		return usageError{command: cmd, cause: err}
 	}
 	host = inv.Hosts[alias]
 	if (options.savePassword || options.noSavePassword) && (host.Auth != "password" || host.Connection != "ssh") {
-		return errors.New("password options require an SSH host with password authentication")
+		return usageError{command: cmd, cause: errors.New("password options require an SSH host with password authentication")}
 	}
 	save := options.savePassword || (!options.noSavePassword && host.Connection == "ssh" && host.Auth == "password" && host.Credential == "" &&
 		(action == "add" || cmd.Flags().Changed("auth")))
