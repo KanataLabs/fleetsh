@@ -19,7 +19,6 @@ npm 的 `latest` 标签提供独立的启动器 `0.1.0`；下载的 Go 程序仍
 
 ```sh
 npx fleetsh version
-npx fleetsh init
 npx fleetsh alive
 npx fleetsh stats
 npx fleetsh ssh hk1

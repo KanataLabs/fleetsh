@@ -110,15 +110,44 @@ func (a *application) load() (*inventory.Inventory, error) {
 	if err != nil {
 		return nil, err
 	}
-	return inventory.Load(path)
+	inv, err := inventory.Load(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, missingInventoryError{path: path, cause: err}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("cannot load inventory %s; check --config PATH and the file's content/access: %w", path, err)
+	}
+	return inv, nil
 }
+
+type missingInventoryError struct {
+	path  string
+	cause error
+}
+
+func (e missingInventoryError) Error() string {
+	return fmt.Sprintf("inventory not found: %s; add a host to create it automatically, or run 'fleetsh init' for an empty inventory; use the same --config PATH on every command for a custom inventory", e.path)
+}
+func (e missingInventoryError) Unwrap() error { return e.cause }
+
 func (a *application) change(fn func(*inventory.Inventory) error) error {
+	return a.updateInventory(fn, false)
+}
+
+func (a *application) changeOrCreate(fn func(*inventory.Inventory) error) error {
+	return a.updateInventory(fn, true)
+}
+
+func (a *application) updateInventory(fn func(*inventory.Inventory) error, create bool) error {
 	path, err := a.configPath()
 	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(a.ctx, 5*time.Second)
 	defer cancel()
+	if create {
+		return inventory.UpdateOrCreate(ctx, path, fn)
+	}
 	return inventory.Update(ctx, path, fn)
 }
 func (a *application) writeJSON(value any) error {

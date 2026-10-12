@@ -4,6 +4,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"slices"
 	"strings"
@@ -47,12 +48,12 @@ func hostChange(cmd *cobra.Command, action, alias string, supplied inventory.Hos
 	old, exists := inv.Hosts[alias]
 	if action == "add" {
 		if exists {
-			return inventory.Host{}, errors.New("host already exists")
+			return inventory.Host{}, fmt.Errorf("host %s already exists; use 'fleetsh edit %s' to change it", alias, alias)
 		}
 		old = supplied
 	} else {
 		if !exists {
-			return inventory.Host{}, errors.New("unknown host")
+			return inventory.Host{}, fmt.Errorf("unknown host %s; use 'fleetsh ls' to list aliases or 'fleetsh add %s --host ADDRESS --user USER' to create it", alias, alias)
 		}
 		previousAuth := old.Auth
 		changes := map[string]func(){
@@ -125,7 +126,9 @@ func (a *application) mutateHost(cmd *cobra.Command, alias, action string, suppl
 		}
 	}
 	inv, err := a.load()
-	if err != nil {
+	if action == "add" && errors.Is(err, os.ErrNotExist) {
+		inv = &inventory.Inventory{Hosts: map[string]inventory.Host{}}
+	} else if err != nil {
 		return err
 	}
 	initial := inv.Hosts[alias]
@@ -163,7 +166,11 @@ func (a *application) mutateHost(cmd *cobra.Command, alias, action string, suppl
 		}
 	}
 	saved := false
-	err = a.change(func(current *inventory.Inventory) error {
+	change := a.change
+	if action == "add" {
+		change = a.changeOrCreate
+	}
+	err = change(func(current *inventory.Inventory) error {
 		if save && action == "edit" && !reflect.DeepEqual(current.Hosts[alias], initial) {
 			return errors.New("host changed while entering the password; retry")
 		}

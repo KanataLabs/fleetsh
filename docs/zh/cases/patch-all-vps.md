@@ -18,7 +18,6 @@ page_key: 'cases/patch-all-vps/'
 先 [安装并注册 PATH](../../installation/)，再添加主机。以下示例使用密钥登录：
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh ls '@all'

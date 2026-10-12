@@ -19,7 +19,6 @@ Install fleetsh and [register it in PATH](../../installation/), then add your
 hosts to the inventory. Here is an example with two key-authenticated hosts:
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh ls '@all'

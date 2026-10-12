@@ -37,7 +37,8 @@ Selectors (ls, exec, alive, stats, update, reboot):
   Quote selectors containing @ in PowerShell. Console-only hosts skip remote work.
 
 Configuration:
-  --config PATH selects a local TOML inventory; init creates it without overwriting.
+  --config PATH selects a local TOML inventory; add creates it automatically if missing.
+  init is optional: it creates an empty commented example without overwriting.
   Otherwise use the OS user config directory. Run docs config for exact locations.
   Passwords live in the OS credential store; the inventory contains references.
 
@@ -48,8 +49,7 @@ Exit codes:
   For mixed batch failures, 1 takes precedence over 3.
 
 Offline guides: fleetsh docs`,
-		example: `  fleetsh init
-  fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups web
+		example: `  fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups web
   fleetsh ssh hk1
   fleetsh ls '@web'
   fleetsh exec '@web' "uptime" --parallel 5
@@ -110,7 +110,8 @@ Up to 128 connections are active per session. Run docs forwarding for TOML.`,
 The file starts with no active hosts and never overwrites an existing file.
 The command prints the configuration path. It stores no passwords.
 
-Run add to create hosts. Run docs config for paths, defaults and backup guidance.`,
+init is optional: add creates a missing inventory automatically while saving its first host.
+Run docs config for paths, defaults and backup guidance.`,
 		example: `  fleetsh init
   fleetsh init --config ./lab/config.toml`,
 		page: "getting-started/",
@@ -143,7 +144,11 @@ HOST must be an exact inventory alias; groups and selectors are not accepted.`,
 		page: "configuration/",
 	},
 	"fleetsh add": {
-		long: `Add a new host alias to the selected inventory; run init first.
+		long: `Add a new host alias; a missing inventory and its parent directories are created automatically.
+init is optional. Existing inventories are read and preserved; invalid or unreadable
+files are reported rather than replaced. Missing required options, invalid host
+settings and cancelled password input do not create an inventory file.
+Use the same --config PATH on every command for a custom inventory.
 
 Required arguments/options (values must not be empty):
   HOST          Local inventory alias, not the hostname or IP address.

@@ -25,7 +25,14 @@ page_key: 'configuration/'
 | Linux | `XDG_CONFIG_HOME` が設定されていれば `$XDG_CONFIG_HOME/fleetsh/config.toml`、それ以外は `~/.config/fleetsh/config.toml` |
 
 Windows では通常 `C:\Users\<user>\AppData\Roaming\fleetsh\config.toml` になります。
-`fleetsh init` はファイルを作成してパスを表示します。既存ファイルは保持します。
+`add` はホストの保存時に、存在しないホスト一覧と親ディレクトリーを自動作成します。
+`init` は空のコメント付きの例が必要な場合だけ使えます。既存の不正なファイルや
+読み取りできないファイルは上書きせず、エラーとして報告します。不正なオプションや
+パスワード入力のキャンセルでは設定ファイルを作成しません。
+ほかのコマンドでは、ホスト一覧がない場合に `add` または `init` を案内します。
+独自のホスト一覧には、すべてのコマンドで同じ `--config PATH` を指定してください。
+登録済みの別名は `edit HOST` で変更します。
+任意の `fleetsh init` は保存先を表示し、既存ファイルを保持します。
 初期化後、次のコマンドで既定のホスト一覧を確認できます。
 
 Windows PowerShell：
@@ -61,7 +68,6 @@ ls -l "$config_file"
 独自のホスト一覧を使うすべてのコマンドに `--config PATH` を指定します。
 
 ```sh
-fleetsh --config "./inventories/production/config.toml" init
 fleetsh --config "./inventories/production/config.toml" add web1 --host web1.example.com --user ubuntu --auth agent
 fleetsh --config "./inventories/production/config.toml" ls
 fleetsh --config "./inventories/production/config.toml" ssh web1

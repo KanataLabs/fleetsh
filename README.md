@@ -59,8 +59,10 @@ Windows user/system PATH and macOS/Linux user/system installation.
 
 ## Use
 
+`add` creates a missing inventory automatically; `init` is optional for an empty example.
+Existing invalid or unreadable files are reported rather than replaced.
+
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh ssh hk1 --connect-timeout 60s
 fleetsh exec '@web' "uptime" --parallel 10

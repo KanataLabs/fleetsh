@@ -7,7 +7,10 @@ The default inventory is TOML, private to the current OS user:
   Linux:   $XDG_CONFIG_HOME/fleetsh/config.toml
            or ~/.config/fleetsh/config.toml when XDG_CONFIG_HOME is unset
 
-fleetsh init prints the created path and preserves existing files. It starts
+add creates a missing inventory and parent directories on successful host saving.
+Invalid options or cancelled password prompts do not create an inventory file.
+Existing unreadable or invalid files are reported, not replaced.
+fleetsh init is optional; it prints the created path and preserves existing files. It starts
 with example hosts commented out. --config PATH overrides the path for any command;
 relative paths are resolved from the current working directory. ~/ is expanded.
 

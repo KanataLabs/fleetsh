@@ -241,6 +241,20 @@ func (inv *Inventory) Select(selector, tag string) ([]string, error) {
 	return ids, nil
 }
 func Update(ctx context.Context, path string, change func(*Inventory) error) error {
+	return update(ctx, path, change, false)
+}
+
+// UpdateOrCreate creates a missing inventory only when the change succeeds.
+func UpdateOrCreate(ctx context.Context, path string, change func(*Inventory) error) error {
+	return update(ctx, path, change, true)
+}
+
+func update(ctx context.Context, path string, change func(*Inventory) error, create bool) error {
+	if create {
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+			return fmt.Errorf("create inventory directory: %w", err)
+		}
+	}
 	lock := flock.New(path + ".lock")
 	ok, err := lock.TryLockContext(ctx, 25*time.Millisecond)
 	if err != nil {
@@ -251,6 +265,10 @@ func Update(ctx context.Context, path string, change func(*Inventory) error) err
 	}
 	defer lock.Close()
 	inv, err := Load(path)
+	if create && errors.Is(err, os.ErrNotExist) {
+		inv = &Inventory{}
+		err = inv.Validate()
+	}
 	if err != nil {
 		return err
 	}

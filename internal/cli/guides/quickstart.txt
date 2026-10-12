@@ -1,9 +1,9 @@
 Quick start
 ===========
-Initialize a local inventory, add a host, then verify its first SSH fingerprint.
+Add a host directly, then verify its first SSH fingerprint.
+add creates a missing inventory automatically; init is optional for an empty example.
 These are examples; replace example.com addresses and usernames with your own.
 
-  fleetsh init
   fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups asia,web
   fleetsh ssh hk1
   fleetsh ls '@web'
@@ -31,7 +31,7 @@ accepting it. Trust is kept in known_hosts beside your inventory.
 
 Every command accepts --config PATH. Use it consistently to select another fleet:
 
-  fleetsh init --config ./lab/config.toml
+  fleetsh add lab1 --host lab.example.com --user ubuntu --config ./lab/config.toml
   fleetsh ls --config ./lab/config.toml
 
 More help:

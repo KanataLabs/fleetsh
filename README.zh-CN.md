@@ -75,8 +75,10 @@ CPU、内存、swap、当前用户和磁盘空余，默认选择所有主机，�
 
 ## 使用
 
+`add` 会自动创建缺失的清单，无需先运行 `init`；`init` 仍可用于创建空示例。
+已有无效或不可读的文件会明确报错，不会自动覆盖。
+
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh ssh hk1 --connect-timeout 60s
 fleetsh exec '@web' "uptime" --parallel 10

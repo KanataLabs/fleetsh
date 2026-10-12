@@ -24,7 +24,11 @@ page_key: 'configuration/'
 | Linux | 设置了 `XDG_CONFIG_HOME` 时为 `$XDG_CONFIG_HOME/fleetsh/config.toml`，否则为 `~/.config/fleetsh/config.toml` |
 
 Windows 下通常展开为 `C:\Users\<用户名>\AppData\Roaming\fleetsh\config.toml`。
-`fleetsh init` 创建文件时会输出路径；已有文件会保留。
+`add` 会在成功保存主机时自动创建不存在的清单和父目录，无需先运行 `init`。
+`init` 仍可用于创建空的带注释示例。已有无效或不可读的文件会明确报错，不会自动覆盖。
+参数无效或取消密码输入时不会创建配置文件。其他命令遇到缺失清单时会提示使用 `add` 或 `init`。
+自定义清单的所有命令需带相同的 `--config PATH`；已有主机别名应使用 `edit HOST` 修改。
+可选的 `fleetsh init` 会输出创建路径，并保留已有文件。
 初始化后，可以用下面的命令查找默认清单：
 
 Windows PowerShell：
@@ -59,7 +63,6 @@ ls -l "$config_file"
 需要使用自定义清单时，每条相关命令都传入 `--config PATH`：
 
 ```sh
-fleetsh --config "./inventories/production/config.toml" init
 fleetsh --config "./inventories/production/config.toml" add web1 --host web1.example.com --user ubuntu --auth agent
 fleetsh --config "./inventories/production/config.toml" ls
 fleetsh --config "./inventories/production/config.toml" ssh web1

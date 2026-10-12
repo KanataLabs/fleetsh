@@ -95,3 +95,25 @@ func TestConcurrentUpdatesAndInvalidChangePreserveFile(t *testing.T) {
 		t.Fatal("invalid mutation changed file")
 	}
 }
+
+func TestConcurrentFirstAdds(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "new", "config.toml")
+	var wg sync.WaitGroup
+	for i := range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := UpdateOrCreate(context.Background(), path, func(inv *Inventory) error {
+				inv.Hosts[fmt.Sprintf("h%d", i)] = Host{Host: "vps.example", User: "root"}
+				return nil
+			}); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	wg.Wait()
+	inv, err := Load(path)
+	if err != nil || len(inv.Hosts) != 8 {
+		t.Fatalf("concurrent first adds lost hosts: %v %v", inv, err)
+	}
+}

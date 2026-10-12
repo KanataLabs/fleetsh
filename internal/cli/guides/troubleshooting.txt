@@ -11,7 +11,11 @@ Mixed batch command/connection failures return 1. Inspect the per-host results
 and JSON summary to identify every failure.
 
 Configuration issues:
-  Run init once, then add hosts. init never overwrites files.
+  add automatically creates a missing inventory and parent directories.
+  init is optional and creates an empty example without overwriting files.
+  Other commands report a missing inventory and suggest add or init.
+  Invalid or unreadable inventories are never replaced automatically.
+  If a host already exists, use edit HOST; do not repeat add to update it.
   Use the same --config PATH on every command for a custom inventory.
   Use show HOST to inspect its alias, address, auth mode and references.
   Empty target selections and unknown hosts/groups are errors.
