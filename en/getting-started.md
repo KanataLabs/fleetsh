@@ -17,7 +17,6 @@ the command available from any directory.
 Use Node.js 22 or newer:
 
 ```sh
-npx fleetsh init
 npx fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
 npx fleetsh ssh hk1
 npx fleetsh alive
@@ -77,7 +76,13 @@ For example, `npx fleetsh exec` and `npx fleetsh exec whoami` show help because
 Help links use the directly served HTTPS documentation address, avoiding the
 HTTP redirect inherited by the default GitHub Pages URL.
 
-## Initialize an inventory
+## Add your first host
+
+`add` automatically creates a missing inventory and parent directories when the host is saved.
+`init` is optional for an empty commented example. Existing invalid or unreadable files are reported,
+not replaced. Invalid host options or cancelled password input do not create an inventory file.
+Other commands suggest `add` or `init` when the inventory is missing; use the same `--config PATH`
+on every command. If an alias already exists, use `edit HOST` to change it.
 
 The inventory is stored locally for your OS user: `%APPDATA%\fleetsh\config.toml`
 on Windows, `~/Library/Application Support/fleetsh/config.toml` on macOS, and
@@ -85,7 +90,6 @@ on Windows, `~/Library/Application Support/fleetsh/config.toml` on macOS, and
 See [storage locations, custom inventories and backup](../configuration/#storage).
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls

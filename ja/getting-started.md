@@ -16,7 +16,6 @@ fleetsh は v0.1 の基本的な操作を実装しています。現在は開発
 Node.js 22 以降を使用します。
 
 ```sh
-npx fleetsh init
 npx fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
 npx fleetsh ssh hk1
 npx fleetsh alive
@@ -76,7 +75,15 @@ fleetsh docs patching
 `--json` は対応する一覧や一括操作の結果に適用され、文書表示には適用されません。
 ヘルプの表示は、例の実行や掲載リンクのブラウザー起動を行いません。
 
-## ホスト一覧を初期化する
+## 最初のホストを追加する
+
+`add` はホストの保存時に、存在しないホスト一覧と親ディレクトリーを自動作成します。
+`init` は空のコメント付きの例が必要な場合だけ使えます。既存の不正なファイルや
+読み取りできないファイルは上書きせず、エラーとして報告します。不正なオプションや
+パスワード入力のキャンセルでは設定ファイルを作成しません。
+ほかのコマンドでは、ホスト一覧がない場合に `add` または `init` を案内します。
+独自のホスト一覧には、すべてのコマンドで同じ `--config PATH` を指定してください。
+登録済みの別名は `edit HOST` で変更します。
 
 ホスト一覧は現在の OS ユーザーのローカル設定ディレクトリに保存されます。
 Windows は `%APPDATA%\fleetsh\config.toml`、
@@ -85,7 +92,6 @@ Linux は `$XDG_CONFIG_HOME/fleetsh/config.toml` または `~/.config/fleetsh/co
 [保存先、独自のホスト一覧、バックアップ](../configuration/#storage)も参照してください。
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls

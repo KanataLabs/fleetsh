@@ -21,7 +21,6 @@ channel. The selected Go program may still be a preview.
 
 ```sh
 npx fleetsh version
-npx fleetsh init
 npx fleetsh alive
 npx fleetsh stats
 npx fleetsh ssh hk1

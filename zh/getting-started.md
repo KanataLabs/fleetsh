@@ -16,7 +16,6 @@ fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
 需要 Node.js 22 或更新版本：
 
 ```sh
-npx fleetsh init
 npx fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519
 npx fleetsh ssh hk1
 npx fleetsh alive
@@ -72,7 +71,12 @@ fleetsh docs patching
 `--json` 用于支持它的列表和批量操作结果，不改变文档格式。
 查看帮助不会执行其中的示例，也不会自动打开文档链接。
 
-## 初始化主机清单
+## 添加第一台主机
+
+`add` 会在成功保存主机时自动创建不存在的清单和父目录，无需先运行 `init`。
+`init` 仍可用于创建空的带注释示例。已有无效或不可读的文件会明确报错，不会自动覆盖。
+参数无效或取消密码输入时不会创建配置文件。其他命令遇到缺失清单时会提示使用 `add` 或 `init`。
+自定义清单的所有命令需带相同的 `--config PATH`；已有主机别名应使用 `edit HOST` 修改。
 
 清单保存在本机当前用户的配置目录：Windows 为 `%APPDATA%\fleetsh\config.toml`，
 macOS 为 `~/Library/Application Support/fleetsh/config.toml`，
@@ -80,7 +84,6 @@ Linux 为 `$XDG_CONFIG_HOME/fleetsh/config.toml` 或 `~/.config/fleetsh/config.t
 详见 [存储位置、自定义清单与备份迁移](../configuration/#storage)。
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups asia,web
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth password --groups asia
 fleetsh ls

@@ -26,7 +26,12 @@ working directory.
 | Linux | `$XDG_CONFIG_HOME/fleetsh/config.toml` when `XDG_CONFIG_HOME` is set; otherwise `~/.config/fleetsh/config.toml` |
 
 On Windows this is normally `C:\Users\<user>\AppData\Roaming\fleetsh\config.toml`.
-`fleetsh init` creates the file and prints its path. It preserves existing files.
+`add` automatically creates a missing inventory and parent directories when the host is saved.
+`init` is optional for an empty commented example. Existing invalid or unreadable files are reported,
+not replaced. Invalid host options or cancelled password input do not create an inventory file.
+Other commands suggest `add` or `init` when the inventory is missing; use the same `--config PATH`
+on every command. If an alias already exists, use `edit HOST` to change it.
+Optional `fleetsh init` prints the path and preserves existing files.
 To locate the default inventory after initialization:
 
 Windows PowerShell:
@@ -62,7 +67,6 @@ path instead.
 Pass `--config PATH` on every command that should use a custom inventory:
 
 ```sh
-fleetsh --config "./inventories/production/config.toml" init
 fleetsh --config "./inventories/production/config.toml" add web1 --host web1.example.com --user ubuntu --auth agent
 fleetsh --config "./inventories/production/config.toml" ls
 fleetsh --config "./inventories/production/config.toml" ssh web1

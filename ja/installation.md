@@ -21,7 +21,6 @@ npm の `latest` タグは独立したランチャー `0.1.0` を提供します
 
 ```sh
 npx fleetsh version
-npx fleetsh init
 npx fleetsh alive
 npx fleetsh stats
 npx fleetsh ssh hk1

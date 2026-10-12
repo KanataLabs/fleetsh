@@ -18,7 +18,6 @@ fleetsh をインストールして [PATH を設定](../../installation/)し、�
 次は鍵認証を使う 2 台の例です。
 
 ```sh
-fleetsh init
 fleetsh add hk1 --host hk1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh add sg1 --host sg1.example.com --user ubuntu --auth key --key ~/.ssh/id_ed25519 --groups apt
 fleetsh ls '@all'
