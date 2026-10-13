@@ -9,6 +9,7 @@ import (
 
 	"github.com/KanataLabs/fleetsh/internal/inventory"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type hostRow struct {
@@ -72,6 +73,13 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 			if action == "add" {
 				return requiredHostOptions(h)
 			}
+			hasChanges := false
+			cmd.LocalNonPersistentFlags().VisitAll(func(flag *pflag.Flag) {
+				hasChanges = hasChanges || flag.Changed
+			})
+			if !hasChanges {
+				return fmt.Errorf("edit requires at least one change option; to replace a saved password, use fleetsh edit %s --save-password", args[0])
+			}
 			return nil
 		}}
 		cmd.Flags().StringVar(&h.Host, "host", "", "hostname or IP (required for add; edit keeps it when omitted)")
@@ -94,6 +102,7 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 			_ = cmd.MarkFlagRequired("host")
 		}
 		if action == "edit" {
+			cmd.Short = "Change host settings or replace a saved password (requires a change option)"
 			cmd.Flags().StringSliceVar(&options.addGroups, "add-groups", nil, "add group memberships without replacing existing groups")
 			cmd.Flags().StringSliceVar(&options.removeGroups, "remove-groups", nil, "remove selected group memberships")
 		}

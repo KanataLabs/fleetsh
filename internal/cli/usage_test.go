@@ -22,6 +22,8 @@ func TestSyntaxErrorsShowRelevantHelpWithoutLoadingInventory(t *testing.T) {
 		{"exec unquoted command", []string{"exec", "@all", "echo", "hello"}, "fleetsh exec SELECTOR COMMAND", "exec requires"},
 		{"exec unknown flag", []string{"exec", "@all", "whoami", "--unknown"}, "fleetsh exec SELECTOR COMMAND", "unknown flag"},
 		{"exec invalid duration", []string{"exec", "@all", "whoami", "--timeout", "invalid"}, "fleetsh exec SELECTOR COMMAND", "invalid argument"},
+		{"edit without changes", []string{"edit", "racknerd"}, "fleetsh edit HOST", "edit requires at least one change option"},
+		{"unknown guide", []string{"docs", "unknown-topic"}, "fleetsh docs [TOPIC]", "available topics:"},
 		{"ssh missing host", []string{"ssh"}, "fleetsh ssh HOST", "received 0"},
 		{"nested credential missing reference", []string{"credential", "add"}, "fleetsh credential add REFERENCE", "received 0"},
 		{"init extra", []string{"init", "extra"}, "fleetsh init", "unknown command"},
@@ -66,7 +68,7 @@ func TestRuntimeErrorsDoNotPrintCommandHelp(t *testing.T) {
 }
 
 func TestOfflineHelpUsesDirectHTTPSDocumentation(t *testing.T) {
-	for _, args := range [][]string{{"exec", "--help"}, {"add", "--help"}, {"edit", "--help"}, {"docs"}, {"docs", "quickstart"}, {"docs", "passwords"}} {
+	for _, args := range [][]string{{"exec", "--help"}, {"add", "--help"}, {"edit", "--help"}, {"docs"}, {"docs", "quickstart"}, {"docs", "passwords"}, {"docs", "password"}, {"docs", "--help"}} {
 		var out, errOut bytes.Buffer
 		code := RunContext(context.Background(), append([]string{"--config", filepath.Join(t.TempDir(), "missing.toml")}, args...),
 			"test", strings.NewReader(""), &out, &errOut)
@@ -82,6 +84,37 @@ func TestOfflineHelpUsesDirectHTTPSDocumentation(t *testing.T) {
 					t.Fatalf("missing %s edition: %s", lang, &out)
 				}
 			}
+		}
+	}
+}
+
+func TestPasswordGuideAliasAndRecoveryHelp(t *testing.T) {
+	var canonical bytes.Buffer
+	for _, topic := range []string{"passwords", "password"} {
+		var out, errOut bytes.Buffer
+		code := RunContext(context.Background(), []string{"docs", topic}, "test", strings.NewReader(""), &out, &errOut)
+		if code != 0 || errOut.Len() != 0 {
+			t.Fatalf("guide %s: code=%d stderr=%s", topic, code, &errOut)
+		}
+		if topic == "passwords" {
+			canonical.Write(out.Bytes())
+		} else if !bytes.Equal(canonical.Bytes(), out.Bytes()) {
+			t.Fatal("alias differs from canonical guide")
+		}
+		for _, want := range []string{"npx fleetsh edit hk1 --save-password", "not the server's password", "npx fleetsh docs password"} {
+			if !strings.Contains(out.String(), want) {
+				t.Fatalf("missing recovery instruction %q: %s", want, &out)
+			}
+		}
+	}
+	for _, args := range [][]string{{"--help"}, {"edit", "--help"}, {"docs", "--help"}, {"edit", "racknerd"}} {
+		var out, errOut bytes.Buffer
+		code := RunContext(context.Background(), args, "test", strings.NewReader(""), &out, &errOut)
+		if code != 0 && !(len(args) == 2 && args[1] == "racknerd" && code == 2) {
+			t.Fatalf("help %v: code=%d stderr=%s", args, code, &errOut)
+		}
+		if !strings.Contains(out.String()+errOut.String(), "--save-password") {
+			t.Fatalf("missing password recovery in %v", args)
 		}
 	}
 }

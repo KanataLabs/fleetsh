@@ -312,6 +312,33 @@ func TestAutomaticallySavedPasswordAuthenticatesGroupedExecution(t *testing.T) {
 	if err != nil || !strings.Contains(out, "fixture uptime") {
 		t.Fatalf("saved credential did not authenticate: %v %s", err, out)
 	}
+
+	// Correcting a saved typo must fix real SSH authentication using a new reference.
+	if _, err := hostCommand(t, path, store, passwordPrompt("wrong-fixture-password"), "edit", "vps", "--save-password"); err != nil {
+		t.Fatal(err)
+	}
+	wrongInventory, err := inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrongRef := wrongInventory.Hosts["vps"].Credential
+	if _, err := hostCommand(t, path, store, nil, "exec", "@lab", "uptime", "--json"); err == nil {
+		t.Fatal("wrong password authenticated")
+	}
+	if _, err := hostCommand(t, path, store, passwordPrompt(testutil.Password), "edit", "vps", "--save-password"); err != nil {
+		t.Fatal(err)
+	}
+	corrected, err := inventory.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if corrected.Hosts["vps"].Credential == wrongRef || store.values[wrongRef] != "wrong-fixture-password" {
+		t.Fatal("recovery reused or removed previous credential")
+	}
+	out, err = hostCommand(t, path, store, nil, "exec", "@lab", "uptime", "--json")
+	if err != nil || !strings.Contains(out, "fixture uptime") {
+		t.Fatalf("corrected password did not authenticate: %v %s", err, out)
+	}
 }
 
 func TestDefaultPasswordHostSavesWithoutAuthFlag(t *testing.T) {
@@ -378,5 +405,29 @@ func TestExistingAgentHostKeepsModeUntilPasswordEdit(t *testing.T) {
 	host := inv.Hosts["racknerd"]
 	if host.Auth != "password" || store.values[host.Credential] != "migration-fixture" || !slices.Contains(host.Groups, "web") {
 		t.Fatal("password migration did not save or retain host fields")
+	}
+}
+
+func TestBareEditPreservesInventory(t *testing.T) {
+	path := emptyInventory(t)
+	store := &recordingStore{values: map[string]string{}}
+	if _, err := hostCommand(t, path, store, nil, "add", "vps", "--host", "vps.example", "--user", "root", "--no-save-password"); err != nil {
+		t.Fatal(err)
+	}
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = hostCommand(t, path, store, func(string) (string, error) { t.Fatal("bare edit prompted"); return "", nil }, "edit", "vps", "--json")
+	var usage usageError
+	if !errors.As(err, &usage) || !strings.Contains(err.Error(), "--save-password") {
+		t.Fatalf("bare edit was accepted or lacks recovery advice: %v", err)
+	}
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) || len(store.values) != 0 {
+		t.Fatal("bare edit changed inventory or credentials")
 	}
 }

@@ -4,6 +4,7 @@ package cli
 import (
 	"embed"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +19,7 @@ type offlineTopic struct {
 var offlineTopics = []offlineTopic{
 	{"quickstart", "Start with your first VPS", "getting-started/"},
 	{"config", "Inventory paths, defaults and backup", "configuration/#storage"},
-	{"passwords", "Automatic password saving and shared credentials", "configuration/#passwords"},
+	{"passwords", "Save or correct a password (alias: password), and shared credentials", "configuration/#passwords"},
 	{"groups", "Multiple groups and incremental host edits", "configuration/#groups"},
 	{"selectors", "Target hosts, group unions and tag filters", "getting-started/"},
 	{"exec", "Parallel execution, quoting, sudo and JSON", "getting-started/"},
@@ -47,8 +48,12 @@ func (a *application) documentationCommand(root *cobra.Command) {
 				_, err := fmt.Fprintln(a.out, "\nCommand help: fleetsh COMMAND --help\n\nOnline editions:\n  English: "+documentationURL+"\n  Japanese: "+documentationSiteURL+"ja/\n  Chinese: "+documentationSiteURL+"zh/")
 				return err
 			}
+			name := args[0]
+			if name == "password" {
+				name = "passwords"
+			}
 			for _, topic := range offlineTopics {
-				if args[0] != topic.name {
+				if name != topic.name {
 					continue
 				}
 				content, err := offlineGuides.ReadFile("guides/" + topic.name + ".txt")
@@ -61,11 +66,12 @@ func (a *application) documentationCommand(root *cobra.Command) {
 				_, err = fmt.Fprintln(a.out, "\nDocumentation: "+documentationURL+topic.page)
 				return err
 			}
-			return fmt.Errorf("unknown documentation topic %q; run fleetsh docs to list topics", args[0])
+			return usageError{command: cmd, cause: fmt.Errorf("unknown documentation topic %q; available topics: %s (password is an alias for passwords)", args[0], strings.Join(cmd.ValidArgs, ", "))}
 		},
 	}
 	for _, topic := range offlineTopics {
 		cmd.ValidArgs = append(cmd.ValidArgs, topic.name)
 	}
+	cmd.ValidArgs = append(cmd.ValidArgs, "password")
 	root.AddCommand(cmd)
 }

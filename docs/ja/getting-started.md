@@ -217,6 +217,20 @@ JSON は `results` と `summary` を持ち、ホスト、終了状態、時間�
 複数種類のリモート失敗がある場合は、コマンド失敗を優先します。
 対話シェルのリモート終了状態が非ゼロの場合は 1、通信エラーの場合は 3 を返します。
 
+## ホストの編集と保存したパスワードの修正
+
+`edit HOST` には変更オプションが必要です。設定の確認には `show HOST` を使います。
+保存したパスワードを間違えた場合は、正しいサーバーのパスワードを 2 回入力します。
+
+```sh
+npx fleetsh edit hk1 --save-password
+npx fleetsh ssh hk1
+npx fleetsh docs password
+```
+
+変更するのはローカルの保存値だけです。[パスワードの修正](../configuration/#passwords)も参照してください。
+`npx fleetsh docs password` の空白を省略しないでください。`fleetshdocs` は別の npm パッケージです。
+
 ## Linux VPS を更新、再起動する
 
 ```sh

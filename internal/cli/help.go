@@ -25,7 +25,7 @@ var commandGuides = map[string]commandGuide{
 One Go binary; no central server or remote agent. Development build, GPL-3.0-only.
 
 Getting started:
-  Initialize an inventory, add a host, then connect to verify its SSH fingerprint.
+  Add a host (creates a missing inventory), then connect to verify its SSH fingerprint.
   Use --help on any command for flags and examples, or docs TOPIC for offline guides.
 
 Selectors (ls, exec, alive, stats, update, reboot):
@@ -41,6 +41,8 @@ Configuration:
   init is optional: it creates an empty commented example without overwriting.
   Otherwise use the OS user config directory. Run docs config for exact locations.
   Passwords live in the OS credential store; the inventory contains references.
+  Saved the wrong password? Run fleetsh edit HOST --save-password, then ssh HOST.
+  edit HOST requires a change option; use show HOST to inspect existing settings.
 
 Exit codes:
   0 success; 1 remote command failure, timeout or cancellation;
@@ -51,6 +53,7 @@ Exit codes:
 Offline guides: fleetsh docs`,
 		example: `  fleetsh add hk1 --host hk1.example.com --user ubuntu --auth password --groups web
   fleetsh ssh hk1
+  fleetsh edit hk1 --save-password
   fleetsh ls '@web'
   fleetsh exec '@web' "uptime" --parallel 5
   fleetsh update '@all' --dry-run --sudo
@@ -184,7 +187,14 @@ Run docs passwords, docs groups or docs proxies for more details.`,
 	"fleetsh edit": {
 		long: `Change only the supplied fields of an existing host; other fields are preserved.
 HOST is a required existing alias. The host alias remains the same.
-This command edits local configuration; omitted flags keep their saved values.
+At least one change option is required. Bare edit HOST displays this help.
+Use show HOST to inspect settings. Omitted flags keep their saved values.
+
+Saved the wrong password? Run edit HOST --save-password, enter the correct server
+password twice at the hidden prompts, then ssh HOST to verify it. This replaces
+only the locally saved password, not the password on the server. --auth password
+alone keeps an existing password reference. To switch from key/agent and save a
+password explicitly, use edit HOST --auth password --save-password.
 
 The resulting host must still have --host, --user for SSH, and --key with key
 authentication. You can omit these flags if their saved values meet the requirements.
@@ -201,13 +211,15 @@ Switching to password authentication without a reference saves automatically.
 --no-save-password detaches the reference and prompts on future connections.
 Detached/previous credentials remain in the OS store; remove them explicitly only
 when no other host needs them. Group-only edits never prompt for a password.`,
-		example: `  fleetsh edit hk1 --add-groups web,production
+		example: `  fleetsh edit hk1 --save-password
+  fleetsh ssh hk1
+  fleetsh edit hk1 --auth password --save-password
+  fleetsh edit hk1 --add-groups web,production
   fleetsh edit hk1 --remove-groups staging --add-groups production
   fleetsh edit hk1 --groups asia,web
   fleetsh edit hk1 --groups ""
-  fleetsh edit hk1 --save-password
   fleetsh edit hk1 --auth password --no-save-password`,
-		page: "configuration/#groups",
+		page: "configuration/",
 	},
 	"fleetsh rm": {
 		long: `Remove one host alias from the local inventory. No remote action is performed.
@@ -364,12 +376,17 @@ removal; it does not trust a new key. Shared/wildcard records may need manual re
 		long: `Read English documentation embedded in the binary, without an inventory, network
 connection or credential store. With no topic, list the available offline guides.
 Run docs TOPIC to read a guide. Output is plain text, including when --json is set.
+Topics: quickstart, config, passwords (alias: password), groups, selectors, exec,
+proxies, patching, monitoring, forwarding, troubleshooting.
+With npm, use npx fleetsh docs password (keep the space before docs).
+To correct a saved password: npx fleetsh edit HOST --save-password.
 
 The online documentation has separate English, Japanese and Chinese editions.
 English is the default. Links below are printed for reference; no browser is opened.`,
 		example: `  fleetsh docs
   fleetsh docs quickstart
   fleetsh docs config
+  fleetsh docs password
   fleetsh docs passwords
   fleetsh docs groups
   fleetsh docs patching`,

@@ -15,7 +15,8 @@ Configuration issues:
   init is optional and creates an empty example without overwriting files.
   Other commands report a missing inventory and suggest add or init.
   Invalid or unreadable inventories are never replaced automatically.
-  If a host already exists, use edit HOST; do not repeat add to update it.
+  If a host already exists, use edit HOST with a change option, such as --user root.
+  Bare edit HOST shows help; show HOST prints current settings.
   Use the same --config PATH on every command for a custom inventory.
   Use show HOST to inspect its alias, address, auth mode and references.
   Empty target selections and unknown hosts/groups are errors.
@@ -42,7 +43,15 @@ Authentication and credentials:
     fleetsh edit HOST --auth password
     fleetsh ssh HOST
 
-  The edit prompts twice and saves without a separate credential command.
+  Switching from agent to password prompts twice and saves without a separate
+  credential command. If a password was already saved incorrectly, replace it:
+
+    npx fleetsh edit HOST --save-password
+    npx fleetsh ssh HOST
+
+  This corrects the local saved copy, not the server's password. --auth password
+  alone keeps an existing password reference. Read npx fleetsh docs password.
+  Use spaces between fleetsh, docs and password; fleetshdocs is another package.
   For a private key, use edit HOST --auth key --key PATH. Keep --config PATH
   on both commands when using a custom inventory.
   Encrypted keys can use a passphrase credential; password auth can use a stored
