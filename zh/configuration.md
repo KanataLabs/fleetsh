@@ -225,6 +225,27 @@ fleetsh show sg1
 主机设置会在输入密码前完成校验。输入或存储失败不会改变清单；
 如果清单写入失败，会删除此次新保存的秘密值。
 
+### 修改保存错的密码
+
+添加主机时输错了密码，可直接替换本地保存的密码：
+
+```sh
+npx fleetsh edit sg1 --save-password
+npx fleetsh ssh sg1
+npx fleetsh docs password
+```
+
+在隐藏提示中输入两遍正确的服务器密码，无需手动创建或查找 credential。
+这只修改本地保存的密码，不会修改服务器密码。原引用会保留，避免影响其他共用主机。
+
+单独指定 `--auth password` 会保留已有的密码引用。若从 key 或 agent 切换为密码并明确保存，
+使用 `npx fleetsh edit sg1 --auth password --save-password`。
+自定义清单需在每个命令中都指定相同的 `--config PATH`。
+
+`edit HOST` 必须带至少一个修改选项，省略时显示帮助；查看配置请用 `show HOST`。
+`docs password` 和 `docs passwords` 打开同一份指南。
+注意 `npx fleetsh docs password` 中的空格；`npx fleetshdocs` 会向 npm 请求另一个包。
+
 ### 在系统中识别 fleetsh 创建的凭据
 
 | 平台 | 可见标识 |

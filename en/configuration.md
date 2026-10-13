@@ -236,6 +236,30 @@ Do not combine a nonempty reference with password-saving options.
 Host settings are validated before prompting. Failed input or storage leaves the
 inventory unchanged; a newly saved secret is removed if inventory persistence fails.
 
+### Correct a saved password
+
+If you entered the wrong password when adding a host, replace its local saved copy:
+
+```sh
+npx fleetsh edit sg1 --save-password
+npx fleetsh ssh sg1
+npx fleetsh docs password
+```
+
+Enter the correct server password twice at the hidden prompts. No manual credential
+creation is needed. This updates the local saved copy; it does not change the
+server's password. The previous reference remains available to other hosts.
+
+`--auth password` alone keeps an existing password reference. To switch from key
+or agent authentication and explicitly save a password, use
+`npx fleetsh edit sg1 --auth password --save-password`.
+Repeat `--config PATH` on every command if you use a custom inventory.
+
+`edit HOST` requires at least one change option and shows help when none is given.
+Use `show HOST` to inspect current settings. `docs password` and `docs passwords`
+open the same guide. Keep the space in `npx fleetsh docs password`;
+`npx fleetshdocs` instead asks npm for a different package.
+
 ### Recognize fleetsh credentials
 
 | Platform | Visible identification |

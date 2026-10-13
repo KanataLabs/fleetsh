@@ -203,6 +203,20 @@ JSON 包含 `results` 和 `summary`，记录主机、退出状态、耗时、错
 包括连接超时。混合远程错误中命令失败优先。
 交互远程 shell 非零退出返回 1，传输失败返回 3。
 
+## 编辑主机与修正保存错的密码
+
+`edit HOST` 必须带修改选项；查看当前配置请用 `show HOST`。
+如果保存时输错密码，可重新输入两遍正确的服务器密码：
+
+```sh
+npx fleetsh edit hk1 --save-password
+npx fleetsh ssh hk1
+npx fleetsh docs password
+```
+
+这只修改本地保存值，详见[密码修正说明](../configuration/#passwords)。
+注意 `npx fleetsh docs password` 中的空格；`fleetshdocs` 是另一个 npm 包名。
+
 ## 更新与重启 Linux VPS
 
 ```sh

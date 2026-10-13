@@ -216,6 +216,20 @@ canceled/timed out; 2 local usage/configuration/credential preparation error;
 A command failure takes precedence in mixed remote failures. Interactive shell
 nonzero remote exit status returns 1; transport failure returns 3.
 
+## Edit a host or correct a saved password
+
+`edit HOST` requires a change option; `show HOST` prints current settings.
+If you saved a password incorrectly, enter the correct server password twice:
+
+```sh
+npx fleetsh edit hk1 --save-password
+npx fleetsh ssh hk1
+npx fleetsh docs password
+```
+
+This updates the locally saved copy only. See [password recovery](../configuration/#passwords).
+Keep the spaces in `npx fleetsh docs password`; `fleetshdocs` is a different npm package.
+
 ## Update and reboot Linux VPSs
 
 ```sh
