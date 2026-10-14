@@ -11,8 +11,8 @@ page_key: 'getting-started/'
 
 # 使い始める
 
-fleetsh は v0.1 の基本的な操作を実装しています。現在は開発版です。
-[インストールと PATH の設定](../installation/)を行うと、どのディレクトリからでも実行できます。
+最初にホストを 1 台追加し、SSH ログインを確認します。
+コマンドが PATH にない場合は[インストールと PATH](../installation/)を参照してください。
 
 ## npx または npm で実行する
 

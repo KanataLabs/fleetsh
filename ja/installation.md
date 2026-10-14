@@ -11,7 +11,8 @@ page_key: 'installation/'
 実行ファイルを常設ディレクトリに配置し、その**ディレクトリ**を PATH に追加すると、
 どの作業ディレクトリからでも `fleetsh` を実行できます。
 実行時に Go、Python、Node.js のランタイムは不要です。
-現在はソースから開発版をビルドできます。Go プログラムの安定版はまだありません。
+[GitHub Releases](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1)
+から `v0.1.0-beta.1` をダウンロードするか、ソースからビルドできます。
 
 ## npx で実行、または npm でインストールする
 
@@ -52,7 +53,7 @@ npm パッケージの再公開はランチャー自体を変更するときだ�
 npx fleetsh --release latest stats
 npx fleetsh --release preview stats
 npx fleetsh --release bundled version
-npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release v0.1.0-beta.1 stats
 npx fleetsh --refresh version
 npx fleetsh --offline stats
 npx fleetsh --launcher-help
@@ -69,7 +70,7 @@ npx fleetsh --launcher-help
 | `--launcher-help` | Go のダウンロードや起動なしでランチャーのヘルプを表示 |
 
 グローバルインストール後も `fleetsh --release bundled version` または
-`fleetsh --release v0.1.0-alpha.1 stats` を使用できます。
+`fleetsh --release v0.1.0-beta.1 stats` を使用できます。
 環境変数 `FLEETSH_RELEASE`、`FLEETSH_REFRESH=1`、`FLEETSH_OFFLINE=1` でも設定でき、
 コマンドラインの指定が優先されます。
 

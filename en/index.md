@@ -6,18 +6,16 @@ locale: en
 page_key: ''
 ---
 
-# Your VPS fleet, one shell away.
+# Manage your VPS hosts
 
-fleetsh is a lightweight VPS manager built in Go for individual developers and
-small teams. One binary, agentless SSH and operating-system credential stores on
-Windows, macOS and Linux.
+fleetsh stores VPS connection settings locally and runs commands over SSH.
+It works on Windows, macOS and Linux. Saved passwords use the operating system's
+credential store.
 
-> **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
-> update and reboot are implemented and tested with local fixtures.
-> There is no stable release yet.
+> Current release: **v0.1.0-beta.1**. [Release notes](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1).
 
 [Install and register PATH](installation/) · [Get started](getting-started/) ·
-[Read the product brief](product/) · [Roadmap](roadmap/)
+[About fleetsh](product/) · [Roadmap](roadmap/)
 
 [Use cases: patch every VPS](cases/patch-all-vps/)
 
@@ -40,15 +38,6 @@ npm install -g fleetsh
 The launcher follows GitHub Releases automatically. Use `--release bundled`
 for the original binary or `--release vVERSION` for a fixed Go version.
 See [npx/npm usage and version selection](installation/).
-
-## Principles
-
-- A single binary, without a language runtime or remote agent.
-- No central server or infrastructure automation DSL.
-- Portable TOML inventory, with no plaintext passwords.
-- Strict host key verification, including jump hosts.
-- Bounded concurrency, deadlines and structured per-host results.
-- Explicit consent for updates/reboots and boot identity verification.
 
 ## Open development
 

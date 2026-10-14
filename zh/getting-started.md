@@ -11,8 +11,8 @@ page_key: 'getting-started/'
 
 # 快速开始
 
-fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
-先参考 [安装与全局 PATH 注册](../installation/)，让命令在任意目录可用。
+先添加一台主机，确认 SSH 可以登录。
+命令尚未加入 PATH 时，请看[安装与 PATH](../installation/)。
 
 ## 使用 npx 或 npm 运行
 

@@ -6,17 +6,15 @@ locale: zh
 page_key: ''
 ---
 
-# 一个命令，管理你的 VPS。
+# 管理 VPS 主机
 
-fleetsh 是面向个人开发者和小团队的轻量 VPS 管理工具，使用 Go 编写。
-一个二进制文件即可在 Windows、macOS 和 Linux 上运行，通过 SSH 连接，
-并使用操作系统的凭据库保存密码。
+fleetsh 用于保存 VPS 连接信息、登录 SSH 和批量运行命令。
+支持 Windows、macOS、Linux，密码保存在系统凭据库。
 
-> **当前为开发版。** 已实现主机管理、SSH、凭据、代理、并发命令、更新和重启，
-> 并通过本地测试环境验证；尚未发布稳定版。
+> 当前版本：**v0.1.0-beta.1**。[发行说明](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1)。
 
 [安装与 PATH 注册](installation/) · [快速开始](getting-started/) ·
-[产品设计](product/) · [路线图](roadmap/)
+[关于 fleetsh](product/) · [路线图](roadmap/)
 
 [使用案例：给所有 VPS 打补丁](cases/patch-all-vps/)
 
@@ -38,15 +36,6 @@ npm install -g fleetsh
 
 启动器自动跟随 GitHub Release。命令前加 `--release bundled` 使用原版，
 或 `--release vVERSION` 固定 Go 版本。详见 [npx/npm 运行和版本选择](installation/)。
-
-## 设计原则
-
-- 单个二进制文件，无需语言运行时或远程代理。
-- 无需中心服务器或基础设施自动化配置语言。
-- 使用可迁移的 TOML 主机清单，不保存明文密码。
-- 严格验证主机密钥，包括跳板主机。
-- 限制并发、设置超时，并为每台主机返回结构化结果。
-- 更新和重启需要明确确认，重启后验证启动标识。
 
 ## 开源开发
 

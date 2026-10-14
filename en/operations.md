@@ -8,8 +8,9 @@ page_key: 'operations/'
 
 # Daily operations
 
-These commands are available from Go v0.1.0-alpha.7. CLI help and offline guides
-default to English. Use the same `--config PATH` on every command for a custom inventory.
+Use these commands to edit hosts, diagnose connections and run everyday tasks.
+CLI help is in English. If you use a custom inventory, pass the same
+`--config PATH` on every command.
 
 <a id="interactive"></a>
 
