@@ -8,61 +8,32 @@ page_key: 'roadmap/'
 
 # Roadmap
 
-## Current: v0.1 development implementation
+The current release is **v0.1.0-beta.1**.
+[Release notes](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1)
 
-- [x] Public Go repository in KanataLabs, GPL-3.0-only.
-- [x] Inventory add/edit/rm/ls/show, groups/tags, console-only assets.
-- [x] Keys (including encrypted keys), passwords and SSH agent.
-- [x] Native OS credential adapters and private terminal input.
-- [x] Direct SSH, ProxyJump, global/per-host SOCKS5 and HTTP/HTTPS CONNECT.
-- [x] One-command SSH liveness and Linux CPU/memory/swap/user/disk snapshots.
-- [x] Named local, remote and dynamic TCP port forwards.
-- [x] Interactive PTY/shell, host key trust/show/reset, keepalive and deadlines.
-- [x] Single/batch exec, worker bounds, per-host results, JSON and output limits.
-- [x] Linux update with OS detection, dry run and confirmation.
-- [x] Reboot with reconnect, new boot ID and health probe.
-- [x] Channel-based sudo credential input and serial execution.
-- [x] Cross-platform CI, release packaging workflow, main-to-gh-pages publishing.
-- [x] Windows/macOS/Linux user/system PATH installation instructions.
-- [ ] First stable release binaries and checksums (alpha tags are development builds).
-- [ ] Manual real-VPS acceptance before declaring a stable release.
+## Available now
 
-Implemented features are tested with local fixtures. This is a development build;
-no stable version has been published.
+- Host inventories, overlapping groups, tags and terminal-guided add/edit.
+- SSH with passwords, keys, an agent, proxies or jump hosts; saved passwords use the OS credential store.
+- Connection diagnosis, liveness checks and Linux resource snapshots with table/watch output.
+- Batch commands, saved commands, package updates, restart checks and reboot batches with health verification.
+- Local, remote and dynamic port forwards; single-file SFTP upload/download.
+- Restricted OpenSSH import, TOML/JSON/OpenSSH export and shell completion.
 
-## v0.2: convenience and interoperability
+See [daily operations](../operations/) for examples and limits.
 
-- [x] Restart requirement checks with explicit unknown results.
-- [x] Saved commands and `run`.
-- [x] Restricted OpenSSH config import and TOML/JSON/OpenSSH export.
-- [x] Rolling reboot batches that stop after a failure.
-- [ ] Connection retry and general rolling command execution.
+## Next
 
-Interactive add/edit, read-only SSH diagnostics and table/watch monitoring are
-also implemented. See [everyday operations](../operations/).
+- More coverage of real terminal/PTY behavior and long-running SSH sessions.
+- OS-aware saved commands.
+- Optional command history with redaction and retention settings.
+- Connection retry rules that cannot repeat a remote command unintentionally.
 
-## v0.3: transfers and interactive tooling
+## Release checks
 
-- [x] Single-file SFTP upload/download.
-- [ ] OS-aware command profiles.
-- [ ] Opt-in history/logs with redaction and retention policy.
-- [x] Bash/Zsh/Fish/PowerShell completion.
-- [ ] Optional TUI.
+Before a release, run the Go unit and local SSH/SFTP tests, `go vet` and the npm
+launcher tests. CI also checks race conditions, native credential stores and
+builds on Windows, macOS and Linux. Release packages contain their licenses and
+SHA-256 checksums.
 
-## Release gates
-
-- [x] Target/jump key verification, unknown-key refusal and changed-key rejection.
-- [x] Plaintext-secret field rejection and channel-based sudo.
-- [x] Authenticated proxies and cancellation tested with local fixtures.
-- [x] Worker limits, output truncation and mixed-failure exit codes tested.
-- [x] Update confirmation/preflight and reboot identity verification tested.
-- [x] CGO-free single binaries across OS/architectures.
-- [x] Native credential integration CI passed on all supported platforms.
-- [ ] Manual terminal/PTY acceptance and real-VPS action verification.
-- [ ] Reviewed, tagged release.
-
-## Non-goals
-
-Complex YAML playbooks, desired-state configuration, template languages, roles,
-collections, remote agents, a central daemon, Web UI, scheduling, Terraform
-replacement, Kubernetes management, service discovery and CMDB.
+The current test fixtures do not modify your inventory or contact your VPSs.

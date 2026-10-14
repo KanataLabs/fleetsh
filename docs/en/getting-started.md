@@ -11,9 +11,8 @@ In scripts and with `--json`, supply the required flags explicitly. See [interac
 
 # Getting started
 
-fleetsh now implements the core v0.1 workflow. It is a development build, not a
-stable release. See [installation and PATH registration](../installation/) to make
-the command available from any directory.
+Start by adding one host and checking its SSH login. See
+[installation and PATH](../installation/) if the command is not on your PATH.
 
 ## Run with npx or npm
 

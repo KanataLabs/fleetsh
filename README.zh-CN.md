@@ -5,8 +5,7 @@ macOS、Linux 上运行；无需远程 Agent 或中心服务器。
 
 [文档站](https://kanatalabs.github.io/fleetsh/zh/) · [安装及全局 PATH 注册](docs/zh/installation.md) · [English](README.md) · [日本語](https://kanatalabs.github.io/fleetsh/ja/)
 
-**当前为开发版。** 已实现主机管理、SSH、系统凭据、跳板/SOCKS5、并发命令、更新和
-重启验证；尚未发布稳定版。
+**当前版本：`v0.1.0-beta.1`。** 变更见[发行说明](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1)。
 
 ## 安装与 PATH
 
@@ -18,15 +17,15 @@ npx fleetsh stats
 npm install -g fleetsh
 ```
 
-npm 包作为长期使用的启动器自动跟随 GitHub Release，优先正式版，
-没有正式版时使用预览版。以后 Go 更新无需再发 npm 包；仅启动器自身更新才发 npm。
-没有运行时 npm 依赖、安装钩子或平台子包，npm 与 Go 程序的版本独立。
+npm 包从 GitHub Releases 下载并缓存 Go 程序，优先选择正式版，
+没有正式版时使用最新预览版。Go 更新不需要重新发布 npm 包。
+想立即检查新版，可在命令前加 `--refresh`。
 
 命令行可选择原版或固定某个 Go 版本：
 
 ```sh
 npx fleetsh --release bundled version
-npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release v0.1.0-beta.1 stats
 npx fleetsh --release preview stats
 npx fleetsh --refresh version
 npx fleetsh --offline stats
@@ -35,9 +34,8 @@ npx fleetsh --launcher-help
 
 npm 的 `latest` 标签提供独立的启动器 `0.1.0`，它下载的 Go 程序仍可能是预览版。
 
-旧 npm 启动器 `0.1.0-alpha.1` 为固定版本模式，先更新一次至
-`0.1.0-alpha.2` 或更新版本。发行信息默认缓存一小时，详细策略见
-[安装文档](docs/zh/installation.md)。直接运行二进制不需要 Node.js；
+缓存、离线运行与 PATH 设置见[安装文档](docs/zh/installation.md)。
+直接运行二进制不需要 Node.js；
 也可从[发行页](https://github.com/KanataLabs/fleetsh/releases)下载，或从源码构建：
 
 ```sh

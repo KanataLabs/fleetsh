@@ -172,7 +172,7 @@ func ParseSSHConfig(reader io.Reader, fallbackUser string) (SSHImport, error) {
 		}
 		if value := values["port"]; value != "" {
 			port, err := strconv.Atoi(value)
-			if err != nil {
+			if err != nil || port < 1 || port > 65535 {
 				return result, fmt.Errorf("Host %s has an invalid Port. Use a number between 1 and 65535.", alias)
 			}
 			h.Port = port

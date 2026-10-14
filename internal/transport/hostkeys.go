@@ -79,7 +79,7 @@ func (k *HostKeys) Callback(ctx context.Context) ssh.HostKeyCallback {
 		if !errors.As(err, &mismatch) || len(mismatch.Want) > 0 {
 			return errors.New("HOST KEY CHANGED or host identity could not be verified")
 		}
-		if k.Trust == nil || !k.Trust(ctx, addr, key) {
+		if k.ReadOnly || k.Trust == nil || !k.Trust(ctx, addr, key) {
 			return fmt.Errorf("unknown host key for %s (%s); connect interactively to verify and trust", addr, ssh.FingerprintSHA256(key))
 		}
 		if ctx.Err() != nil {

@@ -8,8 +8,8 @@ page_key: 'security/'
 
 # Security design
 
-fleetsh is a development build. The following implemented controls and remaining
-release checks guide contributors.
+Passwords are stored in the OS credential store. SSH connections verify the
+server key before login. This page describes how those checks work.
 
 ## Secrets
 

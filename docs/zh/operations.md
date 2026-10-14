@@ -8,7 +8,7 @@ page_key: 'operations/'
 
 # 日常操作
 
-以下功能已在开发版实现。CLI 帮助和离线指南默认英语。
+本页介绍主机编辑、连接诊断和日常操作。CLI 帮助默认使用英语。
 使用自定义清单时，每条命令都需指定相同的 `--config PATH`。
 
 <a id="interactive"></a>

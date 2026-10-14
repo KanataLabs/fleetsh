@@ -9,8 +9,9 @@ page_key: 'installation/'
 # 安装与全局 PATH 注册
 
 将二进制文件放进固定目录，再把**目录**加入 PATH，就可以在任意工作目录运行
-`fleetsh`。运行时不需要 Go、Python 或 Node.js；目前可从源码构建开发版，
-还没有发布 Go 稳定版。
+`fleetsh`。二进制运行时不需要 Go、Python 或 Node.js。
+可从[发行页](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1)
+下载 `v0.1.0-beta.1`，也可以从源码构建。
 
 ## 使用 npx 或通过 npm 安装
 
@@ -48,7 +49,7 @@ npm 会在全局可执行文件目录建立命令入口。Windows 使用 `npm co
 npx fleetsh --release latest stats
 npx fleetsh --release preview stats
 npx fleetsh --release bundled version
-npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release v0.1.0-beta.1 stats
 npx fleetsh --refresh version
 npx fleetsh --offline stats
 npx fleetsh --launcher-help
@@ -65,7 +66,7 @@ npx fleetsh --launcher-help
 | `--launcher-help` | 查看启动器帮助，不下载或启动 Go 程序 |
 
 全局安装后同样可以运行 `fleetsh --release bundled version` 或
-`fleetsh --release v0.1.0-alpha.1 stats`。
+`fleetsh --release v0.1.0-beta.1 stats`。
 也可设置 `FLEETSH_RELEASE`、`FLEETSH_REFRESH=1`、`FLEETSH_OFFLINE=1`；
 命令行选项优先于环境变量。
 

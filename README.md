@@ -8,8 +8,7 @@ One Go binary for Windows, macOS and Linux, without a central server or remote a
 
 [Documentation](https://kanatalabs.github.io/fleetsh/en/) · [Install / PATH](https://kanatalabs.github.io/fleetsh/en/installation/) · [日本語](https://kanatalabs.github.io/fleetsh/ja/) · [中文](README.zh-CN.md) · [Roadmap](docs/en/roadmap.md)
 
-> **Development build.** Core inventory, SSH, credentials, proxies, parallel exec,
-> update and reboot are implemented. There is no stable Go release yet.
+> **Beta:** `v0.1.0-beta.1`. See the [release notes](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1).
 
 ## Install
 
@@ -21,26 +20,23 @@ npx fleetsh stats
 npm install -g fleetsh
 ```
 
-The single npm package is a persistent launcher: it automatically follows GitHub
-Releases, preferring stable versions and using previews only while none exist.
-New Go releases do not need npm publications. There are no runtime npm dependencies
-or install hooks. Go and npm launcher versions are independent. npm's `latest`
-tag delivers launcher `0.1.0`; the selected Go program may still be a preview.
+The npm package downloads and caches the Go binary from GitHub Releases.
+It prefers a stable release; when none exists, it uses the newest preview.
+Go releases update independently of the npm launcher. Use `--refresh` to check
+for a new release immediately.
 
 Select an original or exact Go version from the command line:
 
 ```sh
 npx fleetsh --release bundled version
-npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release v0.1.0-beta.1 stats
 npx fleetsh --release preview stats
 npx fleetsh --refresh version
 npx fleetsh --offline stats
 npx fleetsh --launcher-help
 ```
 
-The original npm launcher `0.1.0-alpha.1` is pinned; update it once to launcher
-`0.1.0-alpha.2` or newer. See [installation](docs/en/installation.md) for
-one-hour metadata caching, offline behavior and global PATH setup.
+See [installation](docs/en/installation.md) for caching, offline use and PATH setup.
 Direct binaries do not require Node.js; [release archives](https://github.com/KanataLabs/fleetsh/releases)
 and source builds remain available.
 

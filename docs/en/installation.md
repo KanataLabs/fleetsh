@@ -10,8 +10,9 @@ page_key: 'installation/'
 
 Place the binary in a permanent directory and add that **directory** to PATH
 to run `fleetsh` from any working directory. No Go, Python or Node.js runtime
-is required to run the binary. You can currently build the development version
-from source; no stable Go release is available yet.
+is required to run the binary. Download `v0.1.0-beta.1` from
+[GitHub Releases](https://github.com/KanataLabs/fleetsh/releases/tag/v0.1.0-beta.1),
+or build it from source.
 
 ## Run with npx or install with npm
 
@@ -52,7 +53,7 @@ Place launcher options **before** the Go command:
 npx fleetsh --release latest stats
 npx fleetsh --release preview stats
 npx fleetsh --release bundled version
-npx fleetsh --release v0.1.0-alpha.1 stats
+npx fleetsh --release v0.1.0-beta.1 stats
 npx fleetsh --refresh version
 npx fleetsh --offline stats
 npx fleetsh --launcher-help
@@ -69,7 +70,7 @@ npx fleetsh --launcher-help
 | `--launcher-help` | Show launcher help without downloading or starting Go |
 
 The same options work after global installation:
-`fleetsh --release bundled version` or `fleetsh --release v0.1.0-alpha.1 stats`.
+`fleetsh --release bundled version` or `fleetsh --release v0.1.0-beta.1 stats`.
 Environment alternatives are `FLEETSH_RELEASE`, `FLEETSH_REFRESH=1` and
 `FLEETSH_OFFLINE=1`; command-line options take precedence.
 
