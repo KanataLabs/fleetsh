@@ -32,20 +32,21 @@ no stable version has been published.
 
 ## v0.2: convenience and interoperability
 
-- [ ] status and reboot-required.
-- [ ] Custom command aliases and `run`.
-- [ ] OpenSSH config import and TOML/JSON/OpenSSH export.
-- [ ] Connection retry and rolling execution.
+- [x] Restart requirement checks with explicit unknown results.
+- [x] Saved commands and `run`.
+- [x] Restricted OpenSSH config import and TOML/JSON/OpenSSH export.
+- [x] Rolling reboot batches that stop after a failure.
+- [ ] Connection retry and general rolling command execution.
 
-HTTP CONNECT and basic snapshots are implemented. Custom aliases/`run` remain v0.2. sudo credential references and serial execution
-were implemented alongside the core executor.
+Interactive add/edit, read-only SSH diagnostics and table/watch monitoring are
+also implemented. See [everyday operations](../operations/).
 
 ## v0.3: transfers and interactive tooling
 
-- [ ] SFTP upload/download.
+- [x] Single-file SFTP upload/download.
 - [ ] OS-aware command profiles.
 - [ ] Opt-in history/logs with redaction and retention policy.
-- [ ] Bash/Zsh/PowerShell completion.
+- [x] Bash/Zsh/Fish/PowerShell completion.
 - [ ] Optional TUI.
 
 ## Release gates

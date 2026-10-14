@@ -30,7 +30,7 @@
 <nav aria-label="{{ labels.navigation }}">
 <p>{{ labels.start }}</p>
 <a href="{{ prefix | relative_url }}"{% if page.page_key == '' %} aria-current="page"{% endif %}>{{ labels.overview }}</a>
-{% assign start_pages = 'installation,getting-started,configuration,cases' | split: ',' %}
+{% assign start_pages = 'installation,getting-started,configuration,operations,cases' | split: ',' %}
 {% for slug in start_pages %}{% assign key = slug | append: '/' %}{% assign path = prefix | append: key %}
 <a href="{{ path | relative_url }}"{% if page.page_key == key %} aria-current="page"{% endif %}>{{ labels[slug] }}</a>
 {% endfor %}
