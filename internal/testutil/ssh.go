@@ -19,6 +19,7 @@ import (
 	"github.com/KanataLabs/fleetsh/internal/credentials"
 	"github.com/KanataLabs/fleetsh/internal/inventory"
 	"github.com/KanataLabs/fleetsh/internal/transport"
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
@@ -64,6 +65,7 @@ func StartSSH(t *testing.T, handler Handler) *Server {
 		t.Fatal(err)
 	}
 	s := &Server{Address: listener.Addr().String(), Key: serverKey, ClientKey: clientKey, Private: private, listener: listener, conns: map[net.Conn]bool{}}
+	sftpHandlers := sftp.InMemHandler()
 	config := &ssh.ServerConfig{
 		PasswordCallback: func(meta ssh.ConnMetadata, password []byte) (*ssh.Permissions, error) {
 			if string(password) != Password {
@@ -120,6 +122,18 @@ func StartSSH(t *testing.T, handler Handler) *Server {
 								if req.Type == "pty-req" || req.Type == "window-change" {
 									_ = req.Reply(true, nil)
 									continue
+								}
+								if req.Type == "subsystem" {
+									var payload struct{ Name string }
+									if ssh.Unmarshal(req.Payload, &payload) != nil || payload.Name != "sftp" {
+										_ = req.Reply(false, nil)
+										return
+									}
+									_ = req.Reply(true, nil)
+									server := sftp.NewRequestServer(ch, sftpHandlers)
+									defer server.Close()
+									_ = server.Serve()
+									return
 								}
 								if req.Type != "exec" && req.Type != "shell" {
 									_ = req.Reply(false, nil)

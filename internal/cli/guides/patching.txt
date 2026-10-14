@@ -44,3 +44,8 @@ which hosts need a reboot, use a group or explicit aliases:
 
 The reboot dry run makes no connections. Actual reboots require confirmation;
 verification requires a new boot ID and a successful uptime probe.
+
+Check restart requirements with fleetsh reboot-required '@all'. Unknown means
+the OS has no supported check. update --check-reboot checks after updates.
+Use reboot '@all' --batch-size 1 for rolling restarts: each batch must pass
+new boot-ID and health checks before the next begins. A failure stops later batches.

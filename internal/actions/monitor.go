@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package actions
 
+// RebootRequired reports an explicit unknown result where no supported check exists.
+const RebootRequired = `set -e
+if [ -e /var/run/reboot-required ]; then
+  printf 'Restart required: yes (the operating system requested it).\n'
+elif command -v needs-restarting >/dev/null 2>&1; then
+  status=0
+  needs-restarting -r >/dev/null 2>&1 || status=$?
+  case "$status" in
+    0) printf 'Restart required: no.\n' ;;
+    1) printf 'Restart required: yes.\n' ;;
+    *) printf 'Restart requirement: unknown (needs-restarting failed).\n' ;;
+  esac
+elif [ -r /etc/os-release ]; then
+  . /etc/os-release
+  case "$ID" in
+    debian|ubuntu) printf 'Restart required: no (no reboot-required marker).\n' ;;
+    *) printf 'Restart requirement: unknown; this operating system has no supported check available.\n' ;;
+  esac
+else
+  printf 'Restart requirement: unknown; operating system information is unavailable.\n'
+fi`
+
 const Alive = "printf 'alive\\n'"
 
 // Stats takes a Linux snapshot without installing a remote agent or using sudo.
@@ -31,4 +53,6 @@ awk '
     printf "SWAP: %.0f / %.0f MiB (%.1f%% used)\n", (st-sf)/1024, st/1024, (st>0 ? 100*(st-sf)/st : 0);
   }' /proc/meminfo
 printf 'DISK: filesystem / size / used / available / use%% / mount\n'
-df -h -P`
+df -h -P
+printf 'ROOT_FREE: '
+df -h -P / | awk 'NR==2 {print $4}'`

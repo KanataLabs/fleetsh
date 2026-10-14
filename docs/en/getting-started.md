@@ -6,6 +6,9 @@ locale: en
 page_key: 'getting-started/'
 ---
 
+In a terminal, missing add fields are prompted interactively: `fleetsh add hk1`.
+In scripts and with `--json`, supply the required flags explicitly. See [interactive setup](../operations/#interactive).
+
 # Getting started
 
 fleetsh now implements the core v0.1 workflow. It is a development build, not a
@@ -36,7 +39,7 @@ Run `npx fleetsh --launcher-help` or read
 
 ## Help and offline guides
 
-The binary includes English command help with examples and eleven offline guides.
+The binary includes English command help with examples and English offline guides.
 Help and guides work before `init`, without an inventory, network connection or
 credential store. Online editions remain separate; English is the default.
 
@@ -218,7 +221,9 @@ nonzero remote exit status returns 1; transport failure returns 3.
 
 ## Edit a host or correct a saved password
 
-`edit HOST` requires a change option; `show HOST` prints current settings.
+In a terminal, `edit HOST` opens a menu; scripts and `--json` require a change
+option. `show HOST` prints current settings. See [everyday operations](../operations/)
+for guided setup, diagnostics, monitoring, saved commands and file transfers.
 If you saved a password incorrectly, enter the correct server password twice:
 
 ```sh

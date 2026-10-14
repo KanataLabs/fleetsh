@@ -19,3 +19,6 @@ The executable is GPL-3.0-only. The following upstream licenses and notices are 
 - golang.org/x/net v0.59.0: [LICENSE](licenses/golang.org_x_net.LICENSE).
 - golang.org/x/sys v0.48.0: [LICENSE](licenses/golang.org_x_sys.LICENSE).
 - golang.org/x/term v0.46.0: [LICENSE](licenses/golang.org_x_term.LICENSE).
+
+- github.com/pkg/sftp v1.13.11: [LICENSE](licenses/github.com_pkg_sftp.LICENSE).
+- github.com/kr/fs v0.1.0: [LICENSE](licenses/github.com_kr_fs.LICENSE).

@@ -1,0 +1,28 @@
+Saved commands and completion
+=============================
+Add to config.toml:
+  [commands.disk]
+  command = "df -h"
+  timeout = "30s"
+
+  [commands.docker-update]
+  command = "docker compose pull && docker compose up -d"
+  sudo = true
+  timeout = "10m"
+
+  fleetsh run '@web' docker-update --dry-run
+  fleetsh run '@web' docker-update --parallel 2
+  fleetsh run hk1 disk --json
+
+SELECTOR and NAME are required. --sudo and --timeout override saved defaults.
+Dry runs do not connect or read secrets. Commands never retry automatically.
+Do not put passwords or tokens in command definitions.
+
+Install the binary or npm install -g fleetsh, then generate completion:
+  fleetsh completion powershell > fleetsh-completion.ps1
+  fleetsh completion bash > fleetsh-completion.bash
+
+PowerShell: dot-source the script, e.g. . ./fleetsh-completion.ps1
+Bash: source fleetsh-completion.bash
+Completion reads local aliases/groups/command names, never credentials.
+Use the fleetsh command on PATH; completion for npx depends on your shell.

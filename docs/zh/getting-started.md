@@ -6,6 +6,9 @@ locale: zh
 page_key: 'getting-started/'
 ---
 
+在终端中，`fleetsh add hk1` 会询问缺少的字段；脚本和 `--json` 需显式提供必填选项。
+详见[交互设置](../operations/#interactive)。
+
 # 快速开始
 
 fleetsh 已实现 v0.1 的核心流程，目前仍是开发版。
@@ -205,7 +208,9 @@ JSON 包含 `results` 和 `summary`，记录主机、退出状态、耗时、错
 
 ## 编辑主机与修正保存错的密码
 
-`edit HOST` 必须带修改选项；查看当前配置请用 `show HOST`。
+交互终端中，`edit HOST` 打开菜单；脚本和 `--json` 必须带修改选项。
+查看配置请用 `show HOST`。交互设置、诊断、持续监控、保存命令和文件传输见
+[日常操作](../operations/)。
 如果保存时输错密码，可重新输入两遍正确的服务器密码：
 
 ```sh

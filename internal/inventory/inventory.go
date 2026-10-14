@@ -47,9 +47,10 @@ type Host struct {
 func (h Host) Address() string { return net.JoinHostPort(h.Host, strconv.Itoa(h.Port)) }
 
 type Inventory struct {
-	Defaults    Defaults        `toml:"defaults" json:"defaults"`
-	Credentials []string        `toml:"credentials,omitempty" json:"credentials,omitempty"`
-	Hosts       map[string]Host `toml:"hosts" json:"hosts"`
+	Defaults    Defaults           `toml:"defaults" json:"defaults"`
+	Credentials []string           `toml:"credentials,omitempty" json:"credentials,omitempty"`
+	Commands    map[string]Command `toml:"commands,omitempty" json:"commands,omitempty"`
+	Hosts       map[string]Host    `toml:"hosts" json:"hosts"`
 }
 
 var namePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
@@ -78,6 +79,9 @@ func Load(path string) (*Inventory, error) {
 	return &inv, nil
 }
 func (inv *Inventory) Validate() error {
+	if err := inv.validateCommands(); err != nil {
+		return err
+	}
 	if inv.Hosts == nil {
 		inv.Hosts = map[string]Host{}
 	}
@@ -216,7 +220,7 @@ func (inv *Inventory) Select(selector, tag string) ([]string, error) {
 			}
 		}
 		if !found {
-			return nil, errors.New("selector contains an unknown host or group")
+			return nil, fmt.Errorf("No host or group matches %q. Run fleetsh ls to check aliases and groups; quote @group selectors in PowerShell.", s)
 		}
 	}
 	ids := []string{}
@@ -236,7 +240,7 @@ func (inv *Inventory) Select(selector, tag string) ([]string, error) {
 	}
 	sort.Strings(ids)
 	if len(ids) == 0 {
-		return nil, errors.New("no hosts match the selector")
+		return nil, fmt.Errorf("No hosts match selector %q with tag %q. Run fleetsh ls to review the inventory.", selector, tag)
 	}
 	return ids, nil
 }

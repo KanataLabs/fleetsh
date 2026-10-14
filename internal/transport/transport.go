@@ -27,6 +27,7 @@ type Manager struct {
 	Auth      map[string][]ssh.AuthMethod
 	ProxyAuth map[string]*proxy.Auth
 	Sudo      map[string]string
+	Trace     func(host, stage string)
 	Secrets   []string
 	closers   []net.Conn
 	mu        sync.Mutex
@@ -77,11 +78,19 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 		m.mu.Unlock()
 		return context.Canceled
 	}
-	m.stopClose = context.AfterFunc(ctx, m.Close)
+	if m.stopClose == nil {
+		m.stopClose = context.AfterFunc(ctx, m.Close)
+	}
 	m.mu.Unlock()
-	m.Auth = map[string][]ssh.AuthMethod{}
-	m.ProxyAuth = map[string]*proxy.Auth{}
-	m.Sudo = map[string]string{}
+	if m.Auth == nil {
+		m.Auth = map[string][]ssh.AuthMethod{}
+	}
+	if m.ProxyAuth == nil {
+		m.ProxyAuth = map[string]*proxy.Auth{}
+	}
+	if m.Sudo == nil {
+		m.Sudo = map[string]string{}
+	}
 	seen := map[string]bool{}
 	var prepare func(string) error
 	prepare = func(id string) error {
@@ -98,68 +107,70 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 				return err
 			}
 		}
-		switch h.Auth {
-		case "password":
-			s, err := m.secret(h.Credential, "SSH password for "+id)
-			if err != nil {
-				return fmt.Errorf("host %s: %w", id, err)
-			}
-			m.Auth[id] = []ssh.AuthMethod{ssh.Password(s)}
-		case "key":
-			path, err := ExpandPath(h.Key)
-			if err != nil {
-				return err
-			}
-			data, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("host %s: cannot read key file", id)
-			}
-			signer, err := ssh.ParsePrivateKey(data)
-			var encrypted *ssh.PassphraseMissingError
-			if errors.As(err, &encrypted) {
-				s, e := m.secret(h.Credential, "Key passphrase for "+id)
-				if e != nil {
-					return e
+		if m.Auth[id] == nil {
+			switch h.Auth {
+			case "password":
+				s, err := m.secret(h.Credential, "SSH password for "+id)
+				if err != nil {
+					return fmt.Errorf("host %s: %w; check fleetsh show %s; to save a new SSH password, run fleetsh edit %s --save-password", id, err, id, id)
 				}
-				signer, err = ssh.ParsePrivateKeyWithPassphrase(data, []byte(s))
-			}
-			if err != nil {
-				return fmt.Errorf("host %s: cannot parse private key", id)
-			}
-			m.Auth[id] = []ssh.AuthMethod{ssh.PublicKeys(signer)}
-		case "agent":
-			agentCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-			conn, err := dialAgent(agentCtx)
-			cancel()
-			if err != nil {
+				m.Auth[id] = []ssh.AuthMethod{ssh.Password(s)}
+			case "key":
+				path, err := ExpandPath(h.Key)
+				if err != nil {
+					return err
+				}
+				data, err := os.ReadFile(path)
+				if err != nil {
+					return fmt.Errorf("host %s: cannot read key file. Check the path and permissions with fleetsh show %s; use fleetsh edit %s --key PATH to correct it", id, id, id)
+				}
+				signer, err := ssh.ParsePrivateKey(data)
+				var encrypted *ssh.PassphraseMissingError
+				if errors.As(err, &encrypted) {
+					s, e := m.secret(h.Credential, "Key passphrase for "+id)
+					if e != nil {
+						return e
+					}
+					signer, err = ssh.ParsePrivateKeyWithPassphrase(data, []byte(s))
+				}
+				if err != nil {
+					return fmt.Errorf("host %s: cannot parse private key. Check that this is a private SSH key and that its passphrase is correct; run fleetsh show %s to review the key path", id, id)
+				}
+				m.Auth[id] = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+			case "agent":
+				agentCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+				conn, err := dialAgent(agentCtx)
+				cancel()
+				if err != nil {
+					if ctx.Err() != nil {
+						return ctx.Err()
+					}
+					return agentPreparationError(id, "SSH agent unavailable")
+				}
+				if err = m.register(conn); err != nil {
+					return err
+				}
+				_ = conn.SetDeadline(time.Now().Add(10 * time.Second))
+				signers, err := agent.NewClient(conn).Signers()
+				_ = conn.SetDeadline(time.Time{})
 				if ctx.Err() != nil {
 					return ctx.Err()
 				}
-				return agentPreparationError(id, "SSH agent unavailable")
+				if err != nil {
+					return agentPreparationError(id, "cannot read keys from SSH agent")
+				}
+				if len(signers) == 0 {
+					return agentPreparationError(id, "SSH agent has no usable keys")
+				}
+				bounded := make([]ssh.Signer, 0, len(signers))
+				for _, signer := range signers {
+					bounded = append(bounded, timedSigner{Signer: signer, conn: conn})
+				}
+				m.Auth[id] = []ssh.AuthMethod{ssh.PublicKeys(bounded...)}
 			}
-			if err = m.register(conn); err != nil {
-				return err
-			}
-			_ = conn.SetDeadline(time.Now().Add(10 * time.Second))
-			signers, err := agent.NewClient(conn).Signers()
-			_ = conn.SetDeadline(time.Time{})
-			if ctx.Err() != nil {
-				return ctx.Err()
-			}
-			if err != nil {
-				return agentPreparationError(id, "cannot read keys from SSH agent")
-			}
-			if len(signers) == 0 {
-				return agentPreparationError(id, "SSH agent has no usable keys")
-			}
-			bounded := make([]ssh.Signer, 0, len(signers))
-			for _, signer := range signers {
-				bounded = append(bounded, timedSigner{Signer: signer, conn: conn})
-			}
-			m.Auth[id] = []ssh.AuthMethod{ssh.PublicKeys(bounded...)}
 		}
 		_, proxyCredential := m.Inventory.ProxyFor(h)
-		if proxyCredential != "" {
+		if proxyCredential != "" && m.ProxyAuth[id] == nil {
 			s, err := m.secret(proxyCredential, "Proxy credential for "+id)
 			if err != nil {
 				return err
@@ -171,7 +182,7 @@ func (m *Manager) Prepare(ctx context.Context, ids []string, sudo bool) error {
 			m.Secrets = append(m.Secrets, pass)
 			m.ProxyAuth[id] = &proxy.Auth{User: user, Password: pass}
 		}
-		if sudo && h.SudoCredential != "" {
+		if sudo && h.SudoCredential != "" && m.Sudo[id] == "" {
 			s, err := m.secret(h.SudoCredential, "sudo password for "+id)
 			if err != nil {
 				return err
@@ -239,6 +250,9 @@ func (m *Manager) dial(ctx context.Context, id string) (*Client, error) {
 		}
 		return nil, err
 	}
+	if m.Trace != nil {
+		m.Trace(id, "Network connection")
+	}
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
 	}
@@ -251,7 +265,13 @@ func (m *Manager) dial(ctx context.Context, id string) (*Client, error) {
 	}
 	completed := make(chan handshake, 1)
 	go func() {
-		connection, channels, requests, e := ssh.NewClientConn(conn, h.Address(), &ssh.ClientConfig{User: h.User, Auth: m.Auth[id], HostKeyCallback: m.Keys.Callback(ctx)})
+		connection, channels, requests, e := ssh.NewClientConn(conn, h.Address(), &ssh.ClientConfig{User: h.User, Auth: m.Auth[id], HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			err := m.Keys.Callback(ctx)(hostname, remote, key)
+			if err == nil && m.Trace != nil {
+				m.Trace(id, "Host-key verification")
+			}
+			return err
+		}})
 		completed <- handshake{connection, channels, requests, e}
 	}()
 	var result handshake
@@ -281,6 +301,9 @@ func (m *Manager) dial(ctx context.Context, id string) (*Client, error) {
 		return nil, errors.New("connection canceled")
 	}
 	_ = conn.SetDeadline(time.Time{})
+	if m.Trace != nil {
+		m.Trace(id, "SSH authentication")
+	}
 	c := &Client{Client: ssh.NewClient(sshConn, chans, reqs)}
 	if parent != nil {
 		c.parents = []*Client{parent}

@@ -1,0 +1,29 @@
+SFTP file transfers
+===================
+  fleetsh upload '@web' ./script.sh /tmp/script.sh --dry-run
+  fleetsh upload '@web' ./script.sh /tmp/script.sh
+  fleetsh download hk1 /var/log/syslog ./syslog.txt
+  fleetsh download '@web' /var/log/syslog ./logs
+
+SELECTOR and both file paths are required. Normal SSH login, proxy and
+host-key verification apply. The server must provide its SFTP subsystem.
+Upload destination parents must exist and be writable by the SSH user.
+Downloads from groups use separate host directories with a short hash.
+Dry runs show exact destinations without connecting or creating files.
+Existing files require --overwrite. Directory recursion and --sudo are
+not supported. Failed transfers may leave partial files; check before retrying.
+
+Interoperability:
+  fleetsh import ~/.ssh/config --dry-run
+  fleetsh import ~/.ssh/config --user ubuntu
+  fleetsh export --format toml --output inventory.toml
+  fleetsh export --format json
+  fleetsh export --format ssh-config --output ssh-config
+
+Import supports literal Host aliases and wildcard defaults, HostName/User/
+Port, one IdentityFile and one ProxyJump alias. First matching values win.
+Include/Match stop import; hosts requiring ProxyCommand or unsupported tokens
+are skipped with notes. Existing aliases are never overwritten. Imported
+hosts use key/agent; use edit HOST for password login. Unsupported directives
+are reported, not executed. Export excludes saved secret values, credential
+references and command definitions. Existing output files need --overwrite.

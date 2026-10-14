@@ -356,11 +356,11 @@ OS の確認だけのために接続し、パッケージは更新しません�
 `fleetsh import ~/.ssh/config` で Host、HostName、User、Port、IdentityFile、
 ProxyJump の設定を変換する予定です。
 当初は `use_openssh_config = true` も検討していました。
-どちらも未実装です。インポートは移行の手間を減らすための機能です。
+制限付きの `fleetsh import FILE` は実装済みです。直接参照方式は未実装です。[日常操作](../operations/#import-export) を参照してください。
 
 ## 23. エクスポート（計画中）
 
-`fleetsh export` と `fleetsh export ssh-config` により、
+実装済みの `fleetsh export --format toml|json|ssh-config` により、
 TOML、JSON、OpenSSH 設定形式の出力を提供する予定です。
 ホスト情報を持ち運びやすくし、特定ツールへの依存を減らします。
 

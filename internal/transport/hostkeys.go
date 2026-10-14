@@ -20,9 +20,10 @@ import (
 )
 
 type HostKeys struct {
-	Path  string
-	Trust func(context.Context, string, ssh.PublicKey) bool
-	mu    sync.Mutex
+	ReadOnly bool
+	Path     string
+	Trust    func(context.Context, string, ssh.PublicKey) bool
+	mu       sync.Mutex
 }
 
 func (k *HostKeys) ensure() error {
@@ -52,7 +53,18 @@ func (k *HostKeys) Callback(ctx context.Context) ssh.HostKeyCallback {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		if err := k.ensure(); err != nil {
+		if k.ReadOnly {
+			info, err := os.Lstat(k.Path)
+			if errors.Is(err, os.ErrNotExist) {
+				return fmt.Errorf("unknown host key for %s (%s); connect interactively to verify and trust", addr, ssh.FingerprintSHA256(key))
+			}
+			if err != nil {
+				return err
+			}
+			if !info.Mode().IsRegular() {
+				return errors.New("known_hosts must be a regular file")
+			}
+		} else if err := k.ensure(); err != nil {
 			return err
 		}
 		check, err := knownhosts.New(k.Path)

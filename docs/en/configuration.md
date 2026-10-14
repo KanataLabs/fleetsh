@@ -6,6 +6,9 @@ locale: en
 page_key: 'configuration/'
 ---
 
+In a terminal, missing add fields are prompted interactively: `fleetsh add hk1`.
+In scripts and with `--json`, supply the required flags explicitly. See [interactive setup](../operations/#interactive).
+
 # Configuration
 
 <a id="storage"></a>
@@ -255,7 +258,8 @@ or agent authentication and explicitly save a password, use
 `npx fleetsh edit sg1 --auth password --save-password`.
 Repeat `--config PATH` on every command if you use a custom inventory.
 
-`edit HOST` requires at least one change option and shows help when none is given.
+In an interactive terminal, `edit HOST` opens a menu. Scripts and `--json` require
+at least one change option and show help when none is given.
 Use `show HOST` to inspect current settings. `docs password` and `docs passwords`
 open the same guide. Keep the space in `npx fleetsh docs password`;
 `npx fleetshdocs` instead asks npm for a different package.

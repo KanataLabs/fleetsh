@@ -1,0 +1,15 @@
+Connection diagnosis
+====================
+  fleetsh doctor hk1
+  fleetsh doctor hk1 --connect-timeout 30s --json
+
+Shows the inventory location, actual proxy/jump route, login preparation,
+network connection, host-key verification, authentication and a remote probe.
+No configuration is edited and no new host key is trusted automatically.
+Verify a new fingerprint independently, then use fleetsh ssh hk1 to accept it.
+Read the failed check and its Next command. Retain --config PATH when using
+a custom inventory. To correct a saved password:
+  fleetsh edit hk1 --save-password
+
+Interactive edit HOST opens a menu in a terminal. Scripts and --json require
+explicit change options. Use show HOST to inspect settings without editing.

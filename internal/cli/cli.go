@@ -31,6 +31,7 @@ type application struct {
 	json         bool
 	promptFailed bool
 	readSecret   func(string) (string, error)
+	readLine     func(string) (string, error)
 }
 type exitError struct{ code int }
 
@@ -53,7 +54,7 @@ func RunContext(ctx context.Context, args []string, version string, in io.Reader
 	if errors.As(err, &code) {
 		return code.code
 	}
-	fmt.Fprintf(errOut, "fleetsh: %v\n", err)
+	fmt.Fprintf(errOut, "fleetsh: %s\n", readableError(err))
 	var usage usageError
 	if errors.As(err, &usage) {
 		fmt.Fprintln(errOut)
@@ -74,7 +75,7 @@ func (a *application) root(version string) *cobra.Command {
 	root.SetErr(a.errOut)
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().StringVar(&a.path, "config", "", "inventory file (default: OS user config directory)")
-	root.PersistentFlags().BoolVar(&a.json, "json", false, "JSON for inventory/batch results and forward --dry-run")
+	root.PersistentFlags().BoolVar(&a.json, "json", false, "JSON for inventory, diagnostics, batch results and dry runs")
 	root.Version = version
 	root.SetVersionTemplate("fleetsh {{.Version}}\n")
 	root.AddCommand(&cobra.Command{Use: "version", Short: "Print the build version", Args: cobra.NoArgs, Run: func(*cobra.Command, []string) { fmt.Fprintf(a.out, "fleetsh %s\n", version) }})
@@ -95,7 +96,12 @@ func (a *application) root(version string) *cobra.Command {
 	a.monitoringCommands(root)
 	a.forwardingCommand(root)
 	a.hostkeyCommands(root)
+	a.transferCommands(root)
+	a.interoperabilityCommands(root)
+	a.runCommand(root)
+	a.doctorCommand(root)
 	a.documentationCommand(root)
+	a.completionCommand(root)
 	documentCommands(root)
 	return root
 }
@@ -126,7 +132,7 @@ type missingInventoryError struct {
 }
 
 func (e missingInventoryError) Error() string {
-	return fmt.Sprintf("inventory not found: %s; add a host to create it automatically, or run 'fleetsh init' for an empty inventory; use the same --config PATH on every command for a custom inventory", e.path)
+	return fmt.Sprintf("inventory not found: %s\nNext: add a host to create it automatically, or run fleetsh init for an empty inventory.\nFor a custom inventory, use the same --config PATH on every command.", e.path)
 }
 func (e missingInventoryError) Unwrap() error { return e.cause }
 

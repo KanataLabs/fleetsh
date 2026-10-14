@@ -2,14 +2,12 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/KanataLabs/fleetsh/internal/inventory"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 type hostRow struct {
@@ -59,7 +57,7 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		}
 		h, ok := inv.Hosts[args[0]]
 		if !ok {
-			return errors.New("unknown host")
+			return unknownHostError(args[0])
 		}
 		return a.writeJSON(hostRow{args[0], h})
 	}})
@@ -71,13 +69,12 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 				return err
 			}
 			if action == "add" {
+				if a.canEditInteractively() {
+					return nil
+				}
 				return requiredHostOptions(h)
 			}
-			hasChanges := false
-			cmd.LocalNonPersistentFlags().VisitAll(func(flag *pflag.Flag) {
-				hasChanges = hasChanges || flag.Changed
-			})
-			if !hasChanges {
+			if !changedHostOptions(cmd) && !a.canEditInteractively() {
 				return fmt.Errorf("edit requires at least one change option; to replace a saved password, use fleetsh edit %s --save-password", args[0])
 			}
 			return nil
@@ -98,15 +95,17 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 		cmd.Flags().StringVar(&h.Description, "description", "", "host description")
 		cmd.Flags().BoolVar(&options.savePassword, "save-password", false, "prompt and save a new SSH password for this host")
 		cmd.Flags().BoolVar(&options.noSavePassword, "no-save-password", false, "prompt on each connection instead of storing the SSH password")
-		if action == "add" {
-			_ = cmd.MarkFlagRequired("host")
-		}
 		if action == "edit" {
-			cmd.Short = "Change host settings or replace a saved password (requires a change option)"
+			cmd.Short = "Edit a host interactively or change supplied settings"
 			cmd.Flags().StringSliceVar(&options.addGroups, "add-groups", nil, "add group memberships without replacing existing groups")
 			cmd.Flags().StringSliceVar(&options.removeGroups, "remove-groups", nil, "remove selected group memberships")
 		}
 		cmd.RunE = func(cmd *cobra.Command, args []string) error {
+			if a.canEditInteractively() && (action == "add" || !changedHostOptions(cmd)) {
+				if err := a.setupHost(cmd, args[0], action, &h); err != nil {
+					return err
+				}
+			}
 			return a.mutateHost(cmd, args[0], action, h, options)
 		}
 		root.AddCommand(cmd)
@@ -114,7 +113,7 @@ func (a *application) inventoryCommands(root *cobra.Command) {
 	root.AddCommand(&cobra.Command{Use: "rm HOST", Short: "Remove a host from inventory", Args: cobra.ExactArgs(1), RunE: func(cmd *cobra.Command, args []string) error {
 		return a.change(func(inv *inventory.Inventory) error {
 			if _, ok := inv.Hosts[args[0]]; !ok {
-				return errors.New("unknown host")
+				return unknownHostError(args[0])
 			}
 			delete(inv.Hosts, args[0])
 			return nil

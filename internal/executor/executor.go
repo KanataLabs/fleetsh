@@ -61,6 +61,10 @@ func ExitCode(rows []Result) int {
 		if r.Skipped || r.Success {
 			continue
 		}
+		if r.ErrorKind == "preparation" {
+			code = 2
+			continue
+		}
 		if r.ErrorKind == "connection" || r.ErrorKind == "authentication" || r.ErrorKind == "hostkey" || r.ErrorKind == "proxy" || r.ErrorKind == "connection_timeout" {
 			if code == 0 {
 				code = 3

@@ -44,3 +44,7 @@ More help:
 Run fleetsh version to check the installed build. See the installation page for
 Windows, macOS and Linux PATH registration:
 https://kanatalabs.com/fleetsh/en/installation/
+
+In a terminal, fleetsh add HOST asks for missing fields and edit HOST opens a menu.
+Use fleetsh doctor HOST for login diagnosis, stats --watch 5s for live snapshots,
+and fleetsh docs commands / transfers for saved commands and SFTP.

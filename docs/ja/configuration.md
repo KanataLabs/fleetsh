@@ -6,6 +6,9 @@ locale: ja
 page_key: 'configuration/'
 ---
 
+対話端末では `fleetsh add hk1` が不足する項目を尋ねます。スクリプトと `--json` では
+必須オプションを明示してください。[対話設定](../operations/#interactive) を参照してください。
+
 # 設定
 
 <a id="storage"></a>
@@ -253,7 +256,8 @@ npx fleetsh docs password
 `npx fleetsh edit sg1 --auth password --save-password` を使ってください。
 独自のホスト一覧を使う場合は、すべてのコマンドに `--config PATH` を指定します。
 
-`edit HOST` には少なくとも 1 つの変更オプションが必要です。省略するとヘルプを表示します。
+対話端末では `edit HOST` がメニューを開きます。スクリプトと `--json` には
+変更オプションが必要です。省略するとヘルプを表示します。
 設定の確認には `show HOST` を使います。`docs password` と `docs passwords` は同じガイドを開きます。
 `npx fleetsh docs password` の空白を省略しないでください。
 `npx fleetshdocs` は別の npm パッケージを要求します。

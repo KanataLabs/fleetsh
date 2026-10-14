@@ -78,9 +78,10 @@ and health probe. Built-in update/reboot actions target Linux VPSs.
 
 Commands: `init`, `version`, `add`, `edit`, `rm`, `ls`, `show`, `ssh`,
 `exec`, `alive`, `stats` (alias `monitor`), `forward`, `update`, `reboot`,
-`credential add/ls/rm`, `hostkey show/reset`, `docs`.
+`credential add/ls/rm`, `hostkey show/reset`, `docs`, `doctor`, `run`,
+`reboot-required`, `import`, `export`, `upload`, `download`, `completion`.
 All commands accept `--config PATH`. Run `fleetsh COMMAND --help` for behavior,
-flags and examples. `fleetsh docs` lists eleven English offline guides, including
+flags and examples. `fleetsh docs` lists English offline guides, including
 `config`, `passwords`, `groups` and `patching`. Help and guides need no inventory
 or network; online documentation has separate English, Japanese and Chinese editions.
 
@@ -90,12 +91,18 @@ VPS configuration is local to your OS user, in `%APPDATA%\fleetsh\config.toml`
 See [storage locations and backup](docs/en/configuration.md#storage) for custom
 inventories, host trust files and migrating credentials.
 
+Interactive `fleetsh edit HOST` opens a menu, including password replacement.
+`doctor`, watch monitoring, saved commands, completion, restart checks, OpenSSH
+import/export and SFTP transfers are covered in [everyday operations](docs/en/operations.md).
+
 ## One-command monitoring and tunnels
 
 ```sh
 fleetsh alive
 fleetsh stats
 fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh stats '@all' --watch 5s
+fleetsh doctor hk1
 fleetsh forward hk1 --dry-run
 fleetsh forward hk1 web
 ```

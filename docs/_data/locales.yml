@@ -16,6 +16,7 @@ en:
   product: Product brief
   architecture: Architecture
   security: Security design
+  operations: Daily operations
   roadmap: Roadmap
   development: Development build
 ja:
@@ -36,6 +37,7 @@ ja:
   product: 製品設計
   architecture: アーキテクチャ
   security: セキュリティ設計
+  operations: 日常の操作
   roadmap: ロードマップ
   development: 開発版
 zh:
@@ -56,5 +58,6 @@ zh:
   product: 产品设计
   architecture: 架构
   security: 安全设计
+  operations: 日常操作
   roadmap: 路线图
   development: 开发版

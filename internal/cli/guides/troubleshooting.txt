@@ -16,7 +16,8 @@ Configuration issues:
   Other commands report a missing inventory and suggest add or init.
   Invalid or unreadable inventories are never replaced automatically.
   If a host already exists, use edit HOST with a change option, such as --user root.
-  Bare edit HOST shows help; show HOST prints current settings.
+  In a terminal, edit HOST opens a menu; scripts require a change option.
+  show HOST prints current settings. doctor HOST checks SSH setup and login.
   Use the same --config PATH on every command for a custom inventory.
   Use show HOST to inspect its alias, address, auth mode and references.
   Empty target selections and unknown hosts/groups are errors.

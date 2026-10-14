@@ -368,12 +368,13 @@ Secret values do not belong in these files.
 Proposed `fleetsh import ~/.ssh/config` would convert Host, HostName, User,
 Port, IdentityFile and ProxyJump entries into inventory hosts.
 The original brief also considered `use_openssh_config = true`.
-Neither interface is implemented yet. Import reduces migration effort.
+`fleetsh import FILE` now supports a restricted subset with first-match semantics.
+The direct `use_openssh_config` interface remains proposed. See [operations](../operations/#import-export).
 
 ## 23. Export (planned)
 
-Provide ordinary TOML/JSON export and an OpenSSH config format, with proposed
-commands `fleetsh export` and `fleetsh export ssh-config`.
+Implemented as `fleetsh export --format toml|json|ssh-config`. Credential references
+and secret-store values are excluded; no private-key file is read.
 Keep host information portable and avoid data lock-in.
 
 ## 24. Secret redaction

@@ -57,12 +57,18 @@ go build -trimpath -o dist/fleetsh ./cmd/fleetsh
 
 安装后运行 `fleetsh version` 验证，可在任意目录使用。
 
+终端中运行 `fleetsh edit HOST` 会打开菜单，可以直接修改已保存密码。
+诊断、持续监控、保存命令、补全、重启检查、OpenSSH 导入导出和 SFTP 传输见
+[日常操作](docs/zh/operations.md)。
+
 ## 一键监控与 SSH 隧道
 
 ```sh
 fleetsh alive
 fleetsh stats
 fleetsh stats '@web' --parallel 5 --timeout 15s
+fleetsh stats '@all' --watch 5s
+fleetsh doctor hk1
 fleetsh forward hk1 --dry-run
 fleetsh forward hk1 web
 ```

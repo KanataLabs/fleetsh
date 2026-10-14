@@ -221,7 +221,19 @@ func (a *application) mutateHost(cmd *cobra.Command, alias, action string, suppl
 				Credential string `json:"credential"`
 			}{alias, ref})
 		}
-		fmt.Fprintf(a.out, "Password saved as %s; no secret was written to inventory.\n", ref)
+		fmt.Fprintf(a.out, "Saved SSH password for %s in your system credential store. The server password was not changed.\n", alias)
+	}
+	if !a.json {
+		verb := "Added"
+		if action == "edit" {
+			verb = "Updated"
+		}
+		fmt.Fprintf(a.out, "%s host %s. Run fleetsh show %s to review its settings.\n", verb, alias, alias)
+	} else if !saved {
+		return a.writeJSON(struct {
+			Host   string `json:"host"`
+			Action string `json:"action"`
+		}{alias, action})
 	}
 	return nil
 }

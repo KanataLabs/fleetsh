@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"github.com/spf13/cobra"
+	"strings"
+)
 
 const documentationSiteURL = "https://kanatalabs.com/fleetsh/"
 const documentationURL = documentationSiteURL + "en/"
@@ -20,6 +24,100 @@ type commandGuide struct {
 }
 
 var commandGuides = map[string]commandGuide{
+	"fleetsh doctor": {
+		long: `Diagnose one existing host without changing configuration or trusted host keys.
+HOST is required. Shows the inventory path, effective proxy/jump route and login
+preparation, then verifies the network connection, host key, authentication and
+a small remote health check. Unknown keys require a verified first login with ssh.
+Failures include a suggested next command. --json emits structured checks.`,
+		example: `  fleetsh doctor hk1
+  fleetsh doctor hk1 --connect-timeout 30s
+  fleetsh doctor hk1 --json`,
+		page: "operations/#diagnostics",
+	},
+	"fleetsh run": {
+		long: `Execute a saved [commands.NAME] command on selected hosts.
+SELECTOR and NAME are required. The command can supply sudo and timeout defaults;
+explicit --sudo/--timeout flags override them. --dry-run lists targets and the
+resolved command without SSH or credential-store access. No automatic retries.`,
+		example: `  fleetsh run '@web' docker-update --dry-run
+  fleetsh run '@web' docker-update --parallel 2
+  fleetsh run hk1 disk --json`,
+		page: "operations/#saved-commands",
+	},
+	"fleetsh completion": {
+		long: `Generate a completion script for bash, zsh, fish or powershell.
+SHELL is required. Host, group, saved-command and documentation completion reads
+only local inventory data; it never reads secrets or connects to a VPS.
+Install a generated script for the native fleetsh command (npm install -g fleetsh
+also provides that command). Completing arbitrary npx invocations is shell-dependent.`,
+		example: `  fleetsh completion powershell > fleetsh-completion.ps1
+  fleetsh completion bash > fleetsh-completion.bash
+  fleetsh completion zsh > _fleetsh`,
+		page: "operations/#completion",
+	},
+	"fleetsh reboot-required": {
+		long: `Check whether Linux hosts report a required restart; defaults to @all.
+Debian/Ubuntu use the reboot-required marker. Other distributions can use
+needs-restarting -r if available. Unsupported or unavailable checks explicitly
+report unknown, not no. This command never reboots hosts.`,
+		example: `  fleetsh reboot-required
+  fleetsh reboot-required '@web' --json`,
+		page: "operations/#maintenance",
+	},
+	"fleetsh import": {
+		long: `Import supported OpenSSH settings from FILE. FILE is required.
+Supports literal Host aliases, wildcard defaults, HostName, User, Port, one
+IdentityFile and a single ProxyJump alias. First matching values win.
+Use --user USER when a host has no User setting. --dry-run previews without writes.
+Existing aliases are never overwritten. Include/Match stop import; hosts requiring
+ProxyCommand or unsupported expansion tokens are skipped with explanations.
+Other unsupported directives are listed as notes, without echoing their values.
+Imported passwords are not saved; use edit HOST to choose password authentication.`,
+		example: `  fleetsh import ~/.ssh/config --dry-run
+  fleetsh import ~/.ssh/config --user ubuntu
+  fleetsh import ./hosts.conf --json`,
+		page: "operations/#import-export",
+	},
+	"fleetsh export": {
+		long: `Export host settings as toml (default), json or ssh-config.
+Saved OS credential-store values and references are excluded; private key files
+are never read. Saved command definitions are excluded. User-supplied descriptions
+and connection settings are exported as entered.
+Output defaults to stdout. --output FILE writes UTF-8; existing files require
+--overwrite. OpenSSH output omits console-only hosts and reports unrepresented
+proxy URLs and port-forward profiles. Do not treat it as a complete migration
+of every OpenSSH authentication preference.`,
+		example: `  fleetsh export --format json
+  fleetsh export --format toml --output inventory.toml
+  fleetsh export --format ssh-config --output ssh-config`,
+		page: "operations/#import-export",
+	},
+	"fleetsh upload": {
+		long: `Upload one regular LOCAL_FILE to REMOTE_FILE on selected hosts through SFTP.
+SELECTOR, LOCAL_FILE and REMOTE_FILE are required. The destination parent directory
+must exist and be writable by the SSH user. --sudo and directory transfers are
+not supported. Existing destinations require --overwrite. --dry-run connects to
+nothing and changes no files. Failed transfers may leave a partial destination;
+review it before retrying. Uses the normal SSH authentication, proxy and key trust.`,
+		example: `  fleetsh upload hk1 ./script.sh /tmp/script.sh --dry-run
+  fleetsh upload '@web' ./script.sh /tmp/script.sh
+  fleetsh upload hk1 ./script.sh /tmp/script.sh --overwrite`,
+		page: "operations/#transfers",
+	},
+	"fleetsh download": {
+		long: `Download one regular REMOTE_FILE through SFTP to LOCAL_PATH.
+SELECTOR, REMOTE_FILE and LOCAL_PATH are required. For one host, LOCAL_PATH may be
+a file or existing directory. For multiple hosts it is a directory containing
+host-specific subdirectories; paths include a short hash to avoid alias collisions.
+Existing files require --overwrite; remote directories/symlinks are not supported.
+--dry-run lists exact paths without connecting or creating directories.
+Failed transfers may leave a partial destination; review it before retrying.`,
+		example: `  fleetsh download hk1 /var/log/syslog ./syslog.txt
+  fleetsh download '@web' /var/log/syslog ./logs --dry-run
+  fleetsh download '@web' /var/log/syslog ./logs --parallel 2`,
+		page: "operations/#transfers",
+	},
 	"fleetsh": {
 		long: `fleetsh manages a local VPS inventory, SSH sessions and parallel remote commands.
 One Go binary; no central server or remote agent. Development build, GPL-3.0-only.
@@ -42,7 +140,8 @@ Configuration:
   Otherwise use the OS user config directory. Run docs config for exact locations.
   Passwords live in the OS credential store; the inventory contains references.
   Saved the wrong password? Run fleetsh edit HOST --save-password, then ssh HOST.
-  edit HOST requires a change option; use show HOST to inspect existing settings.
+  In a terminal, edit HOST opens a menu. Scripts require a change option.
+  Use show HOST to inspect existing settings.
 
 Exit codes:
   0 success; 1 remote command failure, timeout or cancellation;
@@ -79,9 +178,14 @@ Uses /proc, awk, sleep, whoami and df; no remote agent or sudo is required.
 Memory usage uses MemAvailable (or free/buffers/cache on older kernels).
 Swap disabled is shown as zero. CPU is total host CPU, not a container quota.
 The monitor alias runs the same command. --json emits the standard batch report
-with each snapshot in stdout. Use docs monitoring for examples.`,
+with each snapshot in stdout. --table shows compact columns, including root disk
+free space. --watch 5s refreshes after each completed snapshot; Ctrl+C stops it.
+Failed hosts stay visible without stopping other hosts. --watch --json emits one
+compact JSON report per line with a timestamp. Use docs monitoring for examples.`,
 		example: `  fleetsh stats
   fleetsh stats '@web' --parallel 5 --timeout 15s
+  fleetsh stats '@all' --watch 5s
+  fleetsh stats hk1 --table
   fleetsh monitor hk1
   fleetsh stats --json`,
 		page: "getting-started/",
@@ -153,6 +257,9 @@ files are reported rather than replaced. Missing required options, invalid host
 settings and cancelled password input do not create an inventory file.
 Use the same --config PATH on every command for a custom inventory.
 
+In an interactive terminal, add HOST asks for a missing address, username or key
+path. In scripts and --json mode, provide required options explicitly.
+
 Required arguments/options (values must not be empty):
   HOST          Local inventory alias, not the hostname or IP address.
   --host ADDRESS  Hostname or IP address; required for every host.
@@ -187,7 +294,9 @@ Run docs passwords, docs groups or docs proxies for more details.`,
 	"fleetsh edit": {
 		long: `Change only the supplied fields of an existing host; other fields are preserved.
 HOST is a required existing alias. The host alias remains the same.
-At least one change option is required. Bare edit HOST displays this help.
+In an interactive terminal, bare edit HOST opens a field-selection menu.
+In scripts or --json mode, at least one change option is required; otherwise
+this command displays help and does not change the inventory.
 Use show HOST to inspect settings. Omitted flags keep their saved values.
 
 Saved the wrong password? Run edit HOST --save-password, enter the correct server
@@ -276,7 +385,9 @@ for automation. --sudo uses passwordless sudo or the host's sudo_credential.
 --dist selects apt-get dist-upgrade on Debian/Ubuntu; other distributions keep
 their normal upgrade command. Defaults are shared with exec.
 
-Updates do not reboot hosts automatically. Run docs patching for a fleet workflow.`,
+--check-reboot checks restart requirements after each successful update.
+Updates do not reboot hosts automatically. Run reboot-required separately or
+read docs patching for a fleet workflow.`,
 		example: `  fleetsh update '@all' --dry-run --sudo
   fleetsh update '@web' --sudo --parallel 5 --timeout 30m
   fleetsh update '@web' --sudo --yes --json
@@ -291,7 +402,9 @@ uptime probe. A reconnect alone does not count as a verified reboot.
 confirmation is required; --yes confirms explicitly for automation. Use --sudo
 when the SSH user needs privilege elevation. Console-only hosts are skipped.
 Default concurrency is 2; --serial or --parallel overrides it. --wait-timeout is
-the post-reboot verification deadline (default 5m) and is separate from --timeout.`,
+the post-reboot verification deadline (default 5m) and is separate from --timeout.
+--batch-size N waits for the entire batch to finish its boot-ID/health checks
+before starting the next. Any failed batch stops subsequent reboots.`,
 		example: `  fleetsh reboot '@web' --dry-run --sudo
   fleetsh reboot '@web' --sudo --serial --wait-timeout 10m
   fleetsh reboot hk1 --sudo --yes --json`,
@@ -312,7 +425,8 @@ passphrases, sudo passwords and proxy credentials. Run docs passwords for exampl
 	},
 	"fleetsh credential add": {
 		long: `Save a reusable secret under REFERENCE using hidden terminal input twice.
-Run init first. Reference names follow the same naming rules as host aliases.
+An inventory must exist: add a host first, or use init for an empty example.
+Reference names follow the same naming rules as host aliases.
 Use --replace to overwrite an existing secret; every host using it sees the change.
 
 For proxy authentication, enter username:password at the prompt. For an encrypted private key,
@@ -377,7 +491,8 @@ removal; it does not trust a new key. Shared/wildcard records may need manual re
 connection or credential store. With no topic, list the available offline guides.
 Run docs TOPIC to read a guide. Output is plain text, including when --json is set.
 Topics: quickstart, config, passwords (alias: password), groups, selectors, exec,
-proxies, patching, monitoring, forwarding, troubleshooting.
+proxies, patching, monitoring, forwarding, diagnostics, commands, transfers,
+troubleshooting.
 With npm, use npx fleetsh docs password (keep the space before docs).
 To correct a saved password: npx fleetsh edit HOST --save-password.
 
@@ -402,6 +517,14 @@ func documentCommands(cmd *cobra.Command) {
 	if validate := cmd.Args; validate != nil {
 		cmd.Args = func(command *cobra.Command, args []string) error {
 			if err := validate(command, args); err != nil {
+				if strings.Contains(err.Error(), "arg(s)") {
+					words := strings.Fields(command.Use)
+					requirements := strings.Join(words[1:], " ")
+					if requirements == "" {
+						requirements = "no positional arguments"
+					}
+					err = fmt.Errorf("%s requires %s; you provided %d argument(s). Run %s --help for examples.", command.Name(), requirements, len(args), command.CommandPath())
+				}
 				return usageError{command: command, cause: err}
 			}
 			return nil

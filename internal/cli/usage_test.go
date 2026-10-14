@@ -22,10 +22,13 @@ func TestSyntaxErrorsShowRelevantHelpWithoutLoadingInventory(t *testing.T) {
 		{"exec unquoted command", []string{"exec", "@all", "echo", "hello"}, "fleetsh exec SELECTOR COMMAND", "exec requires"},
 		{"exec unknown flag", []string{"exec", "@all", "whoami", "--unknown"}, "fleetsh exec SELECTOR COMMAND", "unknown flag"},
 		{"exec invalid duration", []string{"exec", "@all", "whoami", "--timeout", "invalid"}, "fleetsh exec SELECTOR COMMAND", "invalid argument"},
+		{"zero timeout", []string{"exec", "@all", "whoami", "--timeout", "0s"}, "fleetsh exec SELECTOR COMMAND", "--timeout must be positive"},
+		{"zero workers", []string{"exec", "@all", "whoami", "--parallel", "0"}, "fleetsh exec SELECTOR COMMAND", "--parallel must be between"},
+		{"conflicting workers", []string{"exec", "@all", "whoami", "--serial", "--parallel", "2"}, "fleetsh exec SELECTOR COMMAND", "cannot be used together"},
 		{"edit without changes", []string{"edit", "racknerd"}, "fleetsh edit HOST", "edit requires at least one change option"},
 		{"unknown guide", []string{"docs", "unknown-topic"}, "fleetsh docs [TOPIC]", "available topics:"},
-		{"ssh missing host", []string{"ssh"}, "fleetsh ssh HOST", "received 0"},
-		{"nested credential missing reference", []string{"credential", "add"}, "fleetsh credential add REFERENCE", "received 0"},
+		{"ssh missing host", []string{"ssh"}, "fleetsh ssh HOST", "provided 0"},
+		{"nested credential missing reference", []string{"credential", "add"}, "fleetsh credential add REFERENCE", "provided 0"},
 		{"init extra", []string{"init", "extra"}, "fleetsh init", "unknown command"},
 	} {
 		t.Run(test.name, func(t *testing.T) {

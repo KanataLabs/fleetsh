@@ -17,6 +17,9 @@ type offlineTopic struct {
 }
 
 var offlineTopics = []offlineTopic{
+	{"diagnostics", "Understand a connection failure and its next action", "operations/#diagnostics"},
+	{"commands", "Save common commands and enable completion", "operations/#saved-commands"},
+	{"transfers", "SFTP files and OpenSSH import/export", "operations/#transfers"},
 	{"quickstart", "Start with your first VPS", "getting-started/"},
 	{"config", "Inventory paths, defaults and backup", "configuration/#storage"},
 	{"passwords", "Save or correct a password (alias: password), and shared credentials", "configuration/#passwords"},

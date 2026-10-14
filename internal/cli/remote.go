@@ -32,24 +32,24 @@ func (o *remoteOptions) flags(cmd *cobra.Command) {
 	cmd.Flags().DurationVar(&o.connect, "connect-timeout", 0, "connection timeout (default: inventory)")
 }
 func (a *application) targets(cmd *cobra.Command, args []string, o remoteOptions) (*inventory.Inventory, []string, int, error) {
+	if cmd.Flags().Changed("connect-timeout") && o.connect <= 0 {
+		return nil, nil, 0, usageError{cmd, errors.New("--connect-timeout must be positive, for example 30s")}
+	}
+	if cmd.Flags().Changed("timeout") && o.timeout <= 0 {
+		return nil, nil, 0, usageError{cmd, errors.New("--timeout must be positive, for example 60s")}
+	}
+	if o.parallel < 0 || o.parallel > 256 || (cmd.Flags().Changed("parallel") && o.parallel == 0) {
+		return nil, nil, 0, usageError{cmd, errors.New("--parallel must be between 1 and 256")}
+	}
+	if o.serial && cmd.Flags().Changed("parallel") {
+		return nil, nil, 0, usageError{cmd, errors.New("Choose either --serial or --parallel; they cannot be used together.")}
+	}
 	inv, err := a.load()
 	if err != nil {
 		return nil, nil, 0, err
 	}
 	if cmd.Flags().Changed("connect-timeout") {
-		if o.connect <= 0 {
-			return nil, nil, 0, errors.New("connect-timeout must be positive")
-		}
 		inv.Defaults.ConnectTimeout = o.connect.String()
-	}
-	if cmd.Flags().Changed("timeout") && o.timeout <= 0 {
-		return nil, nil, 0, errors.New("timeout must be positive")
-	}
-	if o.parallel < 0 || o.parallel > 256 || (cmd.Flags().Changed("parallel") && o.parallel == 0) {
-		return nil, nil, 0, errors.New("parallel must be between 1 and 256")
-	}
-	if o.serial && cmd.Flags().Changed("parallel") {
-		return nil, nil, 0, errors.New("choose --serial or --parallel")
 	}
 	n := o.parallel
 	if n == 0 {
@@ -71,6 +71,9 @@ func (a *application) results(rows []executor.Result) error {
 		for _, r := range rows {
 			if r.Skipped {
 				fmt.Fprintf(a.out, "%s SKIPPED\n", r.Host)
+				if r.Error != "" {
+					fmt.Fprintln(a.out, r.Error)
+				}
 				continue
 			}
 			state := "OK"
@@ -88,13 +91,16 @@ func (a *application) results(rows []executor.Result) error {
 				fmt.Fprintf(a.errOut, "[%s stderr]\n%s\n", r.Host, r.Stderr)
 			}
 			if r.Error != "" {
-				fmt.Fprintf(a.errOut, "[%s %s] %s\n", r.Host, r.ErrorKind, r.Error)
+				fmt.Fprintf(a.errOut, "[%s] %s\n", r.Host, remoteFailure(r.Host, r.ErrorKind, r.Error))
+				if r.ErrorKind == "preparation" || r.ErrorKind == "command" {
+					fmt.Fprintln(a.errOut, r.Error)
+				}
 			}
 			if r.Truncated {
 				fmt.Fprintf(a.errOut, "[%s] output truncated at %d bytes per stream\n", r.Host, executor.OutputLimit)
 			}
 		}
-		fmt.Fprintf(a.out, "SUMMARY Success: %d  Failed: %d  Skipped: %d\n", report.Summary.Success, report.Summary.Failed, report.Summary.Skipped)
+		fmt.Fprintf(a.out, "Summary: %d succeeded, %d failed, %d skipped.\n", report.Summary.Success, report.Summary.Failed, report.Summary.Skipped)
 	}
 	if code := executor.ExitCode(rows); code != 0 {
 		return exitError{code}
@@ -119,7 +125,10 @@ func (a *application) remoteCommands(root *cobra.Command) {
 		}
 		h, ok := inv.Hosts[args[0]]
 		if !ok || h.Connection == "console-only" {
-			return errors.New("host is unknown or console-only")
+			if !ok {
+				return unknownHostError(args[0])
+			}
+			return fmt.Errorf("Host %s is console-only. Use your provider console, or edit its connection settings to enable SSH.", args[0])
 		}
 		m, err := a.manager(inv)
 		if err != nil {
@@ -131,7 +140,7 @@ func (a *application) remoteCommands(root *cobra.Command) {
 		}
 		err = executor.Interactive(a.ctx, m, args[0], a.in, a.out, a.errOut)
 		if err != nil {
-			fmt.Fprintln(a.errOut, "SSH session failed:", credentials.Redact(err.Error(), m.Secrets))
+			fmt.Fprintln(a.errOut, remoteFailure(args[0], executor.Classify(err), credentials.Redact(err.Error(), m.Secrets)))
 			var remoteExit *ssh.ExitError
 			if errors.As(err, &remoteExit) {
 				return exitError{1}
@@ -201,7 +210,7 @@ func (a *application) showPlan(plans []plan) error {
 }
 func (a *application) updateCommand(root *cobra.Command) {
 	o := remoteOptions{}
-	var dry, yes, dist bool
+	var dry, yes, dist, checkReboot bool
 	cmd := &cobra.Command{Use: "update SELECTOR", Short: "Detect Linux package manager and update after confirmation", Args: cobra.ExactArgs(1), RunE: func(cmd *cobra.Command, args []string) error {
 		inv, ids, n, err := a.targets(cmd, args, o)
 		if err != nil {
@@ -267,7 +276,18 @@ func (a *application) updateCommand(root *cobra.Command) {
 			return errors.New("update canceled")
 		}
 		rows = executor.Batch(a.ctx, inv, ids, n, func(ctx context.Context, id string) executor.Result {
-			return executor.Run(ctx, m, id, commands[indices[id]], executor.Options{Timeout: o.timeout, Sudo: o.sudo})
+			r := executor.Run(ctx, m, id, commands[indices[id]], executor.Options{Timeout: o.timeout, Sudo: o.sudo})
+			if checkReboot && r.Success {
+				check := executor.Run(ctx, m, id, actions.RebootRequired, executor.Options{Timeout: 30 * time.Second, Sudo: o.sudo})
+				r.Stdout += "\n" + check.Stdout
+				if !check.Success {
+					r.Success = false
+					r.ErrorKind = check.ErrorKind
+					r.Error = "The update finished, but the restart check failed: " + check.Error
+					r.ExitCode = check.ExitCode
+				}
+			}
+			return r
 		})
 		return a.results(rows)
 	}}
@@ -275,12 +295,14 @@ func (a *application) updateCommand(root *cobra.Command) {
 	cmd.Flags().BoolVar(&dry, "dry-run", false, "probe OS and show planned commands without updates")
 	cmd.Flags().BoolVar(&yes, "yes", false, "confirm updating selected hosts")
 	cmd.Flags().BoolVar(&dist, "dist", false, "use apt-get dist-upgrade on Debian/Ubuntu")
+	cmd.Flags().BoolVar(&checkReboot, "check-reboot", false, "check restart requirements after each successful update")
 	root.AddCommand(cmd)
 }
 func (a *application) rebootCommand(root *cobra.Command) {
 	o := remoteOptions{}
 	var dry, yes bool
 	var wait time.Duration
+	var batchSize int
 	cmd := &cobra.Command{Use: "reboot SELECTOR", Short: "Reboot Linux hosts and verify a new boot identity plus health", Args: cobra.ExactArgs(1), RunE: func(cmd *cobra.Command, args []string) error {
 		inv, ids, n, err := a.targets(cmd, args, o)
 		if err != nil {
@@ -288,6 +310,9 @@ func (a *application) rebootCommand(root *cobra.Command) {
 		}
 		if !cmd.Flags().Changed("parallel") && !o.serial {
 			n = 2
+		}
+		if batchSize < 0 || batchSize > 256 || (cmd.Flags().Changed("batch-size") && batchSize == 0) {
+			return usageError{cmd, errors.New("--batch-size must be between 1 and 256")}
 		}
 		if wait <= 0 {
 			return errors.New("wait-timeout must be positive")
@@ -310,14 +335,31 @@ func (a *application) rebootCommand(root *cobra.Command) {
 		if err = m.Prepare(a.ctx, ids, o.sudo); err != nil {
 			return err
 		}
-		rows := executor.Batch(a.ctx, inv, ids, n, func(ctx context.Context, id string) executor.Result {
+		reboot := func(ctx context.Context, id string) executor.Result {
 			return actions.Reboot(ctx, m, id, executor.Options{Timeout: o.timeout, Sudo: o.sudo}, wait)
-		})
+		}
+		rows := []executor.Result{}
+		if batchSize == 0 {
+			rows = executor.Batch(a.ctx, inv, ids, n, reboot)
+		} else {
+			for start := 0; start < len(ids); start += batchSize {
+				end := min(start+batchSize, len(ids))
+				batch := executor.Batch(a.ctx, inv, ids[start:end], n, reboot)
+				rows = append(rows, batch...)
+				if executor.ExitCode(batch) != 0 {
+					for _, id := range ids[end:] {
+						rows = append(rows, executor.Result{Host: id, Skipped: true, ExitCode: -1, Error: "Not rebooted because the previous batch failed its health check."})
+					}
+					break
+				}
+			}
+		}
 		return a.results(rows)
 	}}
 	o.flags(cmd)
 	cmd.Flags().BoolVar(&dry, "dry-run", false, "show targets without connecting or rebooting")
 	cmd.Flags().BoolVar(&yes, "yes", false, "confirm rebooting selected hosts")
 	cmd.Flags().DurationVar(&wait, "wait-timeout", 5*time.Minute, "maximum time waiting for a new boot and health probe")
+	cmd.Flags().IntVar(&batchSize, "batch-size", 0, "reboot in batches; stop if a batch fails its health check")
 	root.AddCommand(cmd)
 }

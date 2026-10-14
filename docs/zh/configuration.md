@@ -6,6 +6,9 @@ locale: zh
 page_key: 'configuration/'
 ---
 
+在终端中，`fleetsh add hk1` 会询问缺少的字段；脚本和 `--json` 需显式提供必填选项。
+详见[交互设置](../operations/#interactive)。
+
 # 配置
 
 <a id="storage"></a>
@@ -242,7 +245,8 @@ npx fleetsh docs password
 使用 `npx fleetsh edit sg1 --auth password --save-password`。
 自定义清单需在每个命令中都指定相同的 `--config PATH`。
 
-`edit HOST` 必须带至少一个修改选项，省略时显示帮助；查看配置请用 `show HOST`。
+在交互终端中，`edit HOST` 打开字段菜单；脚本和 `--json` 必须带修改选项，
+省略时显示帮助。查看配置请用 `show HOST`。
 `docs password` 和 `docs passwords` 打开同一份指南。
 注意 `npx fleetsh docs password` 中的空格；`npx fleetshdocs` 会向 npm 请求另一个包。
 

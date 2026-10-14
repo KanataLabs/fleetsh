@@ -31,4 +31,7 @@ fallback on old kernels. These are host values, not container quota metrics.
 
 JSON is the standard batch report: each host's snapshot is in its stdout field,
 with success/error fields and an aggregate summary. Exit codes match exec.
-Each invocation collects one snapshot. No background scheduler is installed.
+Use --table for one compact snapshot, or --watch 5s for repeated timestamped
+snapshots; Ctrl+C stops. Each round completes before waiting for the next.
+Failed hosts stay visible while other hosts are collected. --watch --json emits
+one JSON report per line with a timestamp. No background scheduler is installed.
